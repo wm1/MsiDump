@@ -1,7 +1,7 @@
-SRC_RELEASE_POINT=\\weimao2\public\msi
+SRC_RELEASE_POINT=\\weimao1\public\msi
 TOOLBOX_RELEASE_POINT=\\TKFilToolBox\Tools\20864
 
-PROJECT_VERSION=2,0,0,14
+PROJECT_VERSION=2,0,0,15
 
 PROJ=MsiDumpCab
 PROJ_CMDLINE=MsiDump
@@ -52,7 +52,6 @@ all: $(O)\$(PROJ).exe $(O)\$(PROJ_CMDLINE).exe
 
 $(O)\$(PROJ).exe: $(OBJECTS)
 	link $(LFLAGS) $(OBJECTS) $(LIBS) -out:$@
-	rem -copy /y $@ C:\WINDOWS\System32
 
 $(O)\MsiUtils.obj: MsiUtils.cpp MsiUtils.h
 
@@ -70,16 +69,15 @@ $(O)\$(PROJ_CMDLINE).exe: $(PROJ_CMDLINE_OBJECTS)
 	link $(LFLAGS) $** setupapi.lib msi.lib -out:$@
 
 release:
-	del /q /s $(SRC_RELEASE_POINT) >nul
-	del /q $(TOOLBOX_RELEASE_POINT)
 	nmake /nologo clean 2>nul
 	-robocopy . $(SRC_RELEASE_POINT)
 	-robocopy managed $(SRC_RELEASE_POINT)\managed
 	nmake /nologo
+	call srcindex.cmd
 	-robocopy $(O) $(SRC_RELEASE_POINT)\bin *.exe *.pdb /xf vc*.pdb
+	-robocopy $(O) $(TOOLBOX_RELEASE_POINT) *.exe *.pdb /xf vc*.pdb
 	-robocopy .    $(TOOLBOX_RELEASE_POINT) Readme.txt History.txt
 	-robocopy .    $(TOOLBOX_RELEASE_POINT)\src
-	-robocopy $(O) $(TOOLBOX_RELEASE_POINT) *.exe
 
 clean:
 	-@del /q trace.txt 2>nul

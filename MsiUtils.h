@@ -2,6 +2,7 @@
 #pragma once
 
 #include <windows.h>
+#include <wtypes.h>
 #include <tchar.h>
 #include <string>
 #include <fstream>
@@ -16,10 +17,16 @@ using namespace std;
 
 #include <msiquery.h>
 #include <msidefs.h>
-#include <SetupApi.h>
+#include <setupapi.h>
 
 #include "MsiDumpPublic.h"
 #include "MsiTable.h"
+
+#define MSISOURCE_COMPRESSED          0x00000002
+
+#define TEST_FLAG(field, flag)        (((field) & (flag)) != 0)
+#define SET_FLAG( field, flag)        ((field) |= (flag))
+#define CLEAR_FLAG(field, flag)       ((field) &= ~(flag))
 
 extern ofstream trace;
 
@@ -42,7 +49,7 @@ private:
 	MsiUtils();
 	~MsiUtils();
 	bool IsOpened() { return database != NULL; }
-	void LoadDatabase();
+	bool LoadDatabase();
 	void LoadSummary();
 	void ExtractFile(int index);
 	void CopyFile(int index);

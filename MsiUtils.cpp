@@ -14,10 +14,12 @@ char*  trace_file =
 ;
 
 ////////////////////////////////////////////////////////////////////////
+TCHAR pathSeperator = TEXT('\\');
+
+////////////////////////////////////////////////////////////////////////
 
 MsiUtils::MsiUtils()
 {
-	
 	trace.open(trace_file);
 	database = NULL;
 
@@ -41,28 +43,34 @@ MsiUtils::Open(
 	LPCTSTR filename
 	)
 {
+	Close();
 	LPTSTR pFilePart;
 	TCHAR  buffer[MAX_PATH];
-	if(filename[0] == TEXT('\\') && filename[1] == TEXT('\\'))
-	{
-		lstrcpy(buffer, filename);
-		pFilePart = _tcsrchr(buffer, TEXT('\\'));
-	}
-	else
-	{
-		GetFullPathName(filename, MAX_PATH, buffer, &pFilePart);
-	}
+	GetFullPathName(filename, MAX_PATH, buffer, &pFilePart);
 	if(!pFilePart)
 	{
-		database = NULL;
+		return false;
+	}
+	DWORD fileAttr = GetFileAttributes(buffer);
+	if((fileAttr == INVALID_FILE_ATTRIBUTES)
+		|| TEST_FLAG(fileAttr, FILE_ATTRIBUTE_DEVICE   )
+		|| TEST_FLAG(fileAttr, FILE_ATTRIBUTE_DIRECTORY)
+		)
+	{
 		return false;
 	}
 
 	msiFilename = buffer;
-	*pFilePart = TEXT('\0');
+
+	if(buffer + 3 == pFilePart) // C:\sample.msi
+		*pFilePart = TEXT('\0');
+	else
+		*(pFilePart-1) = TEXT('\0');
+
 	sourceRootDirectory = buffer;
 	trace << TEXT("******************************") << endl
 		<< msiFilename << endl 
+		<< sourceRootDirectory << endl
 		<< endl;
 
 	UINT r = MsiOpenDatabase(msiFilename.c_str(), MSIDBOPEN_READONLY, &database);
@@ -73,24 +81,30 @@ MsiUtils::Open(
 	}
 
 	LoadSummary();
-	LoadDatabase();
+	bool b = LoadDatabase();
+	if(!b)
+	{
+		Close();
+		return false;
+	}
 	return true;
 }
 
 void
 MsiUtils::Close()
 {
-	if(IsOpened())
-	{
-		MsiCloseHandle(database);
-		database = NULL;
+	if(!IsOpened())
+		return;
 
-		delete cabinet;   cabinet   = NULL;
-		delete directory; directory = NULL;
-		delete component; component = NULL;
-		delete file;      file      = NULL;
-	}
+	MsiCloseHandle(database);
+	database = NULL;
+
+	if(cabinet)   { delete cabinet;   cabinet   = NULL; }
+	if(directory) { delete directory; directory = NULL; }
+	if(component) { delete component; component = NULL; }
+	if(file)      { delete file;      file      = NULL; }
 }
+
 
 void
 MsiUtils::LoadSummary()
@@ -111,19 +125,20 @@ MsiUtils::LoadSummary()
 	r = MsiSummaryInfoGetProperty(summaryInformation, PID_MSISOURCE,
 		&datatype, &data, &filetime, buffer, &size);
 
-	if(r == ERROR_SUCCESS && datatype == 3) // VT_I4 = 3, defined in wtype.h
-		compressed = ((data & 2) != 0);
+	if(r == ERROR_SUCCESS && datatype == VT_I4)
+		compressed = TEST_FLAG(data, MSISOURCE_COMPRESSED);
 
 	trace << TEXT("compressed: ") << compressed << endl << endl;
 }
 
-void
+bool
 MsiUtils::LoadDatabase()
 {
 	cabinet   = new MsiCabinet  (this);
 	directory = new MsiDirectory(this);
 	component = new MsiComponent(this);
 	file      = new MsiFile     (this);
+	UINT r;
 
 	int i, j;
 	trace << TEXT("Cabinet count = ") << cabinet->count << endl << endl;
@@ -140,9 +155,22 @@ MsiUtils::LoadDatabase()
 	DWORD     size = MAX_PATH;
 	TCHAR     buffer[MAX_PATH];
 	_stprintf(packageName, TEXT("#%d"), (DWORD)database);
-	MsiOpenPackage(packageName, &product);
-	MsiDoAction(product, TEXT("CostInitialize"));
-	MsiDoAction(product, TEXT("CostFinalize"));
+	r = MsiOpenPackageEx(packageName, MSIOPENPACKAGEFLAGS_IGNOREMACHINESTATE, &product);
+	if(r != ERROR_SUCCESS)
+		return FALSE;
+
+	r = MsiDoAction(product, TEXT("CostInitialize"));
+	if(r != ERROR_SUCCESS)
+	{
+		MsiCloseHandle(product);
+		return FALSE;
+	}
+	r = MsiDoAction(product, TEXT("CostFinalize"));
+	if(r != ERROR_SUCCESS)
+	{
+		MsiCloseHandle(product);
+		return FALSE;
+	}
 	trace << TEXT("Directory count = ") << directory->count << endl << endl;
 	for(i=0; i<directory->count; i++)
 	{
@@ -236,6 +264,7 @@ MsiUtils::LoadDatabase()
 		trace << TEXT("]: ") << p->filename << endl;
 	}
 	trace << endl;
+	return true;
 }
 
 void
@@ -256,7 +285,7 @@ MsiUtils::ExtractTo(
 	allSelected   = selectAll;
 	folderFlatten = flatFolder;
 	if(folderFlatten &&
-		!VerifyDirectory(targetRootDirectory + TEXT('\\')))
+		!VerifyDirectory(targetRootDirectory))
 		return;
 
 	int i;
@@ -287,7 +316,7 @@ MsiUtils::CopyFile(
 	MsiFile::tagFile           *p          = &file->array[index];
 	MsiDirectory::tagDirectory *pDirectory = &directory->array[ p->keyDirectory ];
 
-	string source = pDirectory->sourceDirectory + p->filename;
+	string source = pDirectory->sourceDirectory + pathSeperator + p->filename;
 
 	//
 	// targetRootDirectory = c:\temp
@@ -296,8 +325,10 @@ MsiUtils::CopyFile(
 	//
 	// target = c:\temp\Program Files\Orca\orca.exe
 	//
-	string middle = (folderFlatten ? TEXT("\\") : pDirectory->targetDirectory);
-	string target = targetRootDirectory + middle + p->filename;
+	string target = (folderFlatten)
+		? (targetRootDirectory + pathSeperator + p->filename)
+		: (targetRootDirectory + pathSeperator + pDirectory->targetDirectory 
+		                       + pathSeperator + p->filename);
 
 	trace << source << endl << TEXT("=> ") << target << endl << endl;
 	::CopyFile(source.c_str(), target.c_str(), FALSE);
@@ -325,7 +356,7 @@ MsiUtils::ExtractFile(
 	}
 	else
 	{
-		sourceCabinet = sourceRootDirectory + pCabinet->cabinet;
+		sourceCabinet = sourceRootDirectory + pathSeperator + pCabinet->cabinet;
 		trace << TEXT("cabinet: ") << sourceCabinet << endl;
 	}
 	
@@ -343,12 +374,11 @@ MsiUtils::VerifyDirectory(
 	CreateDirectory(s.c_str(), NULL);
 	DWORD attributes = GetFileAttributes(s.c_str());
 	if((attributes != INVALID_FILE_ATTRIBUTES)
-		&& ((attributes & FILE_ATTRIBUTE_DIRECTORY) != 0))
+		&& TEST_FLAG(attributes, FILE_ATTRIBUTE_DIRECTORY))
 		return true;
 
-	TCHAR pathSeperator = TEXT('\\');
 	if(s[s.length()-1] != pathSeperator)
-		s.append(TEXT("\\"));
+		s.append(1, pathSeperator);
 
 	TCHAR  buffer[MAX_PATH];
 	_tcscpy(buffer, s.c_str());
@@ -371,8 +401,12 @@ MsiUtils::VerifyDirectory(
 		buffer[index] = TEXT('\0');
 		attributes = GetFileAttributes(buffer);
 		if(attributes == INVALID_FILE_ATTRIBUTES)
+		{
 			CreateDirectory(buffer, NULL);
-		else if((attributes & FILE_ATTRIBUTE_DIRECTORY) == 0)
+			GetFileAttributes(buffer);
+		}
+
+		if(!TEST_FLAG(attributes, FILE_ATTRIBUTE_DIRECTORY))
 			return false;
 		buffer[index] = pathSeperator;
 
@@ -381,7 +415,7 @@ MsiUtils::VerifyDirectory(
 
 	attributes = GetFileAttributes(s.c_str());
 	return ((attributes != INVALID_FILE_ATTRIBUTES)
-		&& ((attributes & FILE_ATTRIBUTE_DIRECTORY) != 0));
+		&& TEST_FLAG(attributes, FILE_ATTRIBUTE_DIRECTORY));
 }
 
 UINT CALLBACK
@@ -410,21 +444,26 @@ MsiUtils::CabinetCallback(
 		)
 	{
 		MsiFile::tagFile *p = &msiUtils->file->array[index];
-		string middle = TEXT("\\");;
-		if(!msiUtils->folderFlatten)
+		
+		string targetFilename;
+		if(msiUtils->folderFlatten)
+		{
+			targetFilename = msiUtils->targetRootDirectory + pathSeperator + p->filename;
+		}
+		else
 		{
 			MsiDirectory::tagDirectory *d = &msiUtils->directory->array[p->keyDirectory];
 			if(!d->targetDirectoryVerified)
 			{
 				d->targetDirectoryVerified = true;
 				d->targetDirectoryExists   = VerifyDirectory(
-					msiUtils->targetRootDirectory + d->targetDirectory);
+					msiUtils->targetRootDirectory + pathSeperator + d->targetDirectory);
 			}
 			if(!d->targetDirectoryExists)
 				return FILEOP_SKIP;
-			middle = d->targetDirectory;
+			targetFilename = msiUtils->targetRootDirectory + pathSeperator + d->targetDirectory + pathSeperator + p->filename;
 		}
-		string targetFilename = msiUtils->targetRootDirectory + middle + p->filename;
+
 		_tcscpy(cabinetInfo->FullTargetName, targetFilename.c_str());
 		trace << TEXT("... ") << p->filename 
 			<< TEXT("\t") << targetFilename << endl;
@@ -441,7 +480,7 @@ MsiUtils::LocateFile(
 	)
 {
 	for(int i=0; i<file->count; i++)
-		if(file->array[i].file == filename)
+		if(_tcsicmp(file->array[i].file.c_str(), filename.c_str()) == 0)
 		{
 			*pIndex = i;
 			return true;

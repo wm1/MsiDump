@@ -143,7 +143,7 @@ CMainFrame::OnCreate(
 		if(szArglist)
 		{
 			LoadMsiFiles(szArglist[1]);
-			GlobalFree(szArglist);
+			LocalFree(szArglist);
 		}
 	}
 

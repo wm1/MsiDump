@@ -1,3 +1,7 @@
+Update: 2005/3/22
+. Fix: handle path separator more consistently
+. Fix: mstsmmc.dll issue on 2003/11/08 below: case insensitive compare in MsiUtils::LocateFile
+
 Update: 2004/10/5
 . Fix: fail to open UNC file
 
