@@ -23,9 +23,10 @@ _tmain(int argc, LPCTSTR argv[])
 	if(!msi->Open(argv[1]))
 	{
 		msi->Release();
-		return ERROR_OPEN_FAILED;
+		return ERROR_INSTALL_PACKAGE_OPEN_FAILED;
 	}
 
+	int retVal = ERROR_SUCCESS;
 	if(argc == 2)
 	{
 		_tprintf(TEXT(" Num %15s %9s %s\n"), TEXT("filename"), TEXT("filesize"), TEXT("path"));
@@ -49,10 +50,13 @@ _tmain(int argc, LPCTSTR argv[])
 		GetFullPathName(argv[2], MAX_PATH, filename, NULL);
 		bool b = msi->ExtractTo(filename, true, flatFolder);
 		if(!b)
+		{
 			_tprintf(TEXT("Fail to extract msi file. check out trace.txt for details\n"));
+			retVal = ERROR_INSTALL_FAILURE;
+		}
 	}
 
 	msi->Close();
 	msi->Release();
-	return ERROR_SUCCESS;
+	return retVal;
 }
