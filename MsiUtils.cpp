@@ -267,7 +267,7 @@ MsiUtils::LoadDatabase()
 	return true;
 }
 
-void
+bool
 MsiUtils::ExtractTo(
 	LPCTSTR theDirectory,
 	bool    selectAll,
@@ -279,14 +279,14 @@ MsiUtils::ExtractTo(
 	theDirectory = buffer;
 	trace << TEXT("Extract to: ") << theDirectory << endl << endl;
 	if(!VerifyDirectory(theDirectory))
-		return;
+		return false;
 
 	targetRootDirectory = theDirectory;
 	allSelected   = selectAll;
 	folderFlatten = flatFolder;
 	if(folderFlatten &&
 		!VerifyDirectory(targetRootDirectory))
-		return;
+		return false;
 
 	int i;
 
@@ -296,16 +296,27 @@ MsiUtils::ExtractTo(
 	for(i=0; i<directory->count; i++)
 		directory->array[i].targetDirectoryVerified = false;
 
+	int countTodo = 0;
+	this->countDone = 0;
 	for(i=0; i<file->count; i++)
 	{
 		MsiFile::tagFile *p = &file->array[i];
 		if(!allSelected && !p->selected) continue;
+		countTodo++;
 		
 		if(p->compressed)
 			ExtractFile(i);
 		else
 			CopyFile(i);
 	}
+	if(countTodo != countDone)
+	{
+		trace << endl 
+			<< TEXT("Error: ") << (countTodo - countDone)
+			<< TEXT(" files are not extracted") << endl;
+		return false;
+	}
+	return true;
 }
 
 void
@@ -331,7 +342,11 @@ MsiUtils::CopyFile(
 		                       + pathSeperator + p->filename);
 
 	trace << source << endl << TEXT("=> ") << target << endl << endl;
-	::CopyFile(source.c_str(), target.c_str(), FALSE);
+	BOOL b = ::CopyFile(source.c_str(), target.c_str(), FALSE);
+	if(b)
+		countDone ++;
+	else
+		trace << "Error copy file" << endl;
 }
 
 void
@@ -360,6 +375,13 @@ MsiUtils::ExtractFile(
 		trace << TEXT("cabinet: ") << sourceCabinet << endl;
 	}
 	
+	DWORD attributes = GetFileAttributes(sourceCabinet.c_str());
+	if(attributes == INVALID_FILE_ATTRIBUTES)
+	{
+		trace << TEXT("Error: cabinet not found") << endl;
+		return;
+	}
+
 	SetupIterateCabinet(sourceCabinet.c_str(), 0, CabinetCallback, this);
 }
 
@@ -467,6 +489,8 @@ MsiUtils::CabinetCallback(
 		_tcscpy(cabinetInfo->FullTargetName, targetFilename.c_str());
 		trace << TEXT("... ") << p->filename 
 			<< TEXT("\t") << targetFilename << endl;
+
+		msiUtils->countDone ++;
 		return FILEOP_DOIT;
 	}
 
@@ -485,6 +509,7 @@ MsiUtils::LocateFile(
 			*pIndex = i;
 			return true;
 		}
+	trace << "Error: file not found: " << filename << endl;
 	return false;
 }
 

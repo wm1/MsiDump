@@ -1,6 +1,8 @@
-Update: 2005/3/22
+Update: 2005/3/23
 . Fix: handle path separator more consistently
 . Fix: mstsmmc.dll issue on 2003/11/08 below: case insensitive compare in MsiUtils::LocateFile
+. Change: IMsiDumpCab::ExtractTo() now returns bool
+. Improve: more diagnositic output in trace.txt file
 
 Update: 2004/10/5
 . Fix: fail to open UNC file

@@ -47,7 +47,9 @@ _tmain(int argc, LPCTSTR argv[])
 				(arg3[1] == TEXT('f') || arg3[1] == TEXT('F')));
 		TCHAR filename[MAX_PATH];
 		GetFullPathName(argv[2], MAX_PATH, filename, NULL);
-		msi->ExtractTo(filename, true, flatFolder);
+		bool b = msi->ExtractTo(filename, true, flatFolder);
+		if(!b)
+			_tprintf(TEXT("Fail to extract msi file. check out trace.txt for details\n"));
 	}
 
 	msi->Close();

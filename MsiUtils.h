@@ -40,6 +40,7 @@ private:
 	bool          folderFlatten;
 	string        targetRootDirectory;
 	string        sourceRootDirectory;
+	int           countDone;
 
 	MsiFile      *file;
 	MsiComponent *component;
@@ -64,7 +65,7 @@ public:
 	void Release();
 	bool Open(LPCTSTR filename);
 	void Close();
-	void ExtractTo(LPCTSTR theDirectory, bool selectAll, bool flatFolder);
+	bool ExtractTo(LPCTSTR theDirectory, bool selectAll, bool flatFolder);
 
 	int  getCount();
 	void setSelected(int index, bool select);

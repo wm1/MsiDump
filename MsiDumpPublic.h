@@ -20,7 +20,7 @@ public:
 	virtual int  getCount() = 0;
 	virtual bool GetFileDetail(int index, MsiDumpFileDetail *detail) = 0;
 	virtual void setSelected(int index, bool select) = 0;
-	virtual void ExtractTo(LPCTSTR directory, bool selectAll, bool flatFolder) = 0;
+	virtual bool ExtractTo(LPCTSTR directory, bool selectAll, bool flatFolder) = 0;
 };
 
 IMsiDumpCab *MsiDumpCreateObject();

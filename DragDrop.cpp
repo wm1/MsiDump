@@ -176,7 +176,7 @@ CDataObject::GetData(
 			MsiDumpFileDetail detail;
 			msi->GetFileDetail(array[i], &detail);
 			desc->nFileSizeLow = detail.filesize;
-			lstrcpy(desc->cFileName, detail.filename);
+			_tcscpy(desc->cFileName, detail.filename);
 		}
 		medium->tymed          = TYMED_HGLOBAL;
 		medium->hGlobal        = (HGLOBAL)group;
