@@ -37,6 +37,8 @@ public:
 		NOTIFY_CODE_HANDLER(LVN_COLUMNCLICK,      OnColumnClick)
 		NOTIFY_CODE_HANDLER(LVN_ITEMCHANGED,      OnItemChanged)
 		NOTIFY_CODE_HANDLER(LVN_BEGINDRAG,        OnBeginDrag)
+		NOTIFY_CODE_HANDLER(LVN_GETDISPINFO,      OnGetDispInfo)
+		NOTIFY_CODE_HANDLER(LVN_ODSTATECHANGED,   OnODStateChanged)
 		NOTIFY_CODE_HANDLER(NM_RCLICK,            OnRightClick)
 		CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
 		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
@@ -66,6 +68,8 @@ public:
 	LRESULT OnColumnClick    (int, LPNMHDR, BOOL&);
 	LRESULT OnItemChanged    (int, LPNMHDR, BOOL&);
 	LRESULT OnBeginDrag      (int, LPNMHDR, BOOL&);
+	LRESULT OnGetDispInfo    (int, LPNMHDR, BOOL&);
+	LRESULT OnODStateChanged (int, LPNMHDR, BOOL&);
 	LRESULT OnRightClick     (int, LPNMHDR, BOOL&);
 	LRESULT OnAppAbout       (WORD, WORD, HWND, BOOL&)
 	{
@@ -88,8 +92,8 @@ private:
 	IMsiDumpCab    *m_msi;
 
 	LPCTSTR CmdLine;
-	int     totalFileSize;
-	int     selectedFileSize;
+	ULONGLONG totalFileSize;
+	ULONGLONG selectedFileSize;
 	bool    selectionChanged;
 
 	// sorting stuff
@@ -104,3 +108,13 @@ private:
 	BOOL sortAscending;
 	static int CALLBACK sortCallback(LPARAM, LPARAM, LPARAM);
 };
+
+enum Columns
+{
+	COLUME_NAME = 0,
+	COLUMN_TYPE,
+	COLUMN_SIZE,
+	COLUMN_PATH,
+	COLUMN_PLATFORM
+};
+

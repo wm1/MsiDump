@@ -38,7 +38,8 @@ CFLAGS=/nologo /Zi /c /EHsc /D_WIN32_WINNT=0x0501 /D_UNICODE /DUNICODE
 # comment out the following line to disable tracing
 CFLAGS=$(CFLAGS) /DENABLE_TRACE=1
 
-LFLAGS=/nologo /debug
+# add /debugtype for office profiler
+LFLAGS=/nologo /debug /debugtype:cv,fixup
 
 RFLAGS=/dPROJECT_VERSION=$(PROJECT_VERSION) /dPROJ=$(PROJ)
 

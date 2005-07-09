@@ -114,15 +114,15 @@ CMainFrame::OnCreate(
 	::DragAcceptFiles(m_hWnd, TRUE);
 
 	m_hWndClient = m_list.Create(m_hWnd, rcDefault,
-		NULL, WS_CHILD | WS_VISIBLE | LVS_REPORT,
+		NULL, WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_OWNERDATA,
 		WS_EX_CLIENTEDGE,
 		IDC_LIST_VIEW);
 	m_list.SetExtendedListViewStyle(LVS_EX_FULLROWSELECT | LVS_EX_HEADERDRAGDROP);
-	m_list.InsertColumn(0, LoadString(IDS_LISTVIEW_COLUMN_NAME), 0, 140, -1);
-	m_list.InsertColumn(1, LoadString(IDS_LISTVIEW_COLUMN_TYPE), 0, 40, -1);
-	m_list.InsertColumn(2, LoadString(IDS_LISTVIEW_COLUMN_SIZE), LVCFMT_RIGHT, 90, -1);
-	m_list.InsertColumn(3, LoadString(IDS_LISTVIEW_COLUMN_PATH), 0, 400, -1);
-	m_list.InsertColumn(4, LoadString(IDS_LISTVIEW_COLUMN_PLATFORM), 0, 60, -1);
+	m_list.InsertColumn(COLUME_NAME, LoadString(IDS_LISTVIEW_COLUMN_NAME), 0, 140, -1);
+	m_list.InsertColumn(COLUMN_TYPE, LoadString(IDS_LISTVIEW_COLUMN_TYPE), 0, 40, -1);
+	m_list.InsertColumn(COLUMN_SIZE, LoadString(IDS_LISTVIEW_COLUMN_SIZE), LVCFMT_RIGHT, 90, -1);
+	m_list.InsertColumn(COLUMN_PATH, LoadString(IDS_LISTVIEW_COLUMN_PATH), 0, 400, -1);
+	m_list.InsertColumn(COLUMN_PLATFORM, LoadString(IDS_LISTVIEW_COLUMN_PLATFORM), 0, 60, -1);
 	sortAttributes[0] = CaseInsensitiveString;
 	sortAttributes[1] = CaseInsensitiveString;
 	sortAttributes[2] = Numeric;
@@ -163,7 +163,19 @@ CMainFrame::OnIdle()
 		selectionChanged = false;
 		UpdateStatusbar(ID_STATUSBAR_SELECTED);
 	}
-		
+	
+	if(totalFileSize == 0)
+	{
+		int count = m_msi->getCount();
+		for(int i = 0; i < count; i++)
+		{
+			MsiDumpFileDetail detail;
+			m_msi->GetFileDetail(i, &detail);
+			totalFileSize += detail.filesize;
+		}
+		UpdateStatusbar(ID_STATUSBAR_TOTAL);
+	}
+
 	return FALSE;
 }
 
@@ -315,8 +327,29 @@ CMainFrame::OnItemChanged(
 		&& (bOldState != bNewState))
 	{
 		MsiDumpFileDetail detail;
-		m_msi->GetFileDetail((int)pnmv->lParam, &detail);
-		m_msi->setSelected((int)pnmv->lParam, bNewState);
+		int iItem = pnmv->iItem;
+		selectionChanged = true;
+
+		// If the iItem member of the structure pointed to by pnmv is -1, 
+		//the change has been applied to all items in the list view. 
+		//
+		if(iItem == -1)
+		{
+			int count = m_msi->getCount();
+			for(iItem=0; iItem<count; iItem++)
+				m_msi->setSelected(iItem, bNewState);
+			
+			selectedFileSize = 
+				(bNewState == false)
+				? 0
+				: totalFileSize;
+
+			return 0;
+		}
+		
+
+		m_msi->GetFileDetail(iItem, &detail);
+		m_msi->setSelected(iItem, bNewState);
 		if(bNewState == false)
 		{
 			// the item is de-selected
@@ -324,7 +357,38 @@ CMainFrame::OnItemChanged(
 		}
 
 		selectedFileSize += detail.filesize;
-		selectionChanged = true;
+	}
+	return 0;
+}
+
+LRESULT
+CMainFrame::OnODStateChanged(
+	int     /*idCtrl*/,
+	LPNMHDR pnmh,
+	BOOL&   /*bHandled*/
+	)
+{
+	LPNMLVODSTATECHANGE pnmv = (LPNMLVODSTATECHANGE)pnmh;
+	bool bOldState = TEST_FLAG(pnmv->uOldState, LVIS_SELECTED);
+	bool bNewState = TEST_FLAG(pnmv->uNewState, LVIS_SELECTED);
+	if(bOldState == bNewState)
+		return 0;
+
+	selectionChanged = true;
+	for(int iItem=pnmv->iFrom; iItem<=pnmv->iTo; iItem++)
+	{
+		MsiDumpFileDetail detail;
+		m_msi->GetFileDetail(iItem, &detail);
+		if(detail.selected == bNewState)
+			continue;
+
+		m_msi->setSelected(iItem, bNewState);
+		if(bNewState == false)
+		{
+			// the item is de-selected
+			detail.filesize = -detail.filesize;
+		}
+		selectedFileSize += detail.filesize;
 	}
 	return 0;
 }
@@ -337,6 +401,74 @@ CMainFrame::OnBeginDrag(
 	)
 {
 	Drag(m_msi, m_list.GetSelectedCount());
+	return 0;
+}
+
+LRESULT
+CMainFrame::OnGetDispInfo(
+	int     /*idCtrl*/,
+	LPNMHDR pnmh,
+	BOOL&   /*bHandled*/
+	)
+{
+	NMLVDISPINFO *pDispInfo = (NMLVDISPINFO*)pnmh;
+	LPLVITEM      pItem     = &pDispInfo->item;
+	
+	if(!TEST_FLAG(pItem->mask, LVIF_TEXT))
+	{
+		return 0;
+	}
+
+	MsiDumpFileDetail detail;
+	m_msi->GetFileDetail(pItem->iItem, &detail);
+	
+	switch(pItem->iSubItem)
+	{
+
+	case COLUME_NAME:
+		pItem->pszText = (LPTSTR)detail.filename;
+		break;
+
+	case COLUMN_TYPE:
+	{
+		LPCTSTR extension = _tcsrchr(detail.filename, TEXT('.'));
+		if(extension)
+			extension++;
+		else
+			extension = TEXT("");
+		pItem->pszText = (LPTSTR)extension;
+		break;
+	}
+	case COLUMN_SIZE:
+		TCHAR filesizeBuffer[20];
+		_stprintf(filesizeBuffer, TEXT("%d"), detail.filesize);
+		pItem->pszText = TEXT("size");//filesizeBuffer;
+		//totalFileSize += detail.filesize;
+		break;
+
+	case COLUMN_PATH:
+		pItem->pszText = (LPTSTR)detail.path;
+		break;
+
+	case COLUMN_PLATFORM:
+	{
+		LPCTSTR win9x   = TEXT("Win9x");
+		LPCTSTR winNT   = TEXT("WinNT");
+		LPCTSTR Win9xNT = TEXT("");
+		LPCTSTR platform = (detail.win9x
+				? (detail.winNT ? Win9xNT : win9x)
+				: (detail.winNT ? winNT : Win9xNT)
+				);
+		pItem->pszText = (LPTSTR)platform;
+		break;
+	}
+
+	default:
+		pItem->pszText = TEXT("???");
+		break;
+
+	} // end switch(pItem->iSubItem)
+
 	return 0;
 }
 
@@ -363,37 +495,7 @@ CMainFrame::LoadMsiFiles(
 
 	int count = m_msi->getCount();
 	totalFileSize = 0;
-	for(int i = 0; i < count; i++)
-	{
-		MsiDumpFileDetail detail;
-		m_msi->GetFileDetail(i, &detail);
-
-		m_list.InsertItem(i, detail.filename);
-		LPCTSTR extension = _tcsrchr(detail.filename, TEXT('.'));
-		if(extension)
-			extension++;
-		else
-			extension = TEXT("");
-		m_list.SetItemText(i, 1, extension);
-
-		m_list.SetItemData(i, i);
-
-		TCHAR filesizeBuffer[20];
-		_stprintf(filesizeBuffer, TEXT("%d"), detail.filesize);
-		m_list.SetItemText(i, 2, filesizeBuffer);
-		totalFileSize += detail.filesize;
-
-		m_list.SetItemText(i, 3, detail.path);
-		
-		LPCTSTR win9x   = TEXT("Win9x");
-		LPCTSTR winNT   = TEXT("WinNT");
-		LPCTSTR Win9xNT = TEXT("");
-		LPCTSTR platform = (detail.win9x
-				? (detail.winNT ? Win9xNT : win9x)
-				: (detail.winNT ? winNT : Win9xNT)
-				);
-		m_list.SetItemText(i, 4, platform);
-	}
+	m_list.SetItemCountEx(count, LVSICF_NOINVALIDATEALL);
 	SetCaption(filename);
 	if(sortColumn != -1)
 		m_list.SortItemsEx(sortCallback, (LPARAM)this);
