@@ -88,6 +88,8 @@ private:
 	void UpdateStatusbar(int part);
 
 	CListViewCtrl   m_list;
+	int            *LVindex;   // map ListView[iItem] to getfiledetail(index)
+	LPCTSTR        *filesizes; // store listview.iItem[COLUMN_SIZE]
 	CStatusBarCtrl  m_statusbar;
 	IMsiDumpCab    *m_msi;
 
@@ -97,21 +99,18 @@ private:
 	bool    selectionChanged;
 
 	// sorting stuff
-	const static int columnCount = 5;
-	enum
-	{
-		Numeric,
-		CaseInsensitiveString,
-		CaseSensitiveString
-	} sortAttributes[columnCount];
 	int  sortColumn;
 	BOOL sortAscending;
-	static int CALLBACK sortCallback(LPARAM, LPARAM, LPARAM);
+	void sort();
+	static int __cdecl sortCallback(const void*, const void*);
 };
 
 enum Columns
 {
+	// the first column must be numbered as iSubItem = 0
+	//
 	COLUME_NAME = 0,
+
 	COLUMN_TYPE,
 	COLUMN_SIZE,
 	COLUMN_PATH,

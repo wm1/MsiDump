@@ -123,11 +123,6 @@ CMainFrame::OnCreate(
 	m_list.InsertColumn(COLUMN_SIZE, LoadString(IDS_LISTVIEW_COLUMN_SIZE), LVCFMT_RIGHT, 90, -1);
 	m_list.InsertColumn(COLUMN_PATH, LoadString(IDS_LISTVIEW_COLUMN_PATH), 0, 400, -1);
 	m_list.InsertColumn(COLUMN_PLATFORM, LoadString(IDS_LISTVIEW_COLUMN_PLATFORM), 0, 60, -1);
-	sortAttributes[0] = CaseInsensitiveString;
-	sortAttributes[1] = CaseInsensitiveString;
-	sortAttributes[2] = Numeric;
-	sortAttributes[3] = CaseInsensitiveString;
-	sortAttributes[4] = CaseInsensitiveString;
 	sortColumn = -1;
 
 	UpdateLayout();
@@ -305,7 +300,7 @@ CMainFrame::OnColumnClick(
 	LPNMLISTVIEW pnmv = (LPNMLISTVIEW)pnmh;
 	sortAscending = (sortColumn != pnmv->iSubItem) ? true : (!sortAscending);
 	sortColumn = pnmv->iSubItem;
-	m_list.SortItemsEx(sortCallback, (LPARAM)this);
+	sort();
 	m_list.SetSelectedColumn(sortColumn);
 	return 0;
 }
@@ -347,9 +342,9 @@ CMainFrame::OnItemChanged(
 			return 0;
 		}
 		
-
-		m_msi->GetFileDetail(iItem, &detail);
-		m_msi->setSelected(iItem, bNewState);
+		int index = LVindex[iItem];
+		m_msi->GetFileDetail(index, &detail);
+		m_msi->setSelected(index, bNewState);
 		if(bNewState == false)
 		{
 			// the item is de-selected
@@ -378,11 +373,12 @@ CMainFrame::OnODStateChanged(
 	for(int iItem=pnmv->iFrom; iItem<=pnmv->iTo; iItem++)
 	{
 		MsiDumpFileDetail detail;
-		m_msi->GetFileDetail(iItem, &detail);
+		int index = LVindex[iItem];
+		m_msi->GetFileDetail(index, &detail);
 		if(detail.selected == bNewState)
 			continue;
 
-		m_msi->setSelected(iItem, bNewState);
+		m_msi->setSelected(index, bNewState);
 		if(bNewState == false)
 		{
 			// the item is de-selected
@@ -420,7 +416,8 @@ CMainFrame::OnGetDispInfo(
 	}
 
 	MsiDumpFileDetail detail;
-	m_msi->GetFileDetail(pItem->iItem, &detail);
+	int index = LVindex[pItem->iItem];
+	m_msi->GetFileDetail(index, &detail);
 	
 	switch(pItem->iSubItem)
 	{
@@ -439,12 +436,18 @@ CMainFrame::OnGetDispInfo(
 		pItem->pszText = (LPTSTR)extension;
 		break;
 	}
+
 	case COLUMN_SIZE:
-		TCHAR filesizeBuffer[20];
-		_stprintf(filesizeBuffer, TEXT("%d"), detail.filesize);
-		pItem->pszText = TEXT("size");//filesizeBuffer;
-		//totalFileSize += detail.filesize;
+	{
+		if(filesizes[index] == NULL)
+		{
+			TCHAR filesizeBuffer[20];
+			_stprintf(filesizeBuffer, TEXT("%d"), detail.filesize);
+			filesizes[index] = _tcsdup(filesizeBuffer);
+		}
+		pItem->pszText = (LPTSTR)filesizes[index];
 		break;
+	}
 
 	case COLUMN_PATH:
 		pItem->pszText = (LPTSTR)detail.path;
@@ -493,12 +496,19 @@ CMainFrame::LoadMsiFiles(
 	if(!m_msi->Open(filename))
 		return;
 
-	int count = m_msi->getCount();
 	totalFileSize = 0;
+	int count = m_msi->getCount();
 	m_list.SetItemCountEx(count, LVSICF_NOINVALIDATEALL);
+	LVindex = new int[count];
+	for(int i=0; i<count; i++)
+		LVindex[i] = i;
+	filesizes = new LPCTSTR[count];
+	for(i=0; i<count; i++)
+		filesizes[i] = NULL;
+
 	SetCaption(filename);
 	if(sortColumn != -1)
-		m_list.SortItemsEx(sortCallback, (LPARAM)this);
+		sort();
 }
 
 void
@@ -506,6 +516,25 @@ CMainFrame::Cleanup()
 {
 	m_msi->Close();
 	m_list.DeleteAllItems();
+
+	if(LVindex)
+	{
+		delete []LVindex;
+		LVindex = NULL;
+	}
+
+	if(filesizes)
+	{
+		int count = m_msi->getCount();
+		for(int i=0; i<count; i++)
+		{
+			if(filesizes[i])
+				free((void*)filesizes[i]);
+		}
+		delete []filesizes;
+		filesizes = NULL;
+	}
+
 	totalFileSize    = 0;
 	selectedFileSize = 0;
 	SetCaption(NULL);
@@ -547,36 +576,108 @@ CMainFrame::UpdateStatusbar(int part)
 	m_statusbar.SetText(part, buffer, 0);
 }
 
-int CALLBACK
+static
+CMainFrame* _this_qsort;
+
+void
+CMainFrame::sort()
+{
+	int count = m_msi->getCount();
+	if(count == 0) return;
+	
+	_this_qsort = this;
+	qsort(LVindex, count, sizeof(*LVindex), sortCallback);
+	m_list.DeleteAllItems();
+	m_list.SetItemCountEx(count, LVSICF_NOINVALIDATEALL);
+}
+
+int __cdecl
 CMainFrame::sortCallback(
-	LPARAM index1,
-	LPARAM index2,
-	LPARAM lParamSort
+	const void *elem1,
+	const void *elem2
 	)
 {
-	CMainFrame* _this = (CMainFrame*)lParamSort;
-	TCHAR item1[MAX_PATH], item2[MAX_PATH];
-	_this->m_list.GetItemText((int)index1, _this->sortColumn, item1, MAX_PATH);
-	_this->m_list.GetItemText((int)index2, _this->sortColumn, item2, MAX_PATH);
+	CMainFrame* _this = _this_qsort;
+	
+	int i1 = *(int*)elem1;
+	int i2 = *(int*)elem2;
+	
+	MsiDumpFileDetail detail1, detail2;
+	_this->m_msi->GetFileDetail(i1, &detail1);
+	_this->m_msi->GetFileDetail(i2, &detail2);
+
 	int retval = 0;
-	switch(_this->sortAttributes[_this->sortColumn])
+	Columns sortColumn = (Columns)_this->sortColumn;
+	switch(sortColumn)
 	{
-		case CMainFrame::Numeric:
-		{
-			__int64 i1 = _tstoi64(item1);
-			__int64 i2 = _tstoi64(item2);
-			if(i1 == i2) retval = 0;
-			else retval = (i1 < i2) ? -1 : 1;
-			break;
-		}
 
-		case CMainFrame::CaseInsensitiveString:
-			retval = _tcsicmp(item1, item2);
-			break;
-
-		case CMainFrame::CaseSensitiveString:
-			retval = _tcscmp(item1, item2);
-			break;
+	case COLUME_NAME: 
+	{
+		retval = _tcsicmp(detail1.filename, detail2.filename);
+		break;
 	}
+
+	case COLUMN_TYPE:
+	{
+		LPCTSTR ext1 = _tcsrchr(detail1.filename, TEXT('.'));
+		if(ext1)
+			ext1++;
+		else
+			ext1 = TEXT("");
+
+		LPCTSTR ext2 = _tcsrchr(detail2.filename, TEXT('.'));
+		if(ext2)
+			ext2++;
+		else
+			ext2 = TEXT("");
+
+		retval = _tcsicmp(ext1, ext2);
+		break;
+	}
+
+	case COLUMN_SIZE:
+	{
+		int size1 = detail1.filesize;
+		int size2 = detail2.filesize;
+
+		if     (size1  < size2) retval = -1;
+		else if(size1 == size2) retval = 0;
+		else                    retval = 1;
+		break;
+	}
+
+	case COLUMN_PATH:
+	{
+		retval = _tcsicmp(detail1.path, detail2.path);
+		break;
+	}
+
+	case COLUMN_PLATFORM:
+	{
+		int plat1, plat2;
+
+		if     ( detail1.win9x && !detail1.winNT) plat1 = 1;
+		else if(!detail1.win9x &&  detail1.winNT) plat1 = 2;
+		else                                      plat1 = 0;
+
+		if     ( detail2.win9x && !detail2.winNT) plat2 = 1;
+		else if(!detail2.win9x &&  detail2.winNT) plat2 = 2;
+		else                                      plat2 = 0;
+
+		if     (plat1  < plat2) retval = -1;
+		else if(plat1 == plat2) retval = 0;
+		else                    retval = 1;
+
+		break;
+	}
+	
+	default:
+	{
+		retval = 0;
+		break;
+	}
+
+	} // end switch(sortColumn)
+
 	return (_this->sortAscending) ? retval : -retval;
 }
