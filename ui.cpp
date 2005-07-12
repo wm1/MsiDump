@@ -128,6 +128,8 @@ CMainFrame::OnCreate(
 	UpdateLayout();
 
 	m_msi = MsiDumpCreateObject();
+	LVindex = NULL;
+	filesizes = NULL;
 	Cleanup();
 
 	if(CmdLine && *CmdLine)
