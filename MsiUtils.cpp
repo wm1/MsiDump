@@ -529,6 +529,7 @@ MsiUtils::GetFileDetail(
 	detail->win9x    = component->array[ p->keyComponent ].win9x;
 	detail->winNT    = component->array[ p->keyComponent ].winNT;
 	detail->selected = p->selected;
+	detail->version  = p->version.c_str();
 	return true;
 }
 

@@ -123,6 +123,7 @@ CMainFrame::OnCreate(
 	m_list.InsertColumn(COLUMN_SIZE, LoadString(IDS_LISTVIEW_COLUMN_SIZE), LVCFMT_RIGHT, 90, -1);
 	m_list.InsertColumn(COLUMN_PATH, LoadString(IDS_LISTVIEW_COLUMN_PATH), 0, 400, -1);
 	m_list.InsertColumn(COLUMN_PLATFORM, LoadString(IDS_LISTVIEW_COLUMN_PLATFORM), 0, 60, -1);
+	m_list.InsertColumn(COLUMN_VERSION,  LoadString(IDS_LISTVIEW_COLUMN_VERSION),  0, 120, -1);
 	sortColumn = -1;
 
 	UpdateLayout();
@@ -467,6 +468,10 @@ CMainFrame::OnGetDispInfo(
 		pItem->pszText = (LPTSTR)platform;
 		break;
 	}
+
+	case COLUMN_VERSION:
+		pItem->pszText = (LPTSTR)detail.version;
+		break;
 
 	default:
 		pItem->pszText = TEXT("???");

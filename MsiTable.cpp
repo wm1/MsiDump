@@ -148,7 +148,7 @@ MsiFile::MsiFile(
 	DWORD size = MAX_PATH;
 	TCHAR buffer[MAX_PATH];
 	array = new tagFile[count];
-	MsiQuery q(msiUtils, TEXT("SELECT File, Component_, FileName, FileSize, Attributes, Sequence FROM File ORDER BY Sequence"));
+	MsiQuery q(msiUtils, TEXT("SELECT File, Component_, FileName, FileSize, Attributes, Sequence, Version FROM File ORDER BY Sequence"));
 
 	for(tagFile* p = array; (record = q.Next()) != NULL; p++)
 	{
@@ -169,6 +169,10 @@ MsiFile::MsiFile(
 		p->filesize   = MsiRecordGetInteger(record, 4);
 		p->attributes = MsiRecordGetInteger(record, 5);
 		p->sequence   = MsiRecordGetInteger(record, 6);
+
+		size = MAX_PATH;
+		MsiRecordGetString(record, 7, buffer, &size);
+		p->version = buffer;
 	}
 }
 

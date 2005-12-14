@@ -6,6 +6,7 @@ struct MsiDumpFileDetail
 	LPCTSTR filename;
 	int     filesize;
 	LPCTSTR path;
+	LPCTSTR version;
 	bool    win9x;    // Should the file be installed on Windows 95/98/Me?
 	bool    winNT;    // Should be installed on Windows NT/2000/XP/2003?
 	bool    selected;

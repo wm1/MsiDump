@@ -41,6 +41,7 @@ private:
 		string file;
 		string component;
 		string filename;
+		string version;
 		int    filesize;
 		int    attributes;
 		int    sequence;
