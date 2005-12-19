@@ -1,3 +1,11 @@
+Update: 2005/12/19
+. Change: Rewrite argument parsing portion in msidump.exe
+. Change: Remove other build methods except for Makefile approach
+. UI: Add "version" column
+
+Update: 2005/7/12
+. UI: use virtual listview to improve startup time
+
 Update: 2005/3/23
 . Fix: handle path separator more consistently
 . Fix: mstsmmc.dll issue on 2003/11/08 below: case insensitive compare in MsiUtils::LocateFile

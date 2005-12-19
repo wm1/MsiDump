@@ -1,7 +1,7 @@
 SRC_RELEASE_POINT=\\weimao1\public\msi
 TOOLBOX_RELEASE_POINT=\\TKFilToolBox\Tools\20864
 
-PROJECT_VERSION=2,0,1,0
+!INCLUDE version.inc
 
 PROJ=MsiDumpCab
 PROJ_CMDLINE=MsiDump
@@ -25,9 +25,10 @@ PROJ_CMDLINE_OBJECTS =           \
 	$(O)\MsiUtils.obj        \
 	$(O)\MsiTable.obj        \
 	$(O)\$(PROJ_CMDLINE).obj \
+	$(O)\parseArgs.obj       \
 	$(O)\ui.res
 
-WTL=$(MSVCDIR)\atlmfc\wtl71\include
+WTL=$(MSVCDIR)\atlmfc\wtl75\include
 INCLUDE=$(INCLUDE);$(WTL)
 
 LIBS = user32.lib ole32.lib comctl32.lib comdlg32.lib shell32.lib shlwapi.lib \
@@ -39,7 +40,8 @@ CFLAGS=/nologo /Zi /c /EHsc /D_WIN32_WINNT=0x0501 /D_UNICODE /DUNICODE
 CFLAGS=$(CFLAGS) /DENABLE_TRACE=1
 
 # add /debugtype for office profiler
-LFLAGS=/nologo /debug /debugtype:cv,fixup
+# add /release to avoid symbol matching warning in windbg
+LFLAGS=/nologo /debug /debugtype:cv,fixup /release
 
 RFLAGS=/dPROJECT_VERSION=$(PROJECT_VERSION) /dPROJ=$(PROJ)
 
@@ -65,6 +67,10 @@ $(O)\DragDrop.obj: DragDrop.cpp DragDrop.h CUnknown.h
 $(O)\ui.res: ui.rc
 
 ui.h: Resource.h MainFrame.h AboutDlg.h
+
+$(O)\$(PROJ_CMDLINE).obj: $(PROJ_CMDLINE).cpp parseArgs.h
+
+$(O)\parseArgs.obj: parseArgs.cpp parseArgs.h
 
 $(O)\$(PROJ_CMDLINE).exe: $(PROJ_CMDLINE_OBJECTS)
 	link $(LFLAGS) $** setupapi.lib msi.lib -out:$@

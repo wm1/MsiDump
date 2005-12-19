@@ -4,50 +4,45 @@
 #include <tchar.h>
 
 #include "MsiDumpPublic.h"
+#include "parseArgs.h"
 
 int __cdecl
 _tmain(int argc, LPCTSTR argv[])
 {
-	if(argc != 2 && argc != 3 && argc != 4)
+	parseArgs(argc, argv);
+	if(args.cmd == cmd_invalid)
 	{
-		_tprintf(TEXT("Usage:\n")
-			TEXT("  %s msiFile                  - list files in the installer package\n")
-			TEXT("  %s msiFile extractPath      - extract files to specified folder\n")
-			TEXT("  %s msiFile extractPath -f   - extract files flatly\n"),
-			argv[0], argv[0], argv[0]
-			);
+		LPCTSTR exe = argv[0];
+		usage(exe);
 		return E_INVALIDARG;
 	}
 
 	IMsiDumpCab *msi = MsiDumpCreateObject();
-	if(!msi->Open(argv[1]))
+	if(!msi->Open(args.filename))
 	{
 		msi->Release();
 		return ERROR_INSTALL_PACKAGE_OPEN_FAILED;
 	}
 
 	int retVal = ERROR_SUCCESS;
-	if(argc == 2)
+
+	if(args.cmd == cmd_list)
 	{
-		_tprintf(TEXT(" Num %15s %9s %s\n"), TEXT("filename"), TEXT("filesize"), TEXT("path"));
+		listHeader();
 		int count = msi->getCount();
 		for(int i=0; i<count; i++)
 		{
 			MsiDumpFileDetail detail;
 			msi->GetFileDetail(i, &detail);
-			_tprintf(TEXT("%4d %15s %9d %s\n"), i, 
-				detail.filename, detail.filesize, detail.path);
+			listRecord(i, &detail);
 		}
-
-	} else if(argc == 3 || argc == 4)
+	}
+	else if(args.cmd == cmd_extract)
 	{
-		bool flatFolder = false;
-		LPCTSTR arg3 = argv[3];
-		if(argc == 4)
-			flatFolder = ((arg3[0] == TEXT('-') || arg3[0] == TEXT('/')) &&
-				(arg3[1] == TEXT('f') || arg3[1] == TEXT('F')));
+		bool flatFolder = !args.extract_full_path;
+
 		TCHAR filename[MAX_PATH];
-		GetFullPathName(argv[2], MAX_PATH, filename, NULL);
+		GetFullPathName(args.path_to_extract, MAX_PATH, filename, NULL);
 		bool b = msi->ExtractTo(filename, true, flatFolder);
 		if(!b)
 		{
