@@ -184,6 +184,39 @@ MsiFile::~MsiFile()
 
 ////////////////////////////////////////////////////////////////////////
 
+MsiSimpleFile::MsiSimpleFile(
+	MsiUtils *msiUtils
+	)
+	: MsiTable(msiUtils, TEXT("File"))
+{
+	if(count == 0) return;
+
+	MSIHANDLE record;
+	DWORD size = MAX_PATH;
+	TCHAR buffer[MAX_PATH];
+	array = new tagFile[count];
+	MsiQuery q(msiUtils, TEXT("SELECT FileName, FileSize FROM File ORDER BY Sequence"));
+
+	for(tagFile* p = array; (record = q.Next()) != NULL; p++)
+	{
+		size = MAX_PATH;
+		MsiRecordGetString(record, 1, buffer, &size);
+		// the format here is: "shortname | longname"
+		LPCTSTR verticalBar = _tcschr(buffer, TEXT('|'));
+		p->filename = (verticalBar ? verticalBar + 1 : buffer);
+		
+		p->filesize   = MsiRecordGetInteger(record, 2);
+	}
+}
+
+MsiSimpleFile::~MsiSimpleFile()
+{
+	if(count != 0)
+		delete[] array;
+}
+
+////////////////////////////////////////////////////////////////////////
+
 MsiComponent::MsiComponent(
 	MsiUtils *msiUtils
 	)

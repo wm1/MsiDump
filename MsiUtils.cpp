@@ -40,7 +40,9 @@ MsiUtils::Release()
 
 bool
 MsiUtils::Open(
-	LPCTSTR filename
+	LPCTSTR filename,
+	bool    delay,
+	HANDLE  event
 	)
 {
 	Close();
@@ -80,12 +82,26 @@ MsiUtils::Open(
 		return false;
 	}
 
-	LoadSummary();
-	bool b = LoadDatabase();
-	if(!b)
+	delayLoading = delay;
+	delayEvent   = event;
+	if(delay == false)
 	{
-		Close();
-		return false;
+		simpleFile = NULL;
+		LoadSummary();
+		bool b = LoadDatabase();
+		if(!b)
+		{
+			Close();
+			return false;
+		}
+	}
+	else 
+	{
+		cabinet   = NULL;
+		directory = NULL;
+		component = NULL;
+		file      = NULL;
+		DelayLoadDatabase();
 	}
 	return true;
 }
@@ -103,6 +119,7 @@ MsiUtils::Close()
 	if(directory) { delete directory; directory = NULL; }
 	if(component) { delete component; component = NULL; }
 	if(file)      { delete file;      file      = NULL; }
+	if(simpleFile){ delete simpleFile;simpleFile= NULL; }
 }
 
 
@@ -274,6 +291,8 @@ MsiUtils::ExtractTo(
 	bool    flatFolder
 	)
 {
+	if(delayLoading) return false;
+
 	TCHAR buffer[MAX_PATH];
 	GetFullPathName(theDirectory, MAX_PATH, buffer, NULL);
 	theDirectory = buffer;
@@ -519,6 +538,19 @@ MsiUtils::GetFileDetail(
 	MsiDumpFileDetail* detail
 	)
 {
+	if(delayLoading)
+	{
+		if(index < 0 || index > simpleFile->count)
+			return false;
+		
+		MsiSimpleFile::tagFile* p = &simpleFile->array[index];
+		ZeroMemory(detail, sizeof(MsiDumpFileDetail));
+
+		detail->filename = p->filename.c_str();
+		detail->filesize = p->filesize;
+		return true;
+	}
+	
 	if(index < 0 || index > file->count)
 		return false;
 
@@ -539,6 +571,8 @@ MsiUtils::setSelected(
 	bool select
 	)
 {
+	if(delayLoading) return;
+
 	if(index < 0 || index > file->count)
 		return;
 
@@ -548,7 +582,9 @@ MsiUtils::setSelected(
 int
 MsiUtils::getCount()
 {
-	return (IsOpened() ? file->count : 0);
+	return (IsOpened()
+		? (delayLoading ? simpleFile->count : file->count)
+		: 0);
 }
 
 IMsiDumpCab*
@@ -556,4 +592,21 @@ MsiDumpCreateObject()
 {
 	MsiUtils *msiUtils = new MsiUtils();
 	return (IMsiDumpCab*)msiUtils;
+}
+
+extern "C" void __cdecl 
+threadLoadDatabase(void* parameter)
+{
+	MsiUtils* _this = (MsiUtils*)parameter;
+	_this->LoadSummary();
+	_this->LoadDatabase();
+	_this->delayLoading = false;
+	SetEvent(_this->delayEvent);
+}
+
+void
+MsiUtils::DelayLoadDatabase()
+{
+	simpleFile = new MsiSimpleFile(this);
+	_beginthread(threadLoadDatabase, 0, this);
 }

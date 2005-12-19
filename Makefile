@@ -34,7 +34,7 @@ INCLUDE=$(INCLUDE);$(WTL)
 LIBS = user32.lib ole32.lib comctl32.lib comdlg32.lib shell32.lib shlwapi.lib \
        atl.lib setupapi.lib msi.lib
 
-CFLAGS=/nologo /Zi /c /EHsc /D_WIN32_WINNT=0x0501 /D_UNICODE /DUNICODE 
+CFLAGS=/nologo /Zi /c /EHsc /MT /D_WIN32_WINNT=0x0501 /D_UNICODE /DUNICODE 
 
 # comment out the following line to disable tracing
 CFLAGS=$(CFLAGS) /DENABLE_TRACE=1

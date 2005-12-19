@@ -16,7 +16,7 @@ class IMsiDumpCab
 {
 public:
 	virtual void Release() = 0;
-	virtual bool Open(LPCTSTR filename)  = 0;
+	virtual bool Open(LPCTSTR filename, bool delay = false, HANDLE event = NULL)  = 0;
 	virtual void Close() = 0;
 	virtual int  getCount() = 0;
 	virtual bool GetFileDetail(int index, MsiDumpFileDetail *detail) = 0;

@@ -132,6 +132,7 @@ CMainFrame::OnCreate(
 	LVindex = NULL;
 	filesizes = NULL;
 	Cleanup();
+	delayEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	if(CmdLine && *CmdLine)
 	{
@@ -494,13 +495,23 @@ CMainFrame::OnRightClick(
 	return S_FALSE;
 }
 
+extern "C" void __cdecl 
+threadWaitDelayLoad(void* parameter)
+{
+	CMainFrame* _this = (CMainFrame*)parameter;
+	WaitForSingleObject(_this->delayEvent, INFINITE);
+	InvalidateRect(_this->m_hWndClient, NULL, TRUE);
+}
+
 void
 CMainFrame::LoadMsiFiles(
 	LPCTSTR filename
 	)
 {
 	Cleanup();
-	if(!m_msi->Open(filename))
+	bool delayLoad = true;
+	_beginthread(threadWaitDelayLoad, 0, this);
+	if(!m_msi->Open(filename, delayLoad, delayEvent))
 		return;
 
 	totalFileSize = 0;
@@ -655,6 +666,11 @@ CMainFrame::sortCallback(
 
 	case COLUMN_PATH:
 	{
+		if(detail1.path == NULL || detail2.path == 0)
+		{
+			retval = 0;
+			break;
+		}
 		retval = _tcsicmp(detail1.path, detail2.path);
 		break;
 	}

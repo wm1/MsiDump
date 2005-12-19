@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <wtypes.h>
 #include <tchar.h>
+#include <process.h>
 #include <string>
 #include <fstream>
 using namespace std;
@@ -30,6 +31,9 @@ using namespace std;
 
 extern ofstream trace;
 
+extern "C" void __cdecl 
+threadLoadDatabase(void* parameter);
+
 class MsiUtils : public IMsiDumpCab
 {
 private:
@@ -41,16 +45,20 @@ private:
 	string        targetRootDirectory;
 	string        sourceRootDirectory;
 	int           countDone;
+	bool          delayLoading;
+	HANDLE        delayEvent;
 
 	MsiFile      *file;
 	MsiComponent *component;
 	MsiDirectory *directory;
 	MsiCabinet   *cabinet;
+	MsiSimpleFile*simpleFile;
 
 	MsiUtils();
 	~MsiUtils();
 	bool IsOpened() { return database != NULL; }
 	bool LoadDatabase();
+	void DelayLoadDatabase();
 	void LoadSummary();
 	void ExtractFile(int index);
 	void CopyFile(int index);
@@ -60,10 +68,11 @@ private:
 	friend class MsiQuery;
 	friend class MsiTable;
 	friend IMsiDumpCab* MsiDumpCreateObject();
+	friend void __cdecl threadLoadDatabase(void* parameter);
 
 public:
 	void Release();
-	bool Open(LPCTSTR filename);
+	bool Open(LPCTSTR filename, bool delay = false, HANDLE event = NULL);
 	void Close();
 	bool ExtractTo(LPCTSTR theDirectory, bool selectAll, bool flatFolder);
 

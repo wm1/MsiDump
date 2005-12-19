@@ -4,6 +4,8 @@
 
 #pragma once
 
+extern "C" void __cdecl 
+threadWaitDelayLoad(void* parameter);
 
 class CMainFrame : public CFrameWindowImpl<CMainFrame>, public CUpdateUI<CMainFrame>,
 		public CMessageFilter, public CIdleHandler
@@ -97,6 +99,9 @@ private:
 	ULONGLONG totalFileSize;
 	ULONGLONG selectedFileSize;
 	bool    selectionChanged;
+
+	HANDLE  delayEvent;
+	friend void __cdecl threadWaitDelayLoad(void* parameter);
 
 	// sorting stuff
 	int  sortColumn;

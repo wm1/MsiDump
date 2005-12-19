@@ -60,6 +60,20 @@ public:
 	friend class MsiUtils;
 };
 
+class MsiSimpleFile : public MsiTable
+{
+private:
+	struct tagFile {
+		string filename;
+		int    filesize;
+	} *array;
+
+public:
+	MsiSimpleFile(MsiUtils* msiUtils);
+	virtual ~MsiSimpleFile();
+	friend class MsiUtils;
+};
+
 class MsiComponent : public MsiTable
 {
 private:
