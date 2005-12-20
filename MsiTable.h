@@ -60,6 +60,10 @@ public:
 	friend class MsiUtils;
 };
 
+//
+// note: ui.cpp (CMainFrame::OnGetDispInfo, case COLUMN_SIZE) caches filesize locally,
+// therefore both MsiSimpleFile and MsiFile must return the same filesize.
+// 
 class MsiSimpleFile : public MsiTable
 {
 private:

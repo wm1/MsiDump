@@ -6,12 +6,6 @@ TOOLBOX_RELEASE_POINT=\\TKFilToolBox\Tools\20864
 PROJ=MsiDumpCab
 PROJ_CMDLINE=MsiDump
 
-!ifdef NTMAKEENV
-
-!INCLUDE $(NTMAKEENV)\makefile.def
-
-!else
-
 O        = obj
 
 OBJECTS =                 \
@@ -64,7 +58,7 @@ $(O)\ui.obj: ui.cpp ui.h
 
 $(O)\DragDrop.obj: DragDrop.cpp DragDrop.h CUnknown.h
 
-$(O)\ui.res: ui.rc
+$(O)\ui.res: ui.rc version.inc
 
 ui.h: Resource.h MainFrame.h AboutDlg.h
 
@@ -78,7 +72,6 @@ $(O)\$(PROJ_CMDLINE).exe: $(PROJ_CMDLINE_OBJECTS)
 release:
 	nmake /nologo clean 2>nul
 	-robocopy . $(SRC_RELEASE_POINT)
-	-robocopy managed $(SRC_RELEASE_POINT)\managed
 	nmake /nologo
 	call srcindex.cmd
 	-robocopy $(O) $(SRC_RELEASE_POINT)\bin *.exe *.pdb /xf vc*.pdb
@@ -90,4 +83,3 @@ clean:
 	-@del /q trace.txt 2>nul
 	-@del /q $(O)      2>nul
 
-!endif

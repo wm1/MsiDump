@@ -30,6 +30,7 @@ public:
 		MESSAGE_HANDLER(WM_CREATE,                OnCreate)
 		MESSAGE_HANDLER(WM_DROPFILES,             OnDropFiles)
 		MESSAGE_HANDLER(WM_CONTEXTMENU,           OnContextMenu)
+		MESSAGE_HANDLER(WM_SETCURSOR,             OnSetCursor)
 		COMMAND_ID_HANDLER(ID_FILE_OPEN,          OnFileOpen)
 		COMMAND_ID_HANDLER(ID_APP_EXIT,           OnAppExit)
 		COMMAND_ID_HANDLER(ID_EDIT_SELECT_ALL,    OnEditSelectAll)
@@ -54,6 +55,7 @@ public:
 	LRESULT OnCreate         (UINT, WPARAM, LPARAM, BOOL&);
 	LRESULT OnDropFiles      (UINT, WPARAM, LPARAM, BOOL&);
 	LRESULT OnContextMenu    (UINT, WPARAM, LPARAM, BOOL&);
+	LRESULT OnSetCursor      (UINT, WPARAM, LPARAM, BOOL&);
 	LRESULT OnFileOpen       (WORD, WORD, HWND, BOOL&);
 	LRESULT OnAppExit        (WORD, WORD, HWND, BOOL&)
 	{
@@ -99,8 +101,11 @@ private:
 	ULONGLONG totalFileSize;
 	ULONGLONG selectedFileSize;
 	bool    selectionChanged;
+	bool    waitCursor;
+	HCURSOR hWaitCursor;
 
 	HANDLE  delayEvent;
+	bool    delayLoading;
 	friend void __cdecl threadWaitDelayLoad(void* parameter);
 
 	// sorting stuff

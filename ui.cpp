@@ -5,20 +5,6 @@ CAppModule _Module;
 
 void Drag(IMsiDumpCab*, int selectedCount);
 
-class CWaitCursor
-{
-private:
-	HCURSOR hCursorRestore;
-
-public:
-	CWaitCursor() {
-		hCursorRestore = SetCursor(LoadCursor(NULL, IDC_WAIT));
-	}
-	~CWaitCursor() {
-		SetCursor(hCursorRestore);
-	}
-};
-
 int
 Run(
 	LPTSTR lpstrCmdLine = NULL,
@@ -52,18 +38,13 @@ _tWinMain(
 	int       nCmdShow
 	)
 {
-	//HRESULT hRes = ::CoInitialize(NULL);
-// If you are running on NT 4.0 or higher you can use the following call instead to
-// make the EXE free threaded. This means that calls come in on a random RPC thread.
-	//HRESULT hRes = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
-	
 	// I am using Drag and Drop, therefore I must use OleInitialize
 	HRESULT hRes = OleInitialize(NULL);
 	
 	ATLASSERT(SUCCEEDED(hRes));
 
 	// this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
-	::DefWindowProc(NULL, 0, 0, 0L);
+	// ::DefWindowProc(NULL, 0, 0, 0L); // n.b. no longer a problem with WTL 7.0
 
 	AtlInitCommonControls(ICC_BAR_CLASSES);	// add flags to support other controls
 
@@ -73,7 +54,7 @@ _tWinMain(
 	int nRet = Run(lpstrCmdLine, nCmdShow);
 
 	_Module.Term();
-	//::CoUninitialize();
+
 	OleUninitialize();
 
 	return nRet;
@@ -125,6 +106,10 @@ CMainFrame::OnCreate(
 	m_list.InsertColumn(COLUMN_PLATFORM, LoadString(IDS_LISTVIEW_COLUMN_PLATFORM), 0, 60, -1);
 	m_list.InsertColumn(COLUMN_VERSION,  LoadString(IDS_LISTVIEW_COLUMN_VERSION),  0, 120, -1);
 	sortColumn = -1;
+	hWaitCursor = LoadCursor(NULL, IDC_WAIT);
+
+	delayEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	delayLoading = false;
 
 	UpdateLayout();
 
@@ -132,7 +117,6 @@ CMainFrame::OnCreate(
 	LVindex = NULL;
 	filesizes = NULL;
 	Cleanup();
-	delayEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	if(CmdLine && *CmdLine)
 	{
@@ -176,6 +160,23 @@ CMainFrame::OnIdle()
 	}
 
 	return FALSE;
+}
+
+LRESULT
+CMainFrame::OnSetCursor(
+	UINT   /*uMsg*/,
+	WPARAM /*wParam*/,
+	LPARAM /*lParam*/,
+	BOOL&  /*bHandled*/
+	)
+{
+	if(waitCursor)
+	{
+		SetCursor(hWaitCursor);
+		return TRUE;
+	}
+	else
+		return FALSE;
 }
 
 LRESULT
@@ -232,7 +233,7 @@ CMainFrame::OnFileOpen(
 		);
 	if(dlg.DoModal() == IDOK)
 	{
-		CWaitCursor wait;
+		waitCursor = true;
 		LoadMsiFiles(dlg.m_szFileName);
 	}
 	return 0;
@@ -258,14 +259,14 @@ CMainFrame::OnExportFileList(
 	FILE* f = _tfopen(dlg.m_szFileName, TEXT("wt"));
 	if(!f) return 0;
 
-	_ftprintf(f, TEXT(" Num %15s %9s %s\n"), TEXT("filename"), TEXT("filesize"), TEXT("path"));
+	_ftprintf(f, TEXT("%4s %15s %9s %-45s %15s\n"), TEXT("num"), TEXT("filename"), TEXT("filesize"), TEXT("path"), TEXT("version"));
 	int count = m_msi->getCount();
 	for(int i = 0; i < count; i++)
 	{
 		MsiDumpFileDetail detail;
 		m_msi->GetFileDetail(i, &detail);
-		_ftprintf(f, TEXT("%4d %15s %9d %s\n"), i, 
-			detail.filename, detail.filesize, detail.path);
+		_ftprintf(f, TEXT("%4d %15s %9d %-45s %15s\n"), i, 
+			detail.filename, detail.filesize, detail.path, detail.version);
 	}
 	fclose(f);
 	return 0;
@@ -289,8 +290,9 @@ LRESULT CMainFrame::OnExtractFiles(
 	CFolderDialog dlg(m_hWnd, title, BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE);
 	if(dlg.DoModal() != IDOK) return 0;
 
-	CWaitCursor wait;
+	waitCursor = true;
 	m_msi->ExtractTo(dlg.m_szFolderPath, selectAll, false);
+	waitCursor = false;
 	return 0;
 }
 
@@ -500,6 +502,9 @@ threadWaitDelayLoad(void* parameter)
 {
 	CMainFrame* _this = (CMainFrame*)parameter;
 	WaitForSingleObject(_this->delayEvent, INFINITE);
+	_this->delayLoading = false;
+	_this->waitCursor = false;
+	SetCursor(NULL);
 	InvalidateRect(_this->m_hWndClient, NULL, TRUE);
 }
 
@@ -509,9 +514,9 @@ CMainFrame::LoadMsiFiles(
 	)
 {
 	Cleanup();
-	bool delayLoad = true;
+	delayLoading = true;
 	_beginthread(threadWaitDelayLoad, 0, this);
-	if(!m_msi->Open(filename, delayLoad, delayEvent))
+	if(!m_msi->DelayedOpen(filename, delayEvent))
 		return;
 
 	totalFileSize = 0;
