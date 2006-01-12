@@ -47,6 +47,12 @@ private:
 	int           countDone;
 	bool          delayLoading;
 	HANDLE        delayEvent;
+	enum { 
+		installer_database, // msi
+		merge_module,       // msm
+		transform_database, // mst
+		patch_package       // msp
+	} db_type;
 
 	MsiFile      *file;
 	MsiComponent *component;
@@ -67,6 +73,7 @@ private:
 	static UINT CALLBACK CabinetCallback(PVOID, UINT, UINT_PTR, UINT_PTR);
 	friend class MsiQuery;
 	friend class MsiTable;
+	friend class MsiCabinet;
 	friend IMsiDumpCab* MsiDumpCreateObject();
 	friend void __cdecl threadLoadDatabase(void* parameter);
 	bool Open(LPCTSTR filename, bool delay, HANDLE event);

@@ -2,13 +2,12 @@
 MsiDumpCab
 Extract files out of .msi package 
 
-Sometimes you want the content of a Windows Installer (.msi) package without actually installing it...
+Sometimes you want the content of a Windows Installer (.msi) package without actually installing it. Here comes MsiDumpCab.exe with friendly UI like WinZip; or use the command line version (MsiDump.exe)
 
-Here comes MsiDumpCab.exe with friendly UI like WinZip; or use the command line version (MsiDump.exe).
+Usage 1:
+  MsiDumpCab.exe [msiFile]
 
-Writing your own UI is easy: the interface between UI and backend is published in MsiDumpPublic.h (in the source tree), and you can take MsiDump.cpp as a starting point.
-
-Usage:
+Usage 2:
   MsiDump.exe command [options] msiFile [path_to_extract]
 
   commands:
@@ -16,19 +15,16 @@ Usage:
     -extract              extract files
 
   options for -list:
-    -format:nfspv         list num, file, size, path, version (DEFAULE:nfsp)
+    -format:nfspv         list num, file, size, path, version (DEFAULT:nfsp)
 
   options for -extract:
     -full_path:yes|no     extract files with full path (DEFAULT:yes)
 
-Note 1: this is a work-in-progress.  It should work with most msi file you might meet; however there is known issue with Office msi package on \\products server.
+Usage 3 (legacy):
+  MsiDump.exe msiFile [extractPath [-f]]
 
-Note 2: it may take quite some time for the listview window to be completely filled in if the msi file is big.  It is normal.
+Note 1: Not all files are necessarily embedded inside msi file; instead, a pointer may be embedded and actual files are stored in normal file system. With -extract command, these companioning files must be present at the same location as msi file is. This is not a requirement for -list command though. The same applies to GUI version "Extract files" and "Export file list" commands
 
-Note 3: a trace.txt is created in the current directory.  Souce code is published at \\weimao1\public\msi for diagnostic. Symbols in \\weimao1\public\msi\bin
+Note 2: [GUI version only] For very large msi file (e.g. Office 2003) you'll notice that the list view is filled in two stages, i.e. the file name column shows almost immediately; however it takes quite some time for the path column to be filled. It is normal
 
-Note 4: to build the source code, download Windows Template Library (WTL) 7.5 at:
-    http://www.microsoft.com/downloads/details.aspx?FamilyID=48CB01D7-112E-46C2-BB6E-5BB2FE20E626&displaylang=en
-Install WTL to $(MSVCDIR)\atlmfc\wtl75, and type "nmake.exe" to build.
-
-mailto:weimao for feedback / suggstion. Please give me a link to the .msi file as well as trace.txt file (in the current folder)
+Note 3: Would you meet any problem, first please look at "trace.txt" at the current folder for any obvious error; next you can get the symbol / source files at \\TKFilToolBox\Tools\20864 and debug it yourself; if it does not work for you, mailto:msidump with a link to the .msi file and trace.txt

@@ -288,6 +288,19 @@ MsiCabinet::MsiCabinet(
 	)
 	: MsiTable(msiUtils, TEXT("Media"))
 {
+	if(msiUtils->db_type == MsiUtils::merge_module)
+	{
+		count = 1;
+		array = new tagCabinet[count];
+		tagCabinet* p = array;
+		p->diskId = 0;
+		p->lastSequence = 0;
+		p->embedded = true;
+		p->cabinet = TEXT("MergeModule.CABinet");
+		p->tempName.erase();
+		return;
+	}
+
 	if(count == 0) return;
 
 	MSIHANDLE record;

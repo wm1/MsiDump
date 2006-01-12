@@ -45,7 +45,10 @@ RFLAGS=/dPROJECT_VERSION=$(PROJECT_VERSION) /dPROJ=$(PROJ)
 .rc{$(O)}.res:
 	rc $(RFLAGS) /Fo"$*.res" /r $<
 
-all: $(O)\$(PROJ).exe $(O)\$(PROJ_CMDLINE).exe
+all: $(O) $(O)\$(PROJ).exe $(O)\$(PROJ_CMDLINE).exe
+
+$(O):
+    if not exist "$(O)/$(NULL)" mkdir $(O)
 
 $(O)\$(PROJ).exe: $(OBJECTS)
 	link $(LFLAGS) $(OBJECTS) $(LIBS) -out:$@
@@ -80,6 +83,6 @@ release:
 	-robocopy .    $(TOOLBOX_RELEASE_POINT)\src
 
 clean:
-	-@del /q trace.txt 2>nul
-	-@del /q $(O)      2>nul
+	-@del /q trace.txt 2>nul >nul
+	-@rd  /q /s $(O)   2>nul >nul
 

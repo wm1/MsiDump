@@ -63,6 +63,21 @@ MsiUtils::Open(
 	}
 
 	msiFilename = buffer;
+	
+	LPCTSTR fileExt = _tcsrchr(buffer, TEXT('.'));
+	if(!fileExt)
+		return false;
+
+	if(_tcsicmp(fileExt, TEXT(".msi")) == 0)
+		db_type = installer_database;
+	else if(_tcsicmp(fileExt, TEXT(".msm")) == 0)
+		db_type = merge_module;
+	else if(_tcsicmp(fileExt, TEXT(".msp")) == 0)
+		db_type = transform_database;
+	else if(_tcsicmp(fileExt, TEXT(".mst")) == 0)
+		db_type = patch_package;
+	else 
+		return false;
 
 	if(buffer + 3 == pFilePart) // C:\sample.msi
 		*pFilePart = TEXT('\0');
@@ -144,6 +159,9 @@ MsiUtils::LoadSummary()
 
 	if(r == ERROR_SUCCESS && datatype == VT_I4)
 		compressed = TEST_FLAG(data, MSISOURCE_COMPRESSED);
+
+	if(db_type == merge_module)
+		compressed = true;
 
 	trace << TEXT("compressed: ") << compressed << endl << endl;
 }
@@ -257,13 +275,17 @@ MsiUtils::LoadDatabase()
 			}
 		}
 
-		for(j=0; j<cabinet->count; j++)
-		{
-			MsiCabinet::tagCabinet *q = &cabinet->array[j];
-			if(p->sequence <= q->lastSequence)
+		if(db_type == merge_module)
+			p->keyCabinet = 0;
+		else {
+			for(j=0; j<cabinet->count; j++)
 			{
-				p->keyCabinet = j;
-				break;
+				MsiCabinet::tagCabinet *q = &cabinet->array[j];
+				if(p->sequence <= q->lastSequence)
+				{
+					p->keyCabinet = j;
+					break;
+				}
 			}
 		}
 

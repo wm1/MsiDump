@@ -107,6 +107,7 @@ CMainFrame::OnCreate(
 	m_list.InsertColumn(COLUMN_VERSION,  LoadString(IDS_LISTVIEW_COLUMN_VERSION),  0, 120, -1);
 	sortColumn = -1;
 	hWaitCursor = LoadCursor(NULL, IDC_WAIT);
+	waitCursor = false;
 
 	delayEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	delayLoading = false;
@@ -196,7 +197,7 @@ CMainFrame::OnDropFiles(
 	DragFinish(hDrop);
 	size_t len = _tcslen(filename);
 	if(len >= 5  /* eg. "a.msi" */
-		&& _tcsicmp(&filename[len-4], TEXT(".msi")) == 0)
+		&& _tcsicmp(&filename[len-4], TEXT(".ms")) == 0)
 	{
 		LoadMsiFiles(filename);
 	}
