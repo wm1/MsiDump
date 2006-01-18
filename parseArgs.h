@@ -10,6 +10,7 @@ enum _cmds
 {
 	cmd_list,
 	cmd_extract,
+	cmd_help,
 	cmd_invalid
 };
 

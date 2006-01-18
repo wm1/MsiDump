@@ -5,12 +5,15 @@
 #include "MsiDumpPublic.h"
 #include "parseArgs.h"
 
-void parseOption(LPCTSTR option);
+bool parseOption(LPCTSTR option);
 bool findOptionWithValue(LPCTSTR option, LPCTSTR name, LPCTSTR *value);
 bool isSeparator(TCHAR c);
 
 _args args;
 
+//
+// Usage: MsiDump.exe command [options] msiFile [path_to_extract]
+//
 void parseArgs(int argc, LPCTSTR argv[])
 {
 	// default command and options
@@ -20,7 +23,10 @@ void parseArgs(int argc, LPCTSTR argv[])
 	args.extract_full_path = true;
 
 	if(argc == 1)
+	{
+		args.cmd = cmd_help;
 		return;
+	}
 	
 	LPCTSTR cmd = argv[1];
 	
@@ -63,20 +69,34 @@ void parseArgs(int argc, LPCTSTR argv[])
 	{
 		args.cmd = cmd_extract;
 	}
-	else
+	else if(_tcscmp(&cmd[1], TEXT("help")) == 0
+		|| _tcscmp(&cmd[1], TEXT("h")) == 0
+		|| _tcscmp(&cmd[1], TEXT("?")) == 0)
+	{
+		args.cmd = cmd_help;
 		return;
+	}
+	else
+	{
+		_tprintf(TEXT("error: unrecognized command %s\n"), cmd);
+		return;
+	}
 	
 	int current_arg = 2;
 	while(current_arg < argc && isSeparator(argv[current_arg][0]))
 	{
-		parseOption(&argv[current_arg][1]);
+		if(!parseOption(argv[current_arg]))
+		{
+			_tprintf(TEXT("error: unrecognized parameter %s\n"), argv[current_arg]);
+			args.cmd = cmd_invalid;
+			return;
+		}
 		current_arg++;
 	}
 	
 	if(current_arg >= argc)
 	{
-		// end of command line, but we do not get a archive filename yet
-		//
+		_tprintf(TEXT("error: msi file is not supplied\n"));
 		args.cmd = cmd_invalid;
 		return;
 	}
@@ -87,8 +107,7 @@ void parseArgs(int argc, LPCTSTR argv[])
 	{
 		if(current_arg >= argc)
 		{
-			// end of command line, but we do not get a path_to_extract yet
-			//
+			_tprintf(TEXT("error: path to extract is not supplied\n"));
 			args.cmd = cmd_invalid;
 			return;
 		}
@@ -102,14 +121,15 @@ bool isSeparator(TCHAR c)
 	return (c == TEXT('-') || c == TEXT('/'));
 }
 
-
 //
-// option ::= name colon value
+// option ::= separator name [colon value]
 //
 // return the 'value' string after the colon mark if 'name' matches
 //
 bool findOptionWithValue(LPCTSTR option, LPCTSTR name, LPCTSTR *value)
 {
+	option ++; // skip leading separator
+	
 	int cName = _tcslen(name);
 	if(_tcsncmp(option, name, cName) == 0)
 	{
@@ -123,7 +143,7 @@ bool findOptionWithValue(LPCTSTR option, LPCTSTR name, LPCTSTR *value)
 	return false;
 }
 
-void parseOption(LPCTSTR option)
+bool parseOption(LPCTSTR option)
 {
 	if(args.cmd == cmd_list)
 	{
@@ -131,7 +151,18 @@ void parseOption(LPCTSTR option)
 		if(findOptionWithValue(option, TEXT("format"), &list_format))
 		{
 			args.list_format = list_format;
-		}
+			int len = _tcslen(list_format);
+			for(int i=0; i<len; i++)
+			{
+				TCHAR c = list_format[i];
+				if(_tcschr(TEXT("nfspv"), c) == NULL)
+				{
+					_tprintf(TEXT("error: unrecognized char \"%c\" in %s\n"), c, option);
+					return false;
+				}
+			}
+		} else
+			return false;
 	}
 	else if(args.cmd == cmd_extract)
 	{
@@ -140,8 +171,17 @@ void parseOption(LPCTSTR option)
 		{
 			if(_tcscmp(extract_full_path, TEXT("no")) == 0)
 				args.extract_full_path = false;
-		}
+			else if(_tcscmp(extract_full_path, TEXT("yes")) == 0)
+				args.extract_full_path = true;
+			else
+			{
+				_tprintf(TEXT("error: unrecognized specifier \"%s\" in %s\n"), extract_full_path, option);
+				return false;
+			}
+		} else
+			return false;
 	}
+	return true;
 }
 
 void usage(LPCTSTR exe)
@@ -149,9 +189,10 @@ void usage(LPCTSTR exe)
 	_tprintf(TEXT("Usage:\n")
 		TEXT("  %s command [options] msiFile [path_to_extract]\n")
 		TEXT("\n")
-		TEXT("  commands:\n")
+		TEXT("  commands (use one of them):\n")
 		TEXT("    -list                 list msiFile\n")
 		TEXT("    -extract              extract files\n")
+		TEXT("    -help                 this help secreen\n")
 		TEXT("\n")
 		TEXT("  options for -list:\n")
 		TEXT("    -format:nfspv         list num, file, size, path, version (DEFAULT:nfsp)\n")

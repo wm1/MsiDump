@@ -10,21 +10,30 @@ int __cdecl
 _tmain(int argc, LPCTSTR argv[])
 {
 	parseArgs(argc, argv);
-	if(args.cmd == cmd_invalid)
+	if(args.cmd == cmd_help)
 	{
 		LPCTSTR exe = argv[0];
 		usage(exe);
-		return E_INVALIDARG;
+		return ERROR_SUCCESS;
 	}
+	else if(args.cmd == cmd_invalid)
+		return E_INVALIDARG;
 
 	IMsiDumpCab *msi = MsiDumpCreateObject();
+	
+	DWORD fileAttr = GetFileAttributes(args.filename);
+	if(fileAttr == INVALID_FILE_ATTRIBUTES)
+	{
+		_tprintf(TEXT("error: file not found: %s\n"), args.filename);
+		return ERROR_FILE_NOT_FOUND;
+	}
+	
 	if(!msi->Open(args.filename))
 	{
+		_tprintf(TEXT("error: fail to open msi package: %s\n"), args.filename);
 		msi->Release();
 		return ERROR_INSTALL_PACKAGE_OPEN_FAILED;
 	}
-
-	int retVal = ERROR_SUCCESS;
 
 	if(args.cmd == cmd_list)
 	{
@@ -47,11 +56,13 @@ _tmain(int argc, LPCTSTR argv[])
 		if(!b)
 		{
 			_tprintf(TEXT("Fail to extract msi file. check out trace.txt for details\n"));
-			retVal = ERROR_INSTALL_FAILURE;
+			msi->Close();
+			msi->Release();
+			return ERROR_INSTALL_FAILURE;
 		}
 	}
 
 	msi->Close();
 	msi->Release();
-	return retVal;
+	return ERROR_SUCCESS;
 }
