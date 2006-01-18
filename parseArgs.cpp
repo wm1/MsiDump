@@ -78,7 +78,7 @@ void parseArgs(int argc, LPCTSTR argv[])
 	}
 	else
 	{
-		_tprintf(TEXT("error: unrecognized command %s\n"), cmd);
+		_ftprintf(stderr, TEXT("error: unrecognized command %s\n"), cmd);
 		return;
 	}
 	
@@ -87,7 +87,7 @@ void parseArgs(int argc, LPCTSTR argv[])
 	{
 		if(!parseOption(argv[current_arg]))
 		{
-			_tprintf(TEXT("error: unrecognized parameter %s\n"), argv[current_arg]);
+			_ftprintf(stderr, TEXT("error: unrecognized parameter %s\n"), argv[current_arg]);
 			args.cmd = cmd_invalid;
 			return;
 		}
@@ -96,7 +96,7 @@ void parseArgs(int argc, LPCTSTR argv[])
 	
 	if(current_arg >= argc)
 	{
-		_tprintf(TEXT("error: msi file is not supplied\n"));
+		_ftprintf(stderr, TEXT("error: msi file is not supplied\n"));
 		args.cmd = cmd_invalid;
 		return;
 	}
@@ -107,7 +107,7 @@ void parseArgs(int argc, LPCTSTR argv[])
 	{
 		if(current_arg >= argc)
 		{
-			_tprintf(TEXT("error: path to extract is not supplied\n"));
+			_ftprintf(stderr, TEXT("error: path to extract is not supplied\n"));
 			args.cmd = cmd_invalid;
 			return;
 		}
@@ -157,7 +157,7 @@ bool parseOption(LPCTSTR option)
 				TCHAR c = list_format[i];
 				if(_tcschr(TEXT("nfspv"), c) == NULL)
 				{
-					_tprintf(TEXT("error: unrecognized char \"%c\" in %s\n"), c, option);
+					_ftprintf(stderr, TEXT("error: unrecognized char \"%c\" in %s\n"), c, option);
 					return false;
 				}
 			}
@@ -175,7 +175,7 @@ bool parseOption(LPCTSTR option)
 				args.extract_full_path = true;
 			else
 			{
-				_tprintf(TEXT("error: unrecognized specifier \"%s\" in %s\n"), extract_full_path, option);
+				_ftprintf(stderr, TEXT("error: unrecognized specifier \"%s\" in %s\n"), extract_full_path, option);
 				return false;
 			}
 		} else
