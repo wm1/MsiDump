@@ -196,8 +196,9 @@ CMainFrame::OnDropFiles(
 	int r = DragQueryFile(hDrop, 0, filename, MAX_PATH);
 	DragFinish(hDrop);
 	size_t len = _tcslen(filename);
+	LPCTSTR extPartial = TEXT(".ms");
 	if(len >= 5  /* eg. "a.msi" */
-		&& _tcsicmp(&filename[len-4], TEXT(".ms")) == 0)
+		&& _tcsnicmp(&filename[len-4], extPartial, _tcslen(extPartial)) == 0)
 	{
 		LoadMsiFiles(filename);
 	}
