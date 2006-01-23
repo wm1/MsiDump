@@ -28,6 +28,8 @@ INCLUDE=$(INCLUDE);$(WTL)
 LIBS = user32.lib ole32.lib comctl32.lib comdlg32.lib shell32.lib shlwapi.lib \
        atl.lib setupapi.lib msi.lib
 
+PROJ_CMDLINE_LIBS = msi.lib setupapi.lib ole32.lib
+
 CFLAGS=/nologo /Zi /c /EHsc /MT /D_WIN32_WINNT=0x0501 /D_UNICODE /DUNICODE 
 
 # comment out the following line to disable tracing
@@ -70,7 +72,7 @@ $(O)\$(PROJ_CMDLINE).obj: $(PROJ_CMDLINE).cpp parseArgs.h
 $(O)\parseArgs.obj: parseArgs.cpp parseArgs.h
 
 $(O)\$(PROJ_CMDLINE).exe: $(PROJ_CMDLINE_OBJECTS)
-	link $(LFLAGS) $** setupapi.lib msi.lib -out:$@
+	link $(LFLAGS) $** $(PROJ_CMDLINE_LIBS) -out:$@
 
 release:
 	nmake /nologo clean 2>nul

@@ -6,6 +6,13 @@
 #include "MsiDumpPublic.h"
 #include "parseArgs.h"
 
+class InitCOM
+{
+public:
+	InitCOM()  { CoInitialize(NULL); }
+	~InitCOM() { CoUninitialize();   }
+} initCOM;
+
 int __cdecl
 _tmain(int argc, LPCTSTR argv[])
 {
