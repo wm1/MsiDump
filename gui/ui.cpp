@@ -105,7 +105,7 @@ CMainFrame::OnCreate(
 	m_list.InsertColumn(COLUMN_PATH,     LoadString(IDS_LISTVIEW_COLUMN_PATH),     0, 400, -1);
 	m_list.InsertColumn(COLUMN_PLATFORM, LoadString(IDS_LISTVIEW_COLUMN_PLATFORM), 0,  60, -1);
 	m_list.InsertColumn(COLUMN_VERSION,  LoadString(IDS_LISTVIEW_COLUMN_VERSION),  0, 100, -1);
-	m_list.InsertColumn(COLUMN_LANGUAGE, LoadString(IDS_LISTVIEW_COLUMN_VERSION),  0,  60, -1);
+	m_list.InsertColumn(COLUMN_LANGUAGE, LoadString(IDS_LISTVIEW_COLUMN_LANGUAGE), 0,  80, -1);
 	sortColumn = -1;
 	hWaitCursor = LoadCursor(NULL, IDC_WAIT);
 	waitCursor = false;
