@@ -15,7 +15,7 @@ Usage 2:
     -extract              extract files
 
   options for -list:
-    -format:nfspv         list num, file, size, path, version (DEFAULT:nfsp)
+    -format:nfspvl        list num, file, size, path, version, lang (DEFAULT:nfsp)
 
   options for -extract:
     -full_path:yes|no     extract files with full path (DEFAULT:yes)

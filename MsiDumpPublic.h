@@ -1,12 +1,31 @@
 
 #pragma once
 
+//
+// Platform SDK: Windows Installer: Installer Database Reference
+//
+// File Table
+// =======================================
+// Column     Type           Key  Nullable 
+// =======================================
+// File       Identifier     Y    N 
+// Component_ Identifier          N 
+// FileName   Filename            N 
+// FileSize   DoubleInteger       N 
+// Version    Version             Y 
+// Language   Language            Y 
+// Attributes Integer             Y 
+// Sequence   Integer             N 
+// =======================================
+//
+
 struct MsiDumpFileDetail
 {
 	LPCTSTR filename;
 	int     filesize;
 	LPCTSTR path;
 	LPCTSTR version;
+	LPCTSTR language;
 	bool    win9x;    // Should the file be installed on Windows 95/98/Me?
 	bool    winNT;    // Should be installed on Windows NT/2000/XP/2003?
 	bool    selected;

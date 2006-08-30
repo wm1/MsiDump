@@ -1,3 +1,7 @@
+Update: 2006/8/30
+. UI: Add "language" column
+. Change: port to DDK build environment.
+
 Update: 2005/12/19
 . Change: Rewrite argument parsing portion in msidump.exe
 . Change: Remove other build methods except for Makefile approach

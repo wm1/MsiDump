@@ -99,12 +99,13 @@ CMainFrame::OnCreate(
 		WS_EX_CLIENTEDGE,
 		IDC_LIST_VIEW);
 	m_list.SetExtendedListViewStyle(LVS_EX_FULLROWSELECT | LVS_EX_HEADERDRAGDROP);
-	m_list.InsertColumn(COLUME_NAME, LoadString(IDS_LISTVIEW_COLUMN_NAME), 0, 140, -1);
-	m_list.InsertColumn(COLUMN_TYPE, LoadString(IDS_LISTVIEW_COLUMN_TYPE), 0, 40, -1);
-	m_list.InsertColumn(COLUMN_SIZE, LoadString(IDS_LISTVIEW_COLUMN_SIZE), LVCFMT_RIGHT, 90, -1);
-	m_list.InsertColumn(COLUMN_PATH, LoadString(IDS_LISTVIEW_COLUMN_PATH), 0, 400, -1);
-	m_list.InsertColumn(COLUMN_PLATFORM, LoadString(IDS_LISTVIEW_COLUMN_PLATFORM), 0, 60, -1);
-	m_list.InsertColumn(COLUMN_VERSION,  LoadString(IDS_LISTVIEW_COLUMN_VERSION),  0, 120, -1);
+	m_list.InsertColumn(COLUME_NAME,     LoadString(IDS_LISTVIEW_COLUMN_NAME),     0, 140, -1);
+	m_list.InsertColumn(COLUMN_TYPE,     LoadString(IDS_LISTVIEW_COLUMN_TYPE),     0,  40, -1);
+	m_list.InsertColumn(COLUMN_SIZE,     LoadString(IDS_LISTVIEW_COLUMN_SIZE),     LVCFMT_RIGHT, 90, -1);
+	m_list.InsertColumn(COLUMN_PATH,     LoadString(IDS_LISTVIEW_COLUMN_PATH),     0, 400, -1);
+	m_list.InsertColumn(COLUMN_PLATFORM, LoadString(IDS_LISTVIEW_COLUMN_PLATFORM), 0,  60, -1);
+	m_list.InsertColumn(COLUMN_VERSION,  LoadString(IDS_LISTVIEW_COLUMN_VERSION),  0, 100, -1);
+	m_list.InsertColumn(COLUMN_LANGUAGE, LoadString(IDS_LISTVIEW_COLUMN_VERSION),  0,  60, -1);
 	sortColumn = -1;
 	hWaitCursor = LoadCursor(NULL, IDC_WAIT);
 	waitCursor = false;
@@ -261,14 +262,15 @@ CMainFrame::OnExportFileList(
 	FILE* f = _tfopen(dlg.m_szFileName, TEXT("wt"));
 	if(!f) return 0;
 
-	_ftprintf(f, TEXT("%4s %15s %9s %-45s %15s\n"), TEXT("num"), TEXT("filename"), TEXT("filesize"), TEXT("path"), TEXT("version"));
+	_ftprintf(f, TEXT("%4s %15s %9s %-45s %15s %9s\n"), 
+		TEXT("num"), TEXT("filename"), TEXT("filesize"), TEXT("path"), TEXT("version"), TEXT("language"));
 	int count = m_msi->getCount();
 	for(int i = 0; i < count; i++)
 	{
 		MsiDumpFileDetail detail;
 		m_msi->GetFileDetail(i, &detail);
-		_ftprintf(f, TEXT("%4d %15s %9d %-45s %15s\n"), i, 
-			detail.filename, detail.filesize, detail.path, detail.version);
+		_ftprintf(f, TEXT("%4d %15s %9d %-45s %15s %9s\n"), i, 
+			detail.filename, detail.filesize, detail.path, detail.version, detail.language);
 	}
 	fclose(f);
 	return 0;
@@ -476,6 +478,10 @@ CMainFrame::OnGetDispInfo(
 
 	case COLUMN_VERSION:
 		pItem->pszText = (LPTSTR)detail.version;
+		break;
+
+	case COLUMN_LANGUAGE:
+		pItem->pszText = (LPTSTR)detail.language;
 		break;
 
 	default:
@@ -701,6 +707,18 @@ CMainFrame::sortCallback(
 		break;
 	}
 	
+	case COLUMN_VERSION:
+	{
+		retval = _tcsicmp(detail1.version, detail2.version);
+		break;
+	}
+	
+	case COLUMN_LANGUAGE:
+	{
+		retval = _tcsicmp(detail1.language, detail2.language);
+		break;
+	}
+
 	default:
 	{
 		retval = 0;

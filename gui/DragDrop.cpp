@@ -2,10 +2,8 @@
 #include <windows.h>
 #include <stdio.h>
 #include <tchar.h>
-#include <objidl.h>
-#include <objbase.h>
+#include <oleidl.h>
 #include <shlobj.h>
-#include <shobjidl.h>
 #include <shellapi.h>
 
 #include "MsiDumpPublic.h"

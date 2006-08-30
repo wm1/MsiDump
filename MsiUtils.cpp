@@ -93,6 +93,7 @@ MsiUtils::Open(
 	UINT r = MsiOpenDatabase(msiFilename.c_str(), MSIDBOPEN_READONLY, &database);
 	if(r != ERROR_SUCCESS) 
 	{
+		trace << TEXT("failed to open msi file, err = ") << r << endl;
 		database = NULL;
 		return false;
 	}
@@ -584,6 +585,7 @@ MsiUtils::GetFileDetail(
 	detail->winNT    = component->array[ p->keyComponent ].winNT;
 	detail->selected = p->selected;
 	detail->version  = p->version.c_str();
+	detail->language = p->language.c_str();
 	return true;
 }
 

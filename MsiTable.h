@@ -42,7 +42,8 @@ private:
 		string component;
 		string filename;
 		string version;
-		int    filesize;
+		string language;
+		int    filesize;        // issue: should be DoubleInteger
 		int    attributes;
 		int    sequence;
 

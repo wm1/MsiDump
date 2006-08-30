@@ -155,7 +155,7 @@ bool parseOption(LPCTSTR option)
 			for(int i=0; i<len; i++)
 			{
 				TCHAR c = list_format[i];
-				if(_tcschr(TEXT("nfspv"), c) == NULL)
+				if(_tcschr(TEXT("nfspvl"), c) == NULL)
 				{
 					_ftprintf(stderr, TEXT("error: unrecognized char \"%c\" in %s\n"), c, option);
 					return false;
@@ -195,7 +195,7 @@ void usage(LPCTSTR exe)
 		TEXT("    -help                 this help secreen\n")
 		TEXT("\n")
 		TEXT("  options for -list:\n")
-		TEXT("    -format:nfspv         list num, file, size, path, version (DEFAULT:nfsp)\n")
+		TEXT("    -format:nfspvl        list num, file, size, path, version, lang (DEFAULT:nfsp)\n")
 		TEXT("\n")
 		TEXT("  options for -extract:\n")
 		TEXT("    -full_path:yes|no     extract files with full path (DEFAULT:yes)\n")
@@ -223,6 +223,7 @@ void listHeader()
 		case TEXT('s'): _tprintf(TEXT(  "%9s"), TEXT("filesize")); break;
 		case TEXT('p'): _tprintf(TEXT("%-45s"), TEXT("path"    )); break;
 		case TEXT('v'): _tprintf(TEXT( "%15s"), TEXT("version" )); break;
+		case TEXT('l'): _tprintf(TEXT(  "%9s"), TEXT("language")); break;
 		}
 		_tprintf(TEXT(" "));
 		format++;
@@ -242,6 +243,7 @@ void listRecord(int num, MsiDumpFileDetail* detail)
 		case TEXT('s'): _tprintf(TEXT(  "%9d"), detail->filesize); break;
 		case TEXT('p'): _tprintf(TEXT("%-45s"), detail->path    ); break;
 		case TEXT('v'): _tprintf(TEXT( "%15s"), detail->version ); break;
+		case TEXT('l'): _tprintf(TEXT(  "%9s"), detail->language); break;
 		}
 		_tprintf(TEXT(" "));
 		format++;
