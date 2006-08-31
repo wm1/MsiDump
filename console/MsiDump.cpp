@@ -56,11 +56,11 @@ _tmain(int argc, LPCTSTR argv[])
 	}
 	else if(args.cmd == cmd_extract)
 	{
-		bool flatFolder = !args.extract_full_path;
+		enumFlatFolder flatFolder = (args.extract_full_path ? EXTRACT_TO_TREE : EXTRACT_TO_FLAT_FOLDER);
 
 		TCHAR filename[MAX_PATH];
 		GetFullPathName(args.path_to_extract, MAX_PATH, filename, NULL);
-		bool b = msi->ExtractTo(filename, true, flatFolder);
+		bool b = msi->ExtractTo(filename, ALL_SELECTED, flatFolder);
 		if(!b)
 		{
 			_ftprintf(stderr, TEXT("error: fail to extract msi file. check out trace.txt for details\n"));

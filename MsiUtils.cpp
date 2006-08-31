@@ -39,10 +39,8 @@ MsiUtils::Release()
 }
 
 bool
-MsiUtils::Open(
-	LPCTSTR filename,
-	bool    delay,
-	HANDLE  event
+MsiUtils::DoOpen(
+	LPCTSTR filename
 	)
 {
 	Close();
@@ -98,9 +96,7 @@ MsiUtils::Open(
 		return false;
 	}
 
-	delayLoading = delay;
-	delayEvent   = event;
-	if(delay == false)
+	if(delayLoading == false)
 	{
 		simpleFile = NULL;
 		LoadSummary();
@@ -309,9 +305,9 @@ MsiUtils::LoadDatabase()
 
 bool
 MsiUtils::ExtractTo(
-	LPCTSTR theDirectory,
-	bool    selectAll,
-	bool    flatFolder
+	LPCTSTR           theDirectory,
+	enumSelectAll     selectAll,
+	enumFlatFolder    flatFolder
 	)
 {
 	if(delayLoading) return false;
@@ -324,8 +320,8 @@ MsiUtils::ExtractTo(
 		return false;
 
 	targetRootDirectory = theDirectory;
-	allSelected   = selectAll;
-	folderFlatten = flatFolder;
+	allSelected   = (selectAll == ALL_SELECTED);
+	folderFlatten = (flatFolder == EXTRACT_TO_FLAT_FOLDER);
 	if(folderFlatten &&
 		!VerifyDirectory(targetRootDirectory))
 		return false;

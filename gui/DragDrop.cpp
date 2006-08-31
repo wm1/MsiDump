@@ -206,7 +206,11 @@ CDataObject::ReadFile(
 	if(!extracted)
 	{
 		extracted = true;
-		bool allSelected = (count == msi->getCount());
+		enumSelectAll selectAll;
+		if(count == msi->getCount())
+			selectAll = ALL_SELECTED;
+		else
+			selectAll = INDIVIDUAL_SELECTED;
 
 		TCHAR temp[MAX_PATH];
 		GetTempPath(MAX_PATH, temp);
@@ -214,7 +218,7 @@ CDataObject::ReadFile(
 		DeleteFile(tempFolder);
 		CreateDirectory(tempFolder, NULL);
 
-		msi->ExtractTo(tempFolder, allSelected, false);
+		msi->ExtractTo(tempFolder, selectAll, EXTRACT_TO_TREE);
 	}
 	TCHAR tempPath[MAX_PATH], tempFile[MAX_PATH];
 	GetTempPath(MAX_PATH, tempPath);

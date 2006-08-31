@@ -7,8 +7,11 @@
 extern "C" void __cdecl 
 threadWaitDelayLoad(void* parameter);
 
-class CMainFrame : public CFrameWindowImpl<CMainFrame>, public CUpdateUI<CMainFrame>,
-		public CMessageFilter, public CIdleHandler
+class CMainFrame :
+	public CFrameWindowImpl<CMainFrame>,
+	public CUpdateUI<CMainFrame>,
+	public CMessageFilter,
+	public CIdleHandler
 {
 public:
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
@@ -97,21 +100,21 @@ private:
 	CStatusBarCtrl  m_statusbar;
 	IMsiDumpCab    *m_msi;
 
-	LPCTSTR CmdLine;
-	ULONGLONG totalFileSize;
-	ULONGLONG selectedFileSize;
-	bool    selectionChanged;
-	bool    waitCursor;
-	HCURSOR hWaitCursor;
+	LPCTSTR         CmdLine;
+	ULONGLONG       totalFileSize;
+	ULONGLONG       selectedFileSize;
+	bool            selectionChanged;
+	bool            waitCursor;
+	HCURSOR         hWaitCursor;
 
-	HANDLE  delayEvent;
-	bool    delayLoading;
+	HANDLE          delayEvent;
+	bool            delayLoading;
 	friend void __cdecl threadWaitDelayLoad(void* parameter);
 
 	// sorting stuff
-	int  sortColumn;
-	BOOL sortAscending;
-	void sort();
+	int             sortColumn;
+	BOOL            sortAscending;
+	void            sort();
 	static int __cdecl sortCallback(const void*, const void*);
 };
 

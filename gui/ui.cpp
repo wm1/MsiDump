@@ -286,16 +286,19 @@ LRESULT CMainFrame::OnExtractFiles(
 	if(m_msi->getCount() == 0)
 		return 0;
 
-	bool selectAll;
 	int selectedCount = m_list.GetSelectedCount();
-	selectAll = (selectedCount == 0 || selectedCount == m_msi->getCount());
+	enumSelectAll selectAll;
+	if(selectedCount == 0 || selectedCount == m_msi->getCount())
+		selectAll = ALL_SELECTED;
+	else
+		selectAll = INDIVIDUAL_SELECTED;
 
 	LPCTSTR title = LoadString(IDS_INFO_SELECT_DEST_FOLDER);
 	CFolderDialog dlg(m_hWnd, title, BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE);
 	if(dlg.DoModal() != IDOK) return 0;
 
 	waitCursor = true;
-	m_msi->ExtractTo(dlg.m_szFolderPath, selectAll, false);
+	m_msi->ExtractTo(dlg.m_szFolderPath, selectAll, EXTRACT_TO_TREE);
 	waitCursor = false;
 	return 0;
 }

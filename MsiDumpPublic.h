@@ -31,6 +31,17 @@ struct MsiDumpFileDetail
 	bool    selected;
 };
 
+
+enum enumSelectAll {
+	ALL_SELECTED,
+	INDIVIDUAL_SELECTED
+};
+
+enum enumFlatFolder {
+	EXTRACT_TO_FLAT_FOLDER,
+	EXTRACT_TO_TREE
+};
+
 class IMsiDumpCab
 {
 public:
@@ -40,7 +51,7 @@ public:
 	virtual int  getCount() = 0;
 	virtual bool GetFileDetail(int index, MsiDumpFileDetail *detail) = 0;
 	virtual void setSelected(int index, bool select) = 0;
-	virtual bool ExtractTo(LPCTSTR directory, bool selectAll, bool flatFolder) = 0;
+	virtual bool ExtractTo(LPCTSTR directory, enumSelectAll selectAll, enumFlatFolder flatFolder) = 0;
 
 	//
 	// delayed open:
