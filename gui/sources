@@ -9,6 +9,8 @@ UMENTRY    = wwinmain
 USE_ATL = 1
 ATL_VER = 30
 
+RCOPTIONS = $(RCOPTIONS) /dPROJ=msidumpcab
+
 SOURCES =              \
 	$(SOURCES)     \
 	DragDrop.cpp   \

@@ -1,32 +1,30 @@
-# built in Windows 2003 SP1 DDK environment
+# built in Windows Vista DDK environment
 #
 # external dependency:
 #
-#  . visual studio 2003
-#  . wtl 7.5
+#  . Vista SDK
+#  . WTL 8.0
 #
 
 !include ..\version.inc
-RCOPTIONS = /dPROJECT_VERSION=$(PROJECT_VERSION) /dPROJ=msidump
+RCOPTIONS = /dPROJECT_VERSION=$(PROJECT_VERSION) 
 
 SOURCES =                   \
 	..\MsiUtils.cpp     \
-	..\MsiTable.cpp     \
-	..\version.rc
+	..\MsiTable.cpp
 
-# C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK
 # required for <msiquery.h>
 #
-PSDK=C:\PROGRA~1\MICROS~2.NET\vc7\PLATFO~1
+#PSDK="C:\Program Files\Microsoft SDKs\Windows\v6.0"
+PSDK=C:\PROGRA~1\MI2578~1\Windows\v6.0
 
 INCLUDES = ..;$(PSDK)\include
 
-# the local copy of WTL v7.5 is saved at c:\my\wtl75
+# the local copy of WTL is saved at c:\my\wtl
 #
 USE_STL=1
 USE_WTL=1
 WTL_INC_PATH=c:\my
-WTL_VER=75
 
 C_DEFINES = $(C_DEFINES) /DUNICODE /D_UNICODE
 

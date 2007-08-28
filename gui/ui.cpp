@@ -534,7 +534,8 @@ CMainFrame::LoadMsiFiles(
 	int count = m_msi->getCount();
 	m_list.SetItemCountEx(count, LVSICF_NOINVALIDATEALL);
 	LVindex = new int[count];
-	for(int i=0; i<count; i++)
+	int i;
+	for(i=0; i<count; i++)
 		LVindex[i] = i;
 	filesizes = new LPCTSTR[count];
 	for(i=0; i<count; i++)

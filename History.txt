@@ -1,3 +1,6 @@
+Update: 2007/8/28
+. ISSUE: Built with VC 8.0. The exe size is increased by 200%
+
 Update: 2006/8/30
 . UI: Add "language" column
 . Change: port to DDK build environment.

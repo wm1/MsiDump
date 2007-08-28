@@ -1,3 +1,5 @@
 
-PROJECT_VERSION=2,6,8,31
+# major.year.month.day
+#
+PROJECT_VERSION=2,7,8,28
 
