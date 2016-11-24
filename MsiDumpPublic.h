@@ -28,6 +28,7 @@ struct MsiDumpFileDetail
 	LPCTSTR language;
 	bool    win9x;    // Should the file be installed on Windows 95/98/Me?
 	bool    winNT;    // Should be installed on Windows NT/2000/XP/2003?
+	bool    winX64;
 	bool    selected;
 };
 

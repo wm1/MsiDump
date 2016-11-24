@@ -1,3 +1,8 @@
+Update: 2008/3/26
+. UI: Add "X64" to "platform" column
+. ISSUE: the exe size issue (increased from 36K to 70K for console version) is due to STL 7.  No workaround.
+  // background: STL 6 depends on msvcp60.dll, while STL 7 is completely inline and has no associated DLL)
+
 Update: 2007/8/28
 . ISSUE: Built with VC 8.0. The exe size is increased by 200%
 
@@ -72,7 +77,7 @@ Update: 2002/05/20
 Rewrite UI to use WTL/ATL
 
 Update: 2002/04/03
-Feature completed.  Now it has a WinZip-like main window, two menu items 
+Feature completed.  Now it has a WinZip-like main window, two menu items
 (Open .msi file and Extract to specified folder)
 
 Update: 2002/03/26
@@ -80,7 +85,7 @@ e:\temp> i2.exe test.msi
 Show a WinZip-like window with filename, size and path information.
 
 Update: 2002/02/05
-Sometimes you want the content of a Windows Installer (.msi) package without 
+Sometimes you want the content of a Windows Installer (.msi) package without
 actually installing it...
 
 e:\temp> MsiDumpCab.exe test.msi

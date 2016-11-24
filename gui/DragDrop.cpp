@@ -174,7 +174,7 @@ CDataObject::GetData(
 			MsiDumpFileDetail detail;
 			msi->GetFileDetail(array[i], &detail);
 			desc->nFileSizeLow = detail.filesize;
-			_tcscpy(desc->cFileName, detail.filename);
+			_tcscpy_s(desc->cFileName, MAX_PATH, detail.filename);
 		}
 		medium->tymed          = TYMED_HGLOBAL;
 		medium->hGlobal        = (HGLOBAL)group;
@@ -227,9 +227,9 @@ CDataObject::ReadFile(
 	MsiDumpFileDetail detail;
 	msi->GetFileDetail(index, &detail);
 	TCHAR filename[MAX_PATH];
-	_tcscpy(filename, tempFolder);
-	_tcscat(filename, detail.path);
-	_tcscat(filename, detail.filename);
+	_tcscpy_s(filename, MAX_PATH, tempFolder);
+	_tcscat_s(filename, MAX_PATH, detail.path);
+	_tcscat_s(filename, MAX_PATH, detail.filename);
 	BYTE* buffer = (BYTE*)GlobalAlloc(GMEM_FIXED, detail.filesize);
 
 	FILE* f = _tfopen(filename, TEXT("rb"));

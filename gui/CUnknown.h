@@ -63,7 +63,10 @@ public:                                                                  \
 	STDMETHOD (QueryInterface)(REFIID _iid, void **p)                \
 	{                                                                \
 		if(_iid != IID_IUnknown && _iid != iid)                  \
+		{                                                        \
+		        *p = NULL;                                       \
 			return E_NOINTERFACE;                            \
+		}                                                        \
 		*p = this;                                               \
 		AddRef();                                                \
 		return S_OK;                                             \

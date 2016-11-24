@@ -90,6 +90,7 @@ private:
 		int    keyDirectory;
 		bool   win9x;
 		bool   winNT;
+		bool   winX64;
 	} *array;
 
 public:

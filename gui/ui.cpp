@@ -7,7 +7,7 @@ void Drag(IMsiDumpCab*, int selectedCount);
 
 int
 Run(
-	LPTSTR lpstrCmdLine = NULL,
+	__in_opt LPTSTR lpstrCmdLine = NULL,
 	int    nCmdShow     = SW_SHOWDEFAULT
 	)
 {
@@ -32,16 +32,16 @@ Run(
 
 int WINAPI
 _tWinMain(
-	HINSTANCE hInstance,
-	HINSTANCE /*hPrevInstance*/,
-	LPTSTR    lpstrCmdLine,
-	int       nCmdShow
+	__in     HINSTANCE hInstance,
+	__in_opt HINSTANCE /*hPrevInstance*/,
+	__in     LPTSTR    lpstrCmdLine,
+	__in     int       nCmdShow
 	)
 {
 	// I am using Drag and Drop, therefore I must use OleInitialize
 	HRESULT hRes = OleInitialize(NULL);
-	
 	ATLASSERT(SUCCEEDED(hRes));
+	if (FAILED(hRes)) return 0;
 
 	// this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
 	// ::DefWindowProc(NULL, 0, 0, 0L); // n.b. no longer a problem with WTL 7.0
@@ -50,6 +50,7 @@ _tWinMain(
 
 	hRes = _Module.Init(NULL, hInstance);
 	ATLASSERT(SUCCEEDED(hRes));
+	if (FAILED(hRes)) return 0;
 
 	int nRet = Run(lpstrCmdLine, nCmdShow);
 
@@ -194,7 +195,7 @@ CMainFrame::OnDropFiles(
 	if(count != 1) return 0;
 
 	TCHAR filename[MAX_PATH];
-	int r = DragQueryFile(hDrop, 0, filename, MAX_PATH);
+	DragQueryFile(hDrop, 0, filename, MAX_PATH);
 	DragFinish(hDrop);
 	size_t len = _tcslen(filename);
 	LPCTSTR extPartial = TEXT(".ms");
@@ -455,7 +456,7 @@ CMainFrame::OnGetDispInfo(
 		if(filesizes[index] == NULL)
 		{
 			TCHAR filesizeBuffer[20];
-			_stprintf(filesizeBuffer, TEXT("%d"), detail.filesize);
+			_stprintf_s(filesizeBuffer, 20, TEXT("%d"), detail.filesize);
 			filesizes[index] = _tcsdup(filesizeBuffer);
 		}
 		pItem->pszText = (LPTSTR)filesizes[index];
@@ -470,10 +471,14 @@ CMainFrame::OnGetDispInfo(
 	{
 		LPCTSTR win9x   = TEXT("Win9x");
 		LPCTSTR winNT   = TEXT("WinNT");
-		LPCTSTR Win9xNT = TEXT("");
-		LPCTSTR platform = (detail.win9x
-				? (detail.winNT ? Win9xNT : win9x)
-				: (detail.winNT ? winNT : Win9xNT)
+		LPCTSTR winX64  = TEXT("WinX64");
+		LPCTSTR winAll  = TEXT("");
+		LPCTSTR platform = (
+				detail.winX64 ? winX64 : (
+				(detail.winNT && detail.win9x) ? winAll : (
+				detail.winNT  ? winNT  : (
+				detail.win9x  ? win9x  : (
+				winAll))))
 				);
 		pItem->pszText = (LPTSTR)platform;
 		break;
@@ -585,7 +590,7 @@ CMainFrame::SetCaption(
 	TCHAR buffer[MAX_PATH];
 	if(caption)
 	{
-		_stprintf(buffer, TEXT("%s - %s"), title, PathFindFileName(caption));
+		_stprintf_s(buffer, MAX_PATH, TEXT("%s - %s"), title, PathFindFileName(caption));
 		SetWindowText(buffer);
 	} else
 		SetWindowText(title);
@@ -600,11 +605,11 @@ CMainFrame::UpdateStatusbar(int part)
 	switch(part)
 	{
 	case ID_STATUSBAR_SELECTED:
-		_stprintf(buffer, LoadString(IDS_STATUSBAR_SELECTED),
+		_stprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_SELECTED),
 			m_list.GetSelectedCount(), selectedFileSize/1024);
 		break;
 	case ID_STATUSBAR_TOTAL:
-		_stprintf(buffer, LoadString(IDS_STATUSBAR_TOTAL),
+		_stprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_TOTAL),
 			m_msi->getCount(), totalFileSize/1024);
 		break;
 	}
@@ -694,15 +699,15 @@ CMainFrame::sortCallback(
 
 	case COLUMN_PLATFORM:
 	{
-		int plat1, plat2;
+		int plat1 = 0, plat2 = 0;
 
-		if     ( detail1.win9x && !detail1.winNT) plat1 = 1;
-		else if(!detail1.win9x &&  detail1.winNT) plat1 = 2;
-		else                                      plat1 = 0;
-
-		if     ( detail2.win9x && !detail2.winNT) plat2 = 1;
-		else if(!detail2.win9x &&  detail2.winNT) plat2 = 2;
-		else                                      plat2 = 0;
+		if (detail1.win9x  ) plat1 |= 1;
+		if (detail1.winNT  ) plat1 |= 2;
+		if (detail1.winX64 ) plat1 |= 4;
+		
+		if (detail2.win9x  ) plat2 |= 1;
+		if (detail2.winNT  ) plat2 |= 2;
+		if (detail2.winX64 ) plat2 |= 4;
 
 		if     (plat1  < plat2) retval = -1;
 		else if(plat1 == plat2) retval = 0;

@@ -70,18 +70,12 @@ MsiUtils::DoOpen(
 		db_type = installer_database;
 	else if(_tcsicmp(fileExt, TEXT(".msm")) == 0)
 		db_type = merge_module;
-	else if(_tcsicmp(fileExt, TEXT(".msp")) == 0)
-		db_type = transform_database;
-	else if(_tcsicmp(fileExt, TEXT(".mst")) == 0)
-		db_type = patch_package;
 	else 
 		return false;
 
-	if(buffer + 3 == pFilePart) // C:\sample.msi
-		*pFilePart = TEXT('\0');
-	else
-		*(pFilePart-1) = TEXT('\0');
-
+	// sourceRootDirectory now contains the trailing path separator
+	//
+	*pFilePart = TEXT('\0');
 	sourceRootDirectory = buffer;
 	trace << TEXT("******************************") << endl
 		<< msiFilename << endl 
@@ -186,7 +180,7 @@ MsiUtils::LoadDatabase()
 	TCHAR     packageName[30];
 	DWORD     size = MAX_PATH;
 	TCHAR     buffer[MAX_PATH];
-	_stprintf(packageName, TEXT("#%d"), (DWORD)database);
+	_stprintf_s(packageName, 30, TEXT("#%d"), (DWORD)database);
 	r = MsiOpenPackageEx(packageName, MSIOPENPACKAGEFLAGS_IGNOREMACHINESTATE, &product);
 	if(r != ERROR_SUCCESS)
 		return FALSE;
@@ -238,15 +232,33 @@ MsiUtils::LoadDatabase()
 		
 		p->win9x = true;
 		p->winNT = true;
+		p->winX64= false;
 		if(!p->condition.empty())
 		{
+			// NOTE: there is no common rule to define which architecture the msi
+			// package or individual files are built for. Therefore what we're
+			// doing here is guess at our best effort
+			//
 			LPCTSTR condition = p->condition.c_str();
+
 			MsiSetProperty(product, TEXT("Version9X"), TEXT("490"));
 			MsiSetProperty(product, TEXT("VersionNT"), TEXT(""));
+			MsiSetProperty(product, TEXT("VersionNT64"), TEXT(""));
 			p->win9x = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
+
 			MsiSetProperty(product, TEXT("Version9X"), TEXT(""));
 			MsiSetProperty(product, TEXT("VersionNT"), TEXT("502"));
+			MsiSetProperty(product, TEXT("VersionNT64"), TEXT(""));
 			p->winNT = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
+
+			MsiSetProperty(product, TEXT("Version9X"), TEXT(""));
+			MsiSetProperty(product, TEXT("VersionNT"), TEXT(""));
+			MsiSetProperty(product, TEXT("VersionNT64"), TEXT("1"));
+			bool x64Pos, x64Neg;
+			x64Pos   = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
+			MsiSetProperty(product, TEXT("VersionNT64"), TEXT(""));
+			x64Neg   = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
+			p->winX64= (x64Pos == true && x64Neg == false);
 		}
 		
 		trace << i << TEXT("[dir = ") << p->keyDirectory;
@@ -409,7 +421,7 @@ MsiUtils::ExtractFile(
 	}
 	else
 	{
-		sourceCabinet = sourceRootDirectory + pathSeperator + pCabinet->cabinet;
+		sourceCabinet = sourceRootDirectory + pCabinet->cabinet;
 		trace << TEXT("cabinet: ") << sourceCabinet << endl;
 	}
 	
@@ -441,7 +453,7 @@ MsiUtils::VerifyDirectory(
 		s.append(1, pathSeperator);
 
 	TCHAR  buffer[MAX_PATH];
-	_tcscpy(buffer, s.c_str());
+	_tcscpy_s(buffer, MAX_PATH, s.c_str());
 	
 	string::size_type index = string::npos;
 	if(s[1] == TEXT(':') && s[2] == pathSeperator)
@@ -524,7 +536,7 @@ MsiUtils::CabinetCallback(
 			targetFilename = msiUtils->targetRootDirectory + pathSeperator + d->targetDirectory + pathSeperator + p->filename;
 		}
 
-		_tcscpy(cabinetInfo->FullTargetName, targetFilename.c_str());
+		_tcscpy_s(cabinetInfo->FullTargetName, MAX_PATH, targetFilename.c_str());
 		trace << TEXT("... ") << p->filename 
 			<< TEXT("\t") << targetFilename << endl;
 
@@ -579,6 +591,7 @@ MsiUtils::GetFileDetail(
 	detail->path     = directory->array[ p->keyDirectory ].targetDirectory.c_str();
 	detail->win9x    = component->array[ p->keyComponent ].win9x;
 	detail->winNT    = component->array[ p->keyComponent ].winNT;
+	detail->winX64   = component->array[ p->keyComponent ].winX64;
 	detail->selected = p->selected;
 	detail->version  = p->version.c_str();
 	detail->language = p->language.c_str();

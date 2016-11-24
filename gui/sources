@@ -1,15 +1,16 @@
+PROJ       = MsiDumpCab
+
 !include ..\sources.inc
 
-TARGETNAME = msidumpcab
-TARGETPATH = obj
+TARGETNAME = $(PROJ)
 TARGETTYPE = PROGRAM
+
 UMTYPE     = windows
 UMENTRY    = wwinmain 
 
 USE_ATL = 1
-ATL_VER = 30
-
-RCOPTIONS = $(RCOPTIONS) /dPROJ=msidumpcab
+ATL_VER = 80
+USE_WTL = 1
 
 SOURCES =              \
 	$(SOURCES)     \
@@ -27,3 +28,8 @@ TARGETLIBS =                          \
 	$(SDK_LIB_PATH)\shell32.lib   \
 	$(SDK_LIB_PATH)\shlwapi.lib   \
 	$(SDK_LIB_PATH)\uuid.lib
+
+SXS_ASSEMBLY_NAME=Vendor.Product
+SXS_ASSEMBLY_VERSION=1.0
+SXS_MANIFEST_IN_RESOURCES=1
+SXS_APPLICATION_MANIFEST=$(PROJ).exe.Manifest

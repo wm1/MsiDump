@@ -1,12 +1,12 @@
+PROJ       = MsiDump
+
 !include ..\sources.inc
 
-TARGETNAME = msidump
-TARGETPATH = obj
+TARGETNAME = $(PROJ)
 TARGETTYPE = PROGRAM
+
 UMTYPE     = console
 UMENTRY    = wmain
-
-RCOPTIONS = $(RCOPTIONS) /dPROJ=msidump
 
 SOURCES =              \
 	$(SOURCES)     \
