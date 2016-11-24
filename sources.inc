@@ -1,8 +1,8 @@
 !include ..\version.inc
 
 SOURCES =                   \
-	..\MsiUtils.cpp     \
-	..\MsiTable.cpp
+        ..\MsiUtils.cpp     \
+        ..\MsiTable.cpp
 
 INCLUDES = ..
 

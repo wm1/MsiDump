@@ -24,7 +24,7 @@
 //
 // INIT_IUNKNOWN should be placed at
 //
-//     CXxx::CXxx(param) 
+//     CXxx::CXxx(param)
 //         : INIT_IUNKNOWN(IID_IXxx)
 //     {
 //         ...
@@ -56,32 +56,32 @@
 #define DECLARE_IUNKNOWN                                                 \
                                                                          \
 private:                                                                 \
-	ULONG  refCount;                                                 \
-	REFIID iid;                                                      \
+        ULONG  refCount;                                                 \
+        REFIID iid;                                                      \
                                                                          \
 public:                                                                  \
-	STDMETHOD (QueryInterface)(REFIID _iid, void **p)                \
-	{                                                                \
-		if(_iid != IID_IUnknown && _iid != iid)                  \
-		{                                                        \
-		        *p = NULL;                                       \
-			return E_NOINTERFACE;                            \
-		}                                                        \
-		*p = this;                                               \
-		AddRef();                                                \
-		return S_OK;                                             \
-	};                                                               \
-	STDMETHOD_(ULONG, AddRef )()                                     \
-	{                                                                \
-		return ++refCount;                                       \
-	}                                                                \
-	STDMETHOD_(ULONG, Release)()                                     \
-	{                                                                \
-		ULONG i = --refCount;                                    \
-		if(refCount == 0)                                        \
-			delete this;                                     \
-		return i;                                                \
-	}
+        STDMETHOD (QueryInterface)(REFIID _iid, void **p)                \
+        {                                                                \
+                if(_iid != IID_IUnknown && _iid != iid)                  \
+                {                                                        \
+                        *p = NULL;                                       \
+                        return E_NOINTERFACE;                            \
+                }                                                        \
+                *p = this;                                               \
+                AddRef();                                                \
+                return S_OK;                                             \
+        };                                                               \
+        STDMETHOD_(ULONG, AddRef )()                                     \
+        {                                                                \
+                return ++refCount;                                       \
+        }                                                                \
+        STDMETHOD_(ULONG, Release)()                                     \
+        {                                                                \
+                ULONG i = --refCount;                                    \
+                if(refCount == 0)                                        \
+                        delete this;                                     \
+                return i;                                                \
+        }
 
 //////////////////////////////////////////////////////////////////////////
 

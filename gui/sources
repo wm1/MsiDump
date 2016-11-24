@@ -6,28 +6,28 @@ TARGETNAME = $(PROJ)
 TARGETTYPE = PROGRAM
 
 UMTYPE     = windows
-UMENTRY    = wwinmain 
+UMENTRY    = wwinmain
 
 USE_ATL = 1
 ATL_VER = 80
 USE_WTL = 1
 
 SOURCES =              \
-	$(SOURCES)     \
-	DragDrop.cpp   \
-	ui.cpp         \
-	ui.rc
+        $(SOURCES)     \
+        DragDrop.cpp   \
+        ui.cpp         \
+        ui.rc
 
 TARGETLIBS =                          \
-	$(SDK_LIB_PATH)\msi.lib       \
-	$(SDK_LIB_PATH)\setupapi.lib  \
-	$(SDK_LIB_PATH)\comctl32.lib  \
-	$(SDK_LIB_PATH)\comdlg32.lib  \
-	$(SDK_LIB_PATH)\ole32.lib     \
-	$(SDK_LIB_PATH)\oleaut32.lib  \
-	$(SDK_LIB_PATH)\shell32.lib   \
-	$(SDK_LIB_PATH)\shlwapi.lib   \
-	$(SDK_LIB_PATH)\uuid.lib
+        $(SDK_LIB_PATH)\msi.lib       \
+        $(SDK_LIB_PATH)\setupapi.lib  \
+        $(SDK_LIB_PATH)\comctl32.lib  \
+        $(SDK_LIB_PATH)\comdlg32.lib  \
+        $(SDK_LIB_PATH)\ole32.lib     \
+        $(SDK_LIB_PATH)\oleaut32.lib  \
+        $(SDK_LIB_PATH)\shell32.lib   \
+        $(SDK_LIB_PATH)\shlwapi.lib   \
+        $(SDK_LIB_PATH)\uuid.lib
 
 SXS_ASSEMBLY_NAME=Vendor.Product
 SXS_ASSEMBLY_VERSION=1.0

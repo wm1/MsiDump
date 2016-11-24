@@ -4,32 +4,32 @@
 
 IDR_MAINFRAME MENU
 BEGIN
-	POPUP "&File"
-	BEGIN
-		MENUITEM "&Open...\tCtrl+O",          ID_FILE_OPEN
-		MENUITEM "E&xit\tAlt+F4",             ID_APP_EXIT
-	END
-	POPUP "&Action"
-	BEGIN
-		MENUITEM "&Extract Files\tCtrl+E",    IDM_EXTRACT_FILES
-		MENUITEM SEPARATOR
-		MENUITEM "Select &All\tCtrl+A",       ID_EDIT_SELECT_ALL
-		MENUITEM "Export &Filelist\tCtrl+F",  IDM_EXPORT_FILELIST
-	END
-	POPUP "&Help"
-	BEGIN
-		MENUITEM "&About MsiDumpCab",         ID_APP_ABOUT
-	END
+        POPUP "&File"
+        BEGIN
+                MENUITEM "&Open...\tCtrl+O",          ID_FILE_OPEN
+                MENUITEM "E&xit\tAlt+F4",             ID_APP_EXIT
+        END
+        POPUP "&Action"
+        BEGIN
+                MENUITEM "&Extract Files\tCtrl+E",    IDM_EXTRACT_FILES
+                MENUITEM SEPARATOR
+                MENUITEM "Select &All\tCtrl+A",       ID_EDIT_SELECT_ALL
+                MENUITEM "Export &Filelist\tCtrl+F",  IDM_EXPORT_FILELIST
+        END
+        POPUP "&Help"
+        BEGIN
+                MENUITEM "&About MsiDumpCab",         ID_APP_ABOUT
+        END
 END
 
 IDR_MAINFRAME ACCELERATORS
 BEGIN
-	"^O",   ID_FILE_OPEN
-	VK_F4,  ID_APP_EXIT,         ALT, VIRTKEY
-	"^E",   IDM_EXTRACT_FILES
-	"^A",   ID_EDIT_SELECT_ALL
-	"^F",   IDM_EXPORT_FILELIST
-	VK_F1,  ID_APP_ABOUT,        VIRTKEY
+        "^O",   ID_FILE_OPEN
+        VK_F4,  ID_APP_EXIT,         ALT, VIRTKEY
+        "^E",   IDM_EXTRACT_FILES
+        "^A",   ID_EDIT_SELECT_ALL
+        "^F",   IDM_EXPORT_FILELIST
+        VK_F1,  ID_APP_ABOUT,        VIRTKEY
 END
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 187, 102
@@ -37,38 +37,38 @@ CAPTION "About MsiDumpCab"
 FONT 8, "MS Shell Dlg"
 STYLE DS_MODALFRAME | DS_SHELLFONT | WS_POPUP | WS_CAPTION | WS_SYSMENU
 BEGIN
-    ICON            IDR_MAINFRAME,           IDC_STATIC,   9, 18,  21, 20
-    LTEXT           PROJECT_STR              IDC_STATIC,  40, 16, 120, 32
-    LTEXT           VER_LEGALCOPYRIGHT_STR,  IDC_STATIC,  40, 32, 120, 48
-    LTEXT           "",                      IDC_STATIC,  40, 65, 140, 32, SS_ETCHEDHORZ
-    LTEXT           PROJECT_VERSION_STR,     IDC_STATIC,  40, 70,  60, 16
-    DEFPUSHBUTTON   "OK",                    IDOK,       130, 81,  50, 14, WS_TABSTOP
+        ICON            IDR_MAINFRAME,           IDC_STATIC,   9, 18,  21, 20
+        LTEXT           PROJECT_STR              IDC_STATIC,  40, 16, 120, 32
+        LTEXT           VER_LEGALCOPYRIGHT_STR,  IDC_STATIC,  40, 32, 120, 48
+        LTEXT           "",                      IDC_STATIC,  40, 65, 140, 32, SS_ETCHEDHORZ
+        LTEXT           PROJECT_VERSION_STR,     IDC_STATIC,  40, 70,  60, 16
+        DEFPUSHBUTTON   "OK",                    IDOK,       130, 81,  50, 14, WS_TABSTOP
 END
 
 STRINGTABLE
 BEGIN
-    IDR_MAINFRAME                PROJECT_STR
-    IDS_LISTVIEW_COLUMN_NAME     "Name"
-    IDS_LISTVIEW_COLUMN_TYPE     "Type"
-    IDS_LISTVIEW_COLUMN_SIZE     "Size"
-    IDS_LISTVIEW_COLUMN_PATH     "Path"
-    IDS_LISTVIEW_COLUMN_PLATFORM "Platform"
-    IDS_LISTVIEW_COLUMN_VERSION  "Version"
-    IDS_LISTVIEW_COLUMN_LANGUAGE "Language"
+        IDR_MAINFRAME                PROJECT_STR
+        IDS_LISTVIEW_COLUMN_NAME     "Name"
+        IDS_LISTVIEW_COLUMN_TYPE     "Type"
+        IDS_LISTVIEW_COLUMN_SIZE     "Size"
+        IDS_LISTVIEW_COLUMN_PATH     "Path"
+        IDS_LISTVIEW_COLUMN_PLATFORM "Platform"
+        IDS_LISTVIEW_COLUMN_VERSION  "Version"
+        IDS_LISTVIEW_COLUMN_LANGUAGE "Language"
 
-    IDS_STATUSBAR_SELECTED       "Selected %d files, %d KB"
-    IDS_STATUSBAR_TOTAL          "Total %d files, %d KB"
+        IDS_STATUSBAR_SELECTED       "Selected %d files, %d KB"
+        IDS_STATUSBAR_TOTAL          "Total %d files, %d KB"
 
-    IDS_OPEN_FILE_FILTER         "Windows Installer Files \0*.msi;*.msm\0Installer Package (*.msi)\0*.msi\0Merge Module (*.msm)\0*.msm\0"
-    //Patch File (*.msp)\0*.msp\0Transform File (*.msm)\0*.msm\0All Files (*.*)\0*.*\0"
-    IDS_EXPORT_FILELIST_FILTER   "blank-space-separated text file (*.txt)\0*.txt\0All Files (*.*)\0*.*\0"
-    IDS_INFO_SELECT_DEST_FOLDER  "Extract selected files to the following folder:"
-    ID_FILE_OPEN                 "Open a Windows Installer Package"
-    ID_APP_EXIT                  "Quit the application"
-    ID_EDIT_SELECT_ALL           "Select all files"
-    IDM_EXTRACT_FILES            "Extract files to a specified folder"
-    IDM_EXPORT_FILELIST          "Export filelist to a text file"
-    ID_APP_ABOUT                 "About this application"
+        IDS_OPEN_FILE_FILTER         "Windows Installer Files \0*.msi;*.msm\0Installer Package (*.msi)\0*.msi\0Merge Module (*.msm)\0*.msm\0"
+        //Patch File (*.msp)\0*.msp\0Transform File (*.msm)\0*.msm\0All Files (*.*)\0*.*\0"
+        IDS_EXPORT_FILELIST_FILTER   "blank-space-separated text file (*.txt)\0*.txt\0All Files (*.*)\0*.*\0"
+        IDS_INFO_SELECT_DEST_FOLDER  "Extract selected files to the following folder:"
+        ID_FILE_OPEN                 "Open a Windows Installer Package"
+        ID_APP_EXIT                  "Quit the application"
+        ID_EDIT_SELECT_ALL           "Select all files"
+        IDM_EXTRACT_FILES            "Extract files to a specified folder"
+        IDM_EXPORT_FILELIST          "Export filelist to a text file"
+        ID_APP_ABOUT                 "About this application"
 END
 
-IDR_MAINFRAME                      ICON         "cabinet.ico"
+IDR_MAINFRAME           ICON         "cabinet.ico"
