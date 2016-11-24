@@ -142,6 +142,7 @@ MsiFile::MsiFile(
         )
         : MsiTable(msiUtils, TEXT("File"))
 {
+        array = NULL;
         if(count == 0) return;
 
         MSIHANDLE record;
@@ -193,6 +194,7 @@ MsiSimpleFile::MsiSimpleFile(
         )
         : MsiTable(msiUtils, TEXT("File"))
 {
+        array = NULL;
         if(count == 0) return;
 
         MSIHANDLE record;
@@ -226,6 +228,7 @@ MsiComponent::MsiComponent(
         )
         : MsiTable(msiUtils, TEXT("Component"))
 {
+        array = NULL;
         if(count == 0) return;
 
         MSIHANDLE record;
@@ -263,6 +266,7 @@ MsiDirectory::MsiDirectory(
         )
         : MsiTable(msiUtils, TEXT("Directory"))
 {
+        array = NULL;
         if(count == 0) return;
 
         MSIHANDLE record;
@@ -292,6 +296,7 @@ MsiCabinet::MsiCabinet(
         )
         : MsiTable(msiUtils, TEXT("Media"))
 {
+        array = NULL;
         if(msiUtils->db_type == MsiUtils::merge_module)
         {
                 count = 1;

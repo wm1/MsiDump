@@ -130,10 +130,10 @@ bool findOptionWithValue(LPCTSTR option, LPCTSTR name, LPCTSTR *value)
 {
         option ++; // skip leading separator
 
-        int cName = _tcslen(name);
+        size_t cName = _tcslen(name);
         if(_tcsncmp(option, name, cName) == 0)
         {
-                int cOption = _tcslen(option);
+                size_t cOption = _tcslen(option);
                 if(cOption > cName && option[cName] == TEXT(':'))
                 {
                         *value = &option[cName+1];
@@ -151,7 +151,7 @@ bool parseOption(LPCTSTR option)
                 if(findOptionWithValue(option, TEXT("format"), &list_format))
                 {
                         args.list_format = list_format;
-                        int len = _tcslen(list_format);
+                        size_t len = _tcslen(list_format);
                         for(int i=0; i<len; i++)
                         {
                                 TCHAR c = list_format[i];

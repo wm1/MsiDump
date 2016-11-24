@@ -468,7 +468,7 @@ MsiUtils::VerifyDirectory(
                 index = s.find(pathSeperator, index + 1);
         }
 
-        while(index != string::npos)
+        while(index != string::npos && index < MAX_PATH)
         {
                 buffer[index] = TEXT('\0');
                 attributes = GetFileAttributes(buffer);
@@ -495,7 +495,7 @@ MsiUtils::CabinetCallback(
         PVOID    context,
         UINT     notification,
         UINT_PTR param1,
-        UINT_PTR param2
+        UINT_PTR /*param2*/
         )
 {
         MsiUtils             *msiUtils    = (MsiUtils*)context;

@@ -279,7 +279,7 @@ CMainFrame::OnExportFileList(
 
 LRESULT CMainFrame::OnExtractFiles(
         WORD  /*wNotifyCode*/,
-        WORD  wID,
+        WORD  /*wID*/,
         HWND  /*hWndCtl*/,
         BOOL& /*bHandled*/
         )

@@ -31,7 +31,7 @@ CDropSource::QueryContinueDrag(
 
 STDMETHODIMP
 CDropSource::GiveFeedback(
-        DWORD dwEffect
+        DWORD /*dwEffect*/
         )
 {
         return DRAGDROP_S_USEDEFAULTCURSORS;
@@ -52,7 +52,7 @@ CEnumFormatetc::CEnumFormatetc(
 
 STDMETHODIMP
 CEnumFormatetc::Next(
-        ULONG      celt,
+        ULONG      /*celt*/,
         FORMATETC *rgelt,
         ULONG     *pceltFetched
         )
