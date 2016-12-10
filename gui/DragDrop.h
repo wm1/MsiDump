@@ -53,7 +53,7 @@ public:
         STDMETHOD (DAdvise)      (FORMATETC*, DWORD, IAdviseSink*, DWORD*){ return E_NOTIMPL; }
 
         CDataObject(IMsiDumpCab*, int);
-        ~CDataObject();
+        virtual ~CDataObject();
 
 private:
         static FORMATETC  formats[2];

@@ -232,8 +232,8 @@ CDataObject::ReadFile(
         _tcscat_s(filename, MAX_PATH, detail.filename);
         BYTE* buffer = (BYTE*)GlobalAlloc(GMEM_FIXED, detail.filesize);
 
-        FILE* f = _tfopen(filename, TEXT("rb"));
-        if(f)
+        FILE* f;
+        if(_tfopen_s(&f, filename, TEXT("rb")) != 0)
         {
                 fread(buffer, detail.filesize, 1, f);
                 fclose(f);

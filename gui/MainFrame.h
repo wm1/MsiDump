@@ -86,7 +86,7 @@ public:
         }
 
         CMainFrame(LPCTSTR cmdLine) { CmdLine = cmdLine; }
-        ~CMainFrame() { Cleanup(); m_msi->Release(); }
+        ~CMainFrame() { m_msi->Release(); }
 
 private:
         void SetCaption(LPCTSTR caption);

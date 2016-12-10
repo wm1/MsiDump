@@ -180,7 +180,7 @@ MsiUtils::LoadDatabase()
         TCHAR     packageName[30];
         DWORD     size = MAX_PATH;
         TCHAR     buffer[MAX_PATH];
-        _stprintf_s(packageName, 30, TEXT("#%d"), (DWORD)database);
+        _stprintf_s(packageName, 30, TEXT("#%d"), (int)database);
         r = MsiOpenPackageEx(packageName, MSIOPENPACKAGEFLAGS_IGNOREMACHINESTATE, &product);
         if(r != ERROR_SUCCESS)
                 return FALSE;

@@ -260,8 +260,8 @@ CMainFrame::OnExportFileList(
                 );
         if(dlg.DoModal() != IDOK) return 0;
 
-        FILE* f = _tfopen(dlg.m_szFileName, TEXT("wt"));
-        if(!f) return 0;
+        FILE* f;
+        if(_tfopen_s(&f, dlg.m_szFileName, TEXT("wt")) == 0) return 0;
 
         _ftprintf(f, TEXT("%4s %15s %9s %-45s %15s %9s\n"),
                 TEXT("num"), TEXT("filename"), TEXT("filesize"), TEXT("path"), TEXT("version"), TEXT("language"));
@@ -605,10 +605,12 @@ CMainFrame::UpdateStatusbar(int part)
         switch(part)
         {
         case ID_STATUSBAR_SELECTED:
+                #pragma warning(suppress: 4774) // warning C4774: 'swprintf_s' : format string expected in argument 3 is not a string literal
                 _stprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_SELECTED),
                         m_list.GetSelectedCount(), selectedFileSize/1024);
                 break;
         case ID_STATUSBAR_TOTAL:
+                #pragma warning(suppress: 4774) // warning C4774: 'swprintf_s' : format string expected in argument 3 is not a string literal
                 _stprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_TOTAL),
                         m_msi->getCount(), totalFileSize/1024);
                 break;

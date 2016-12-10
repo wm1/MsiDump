@@ -128,11 +128,11 @@ MsiTable::CountRows()
         string sql = TEXT("SELECT ") + primaryKey + TEXT(" FROM ") + name;
 
         MsiQuery q(msiUtils, sql);
-        int count = 0;
+        int row_count = 0;
         while(q.Next() != NULL)
-                count++;
+                row_count++;
 
-        return count;
+        return row_count;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -370,7 +370,8 @@ MsiCabinet::Extract(
         BYTE     *buffer = new BYTE[size];
         MsiRecordReadStream(record, 1, (char*)buffer, &size);
 
-        FILE* file  = _tfopen(tempFile, TEXT("wb"));
+        FILE* file;
+        if(_tfopen_s(&file, tempFile, TEXT("wb")) == 0) return;
         fwrite(buffer, sizeof(BYTE), size, file);
         fclose(file);
         delete[] buffer;

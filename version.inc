@@ -1,5 +1,5 @@
 
 # major.year.month.day
 #
-PROJECT_VERSION=2.8.5.16
+PROJECT_VERSION=2.2016.12.10
 

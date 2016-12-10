@@ -61,7 +61,7 @@ private:
         MsiSimpleFile*simpleFile;
 
         MsiUtils();
-        ~MsiUtils();
+        virtual ~MsiUtils();
         bool IsOpened() { return database != NULL; }
         bool LoadDatabase();
         void DelayLoadDatabase();
