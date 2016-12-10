@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(SolutionDir)\msbuild\common.build.pre.props"/>
+  <ItemGroup>
+    <ClCompile Include="MsiDump.cpp" />
+    <ClCompile Include="ParseArgs.cpp" />
+    <ClCompile Include="..\MsiTable.cpp" />
+    <ClCompile Include="..\MsiUtils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ParseArgs.h" />
+    <ClInclude Include="..\MsiTable.h" />
+    <ClInclude Include="..\MsiUtils.h" />
+    <ClInclude Include="..\MsiDumpPublic.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\version.rc" />
+  </ItemGroup>
+  <PropertyGroup>
+    <ProjectGuid>{9CBD7DFA-1754-4A9D-93D7-857A9D17CB1B}</ProjectGuid>
+    <ProjectName>MsiDump</ProjectName>
+    <TargetName>MsiDump</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Link>
+      <AdditionalDependencies>msi.lib;setupapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>PROJ=$(ProjectName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <!-- Careful reordering these. Some default props (contained in these files) are order sensitive. -->
+  <Import Project="$(SolutionDir)\msbuild\common.build.post.props"/>
+</Project>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="GetVersion" BeforeTargets="ResourceCompile">
+    <ReadLinesFromFile File="$(SolutionDir)version.inc">
+      <Output TaskParameter="Lines" ItemName="VersionInc" />
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <VersionInc>@(VersionInc)</VersionInc>
+      <PROJECT_VERSION>$([System.Text.RegularExpressions.Regex]::Match($(VersionInc), `PROJECT_VERSION.*`))</PROJECT_VERSION>
+      <PROJECT_VERSION>$(PROJECT_VERSION.Remove(0, 16))</PROJECT_VERSION>
+    </PropertyGroup>
+    <Message Text="Project version: $(PROJECT_VERSION)" />
+    <ItemGroup>
+      <ResourceCompile>
+        <PreprocessorDefinitions>PROJECT_VERSION=$(PROJECT_VERSION);PROJECT_VERSION_COMMA=$(PROJECT_VERSION.Replace('.', ','));%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      </ResourceCompile>
+    </ItemGroup>
+  </Target>
+</Project>

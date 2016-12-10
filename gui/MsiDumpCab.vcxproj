@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(SolutionDir)\msbuild\common.build.pre.props"/>
+  <ItemGroup>
+    <ClCompile Include="DragDrop.cpp" />
+    <ClCompile Include="ui.cpp" />
+    <ClCompile Include="..\MsiTable.cpp" />
+    <ClCompile Include="..\MsiUtils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AboutDlg.h" />
+    <ClInclude Include="CUnknown.h" />
+    <ClInclude Include="DragDrop.h" />
+    <ClInclude Include="MainFrame.h" />
+    <ClInclude Include="ui.h" />
+    <ClInclude Include="..\MsiTable.h" />
+    <ClInclude Include="..\MsiUtils.h" />
+    <ClInclude Include="..\MsiDumpPublic.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ui.rc" />
+  </ItemGroup>
+  <PropertyGroup>
+    <ProjectGuid>{23F47152-3B78-4369-8050-E4AD865825DE}</ProjectGuid>
+    <ProjectName>MsiDumpCab</ProjectName>
+    <TargetName>MsiDumpCab</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\deps\wtl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>msi.lib;setupapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalManifestDependencies>type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'</AdditionalManifestDependencies>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>..;..\deps\wtl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PROJ=$(ProjectName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <!-- Careful reordering these. Some default props (contained in these files) are order sensitive. -->
+  <Import Project="$(SolutionDir)\msbuild\common.build.post.props"/>
+</Project>
