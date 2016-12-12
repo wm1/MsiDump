@@ -31,13 +31,13 @@ wmain(int argc, LPCWSTR argv[])
         DWORD fileAttr = GetFileAttributes(args.filename);
         if(fileAttr == INVALID_FILE_ATTRIBUTES)
         {
-                fwprintf(stderr, TEXT("error: file not found: %s\n"), args.filename);
+                fwprintf(stderr, L"error: file not found: %s\n", args.filename);
                 return ERROR_FILE_NOT_FOUND;
         }
 
         if(!msi->Open(args.filename))
         {
-                fwprintf(stderr, TEXT("error: fail to open msi package: %s\n"), args.filename);
+                fwprintf(stderr, L"error: fail to open msi package: %s\n", args.filename);
                 msi->Release();
                 return ERROR_INSTALL_PACKAGE_OPEN_FAILED;
         }
@@ -62,7 +62,7 @@ wmain(int argc, LPCWSTR argv[])
                 bool b = msi->ExtractTo(filename, ALL_SELECTED, flatFolder);
                 if(!b)
                 {
-                        fwprintf(stderr, TEXT("error: fail to extract msi file. check out trace.txt for details\n"));
+                        fwprintf(stderr, L"error: fail to extract msi file. check out trace.txt for details\n");
                         msi->Close();
                         msi->Release();
                         return ERROR_INSTALL_FAILURE;

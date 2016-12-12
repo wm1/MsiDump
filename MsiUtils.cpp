@@ -14,7 +14,7 @@ char*  trace_file =
 ;
 
 ////////////////////////////////////////////////////////////////////////
-WCHAR pathSeperator = TEXT('\\');
+WCHAR pathSeperator = L'\\';
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -62,22 +62,22 @@ MsiUtils::DoOpen(
 
         msiFilename = buffer;
 
-        LPCWSTR fileExt = wcsrchr(buffer, TEXT('.'));
+        LPCWSTR fileExt = wcsrchr(buffer, L'.');
         if(!fileExt)
                 return false;
 
-        if(_wcsicmp(fileExt, TEXT(".msi")) == 0)
+        if(_wcsicmp(fileExt, L".msi") == 0)
                 db_type = installer_database;
-        else if(_wcsicmp(fileExt, TEXT(".msm")) == 0)
+        else if(_wcsicmp(fileExt, L".msm") == 0)
                 db_type = merge_module;
         else
                 return false;
 
         // sourceRootDirectory now contains the trailing path separator
         //
-        *pFilePart = TEXT('\0');
+        *pFilePart = L'\0';
         sourceRootDirectory = buffer;
-        trace << TEXT("******************************") << endl
+        trace << L"******************************" << endl
                 << msiFilename << endl
                 << sourceRootDirectory << endl
                 << endl;
@@ -85,7 +85,7 @@ MsiUtils::DoOpen(
         UINT r = MsiOpenDatabase(msiFilename.c_str(), MSIDBOPEN_READONLY, &database);
         if(r != ERROR_SUCCESS)
         {
-                trace << TEXT("failed to open msi file, err = ") << r << endl;
+                trace << L"failed to open msi file, err = " << r << endl;
                 database = NULL;
                 return false;
         }
@@ -154,7 +154,7 @@ MsiUtils::LoadSummary()
         if(db_type == merge_module)
                 compressed = true;
 
-        trace << TEXT("compressed: ") << compressed << endl << endl;
+        trace << L"compressed: " << compressed << endl << endl;
 }
 
 bool
@@ -167,11 +167,11 @@ MsiUtils::LoadDatabase()
         UINT r;
 
         int i, j;
-        trace << TEXT("Cabinet count = ") << cabinet->count << endl << endl;
+        trace << L"Cabinet count = " << cabinet->count << endl << endl;
         for(i=0; i<cabinet->count; i++)
         {
                 MsiCabinet::tagCabinet *p = &cabinet->array[i];
-                trace << i << TEXT("[last seq = ") << p->lastSequence << TEXT("]: ")
+                trace << i << L"[last seq = " << p->lastSequence << L"]: "
                         << p->cabinet << endl;
         }
         trace << endl;
@@ -180,24 +180,24 @@ MsiUtils::LoadDatabase()
         WCHAR     packageName[30];
         DWORD     size = MAX_PATH;
         WCHAR     buffer[MAX_PATH];
-        swprintf_s(packageName, 30, TEXT("#%d"), (int)database);
+        swprintf_s(packageName, 30, L"#%d", (int)database);
         r = MsiOpenPackageEx(packageName, MSIOPENPACKAGEFLAGS_IGNOREMACHINESTATE, &product);
         if(r != ERROR_SUCCESS)
                 return FALSE;
 
-        r = MsiDoAction(product, TEXT("CostInitialize"));
+        r = MsiDoAction(product, L"CostInitialize");
         if(r != ERROR_SUCCESS)
         {
                 MsiCloseHandle(product);
                 return FALSE;
         }
-        r = MsiDoAction(product, TEXT("CostFinalize"));
+        r = MsiDoAction(product, L"CostFinalize");
         if(r != ERROR_SUCCESS)
         {
                 MsiCloseHandle(product);
                 return FALSE;
         }
-        trace << TEXT("Directory count = ") << directory->count << endl << endl;
+        trace << L"Directory count = " << directory->count << endl << endl;
         for(i=0; i<directory->count; i++)
         {
                 MsiDirectory::tagDirectory *p = &directory->array[i];
@@ -210,13 +210,13 @@ MsiUtils::LoadDatabase()
                 MsiGetTargetPath(product, p->directory.c_str(), buffer, &size);
                 p->targetDirectory = &buffer[2]; // skip drive letter part of C:\xxxx
 
-                trace << i << TEXT(": ") << p->directory << endl
-                        << TEXT("    ") << p->sourceDirectory << endl
-                        << TEXT("    ") << p->targetDirectory << endl;
+                trace << i << L": " << p->directory << endl
+                        << L"    " << p->sourceDirectory << endl
+                        << L"    " << p->targetDirectory << endl;
         }
         trace << endl;
 
-        trace << TEXT("Component count = ") << component->count << endl << endl;
+        trace << L"Component count = " << component->count << endl << endl;
         for(i=0; i<component->count; i++)
         {
                 MsiComponent::tagComponent *p = &component->array[i];
@@ -241,35 +241,35 @@ MsiUtils::LoadDatabase()
                         //
                         LPCWSTR condition = p->condition.c_str();
 
-                        MsiSetProperty(product, TEXT("Version9X"), TEXT("490"));
-                        MsiSetProperty(product, TEXT("VersionNT"), TEXT(""));
-                        MsiSetProperty(product, TEXT("VersionNT64"), TEXT(""));
+                        MsiSetProperty(product, L"Version9X", L"490");
+                        MsiSetProperty(product, L"VersionNT", L"");
+                        MsiSetProperty(product, L"VersionNT64", L"");
                         p->win9x = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
 
-                        MsiSetProperty(product, TEXT("Version9X"), TEXT(""));
-                        MsiSetProperty(product, TEXT("VersionNT"), TEXT("502"));
-                        MsiSetProperty(product, TEXT("VersionNT64"), TEXT(""));
+                        MsiSetProperty(product, L"Version9X", L"");
+                        MsiSetProperty(product, L"VersionNT", L"502");
+                        MsiSetProperty(product, L"VersionNT64", L"");
                         p->winNT = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
 
-                        MsiSetProperty(product, TEXT("Version9X"), TEXT(""));
-                        MsiSetProperty(product, TEXT("VersionNT"), TEXT(""));
-                        MsiSetProperty(product, TEXT("VersionNT64"), TEXT("1"));
+                        MsiSetProperty(product, L"Version9X", L"");
+                        MsiSetProperty(product, L"VersionNT", L"");
+                        MsiSetProperty(product, L"VersionNT64", L"1");
                         bool x64Pos, x64Neg;
                         x64Pos   = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
-                        MsiSetProperty(product, TEXT("VersionNT64"), TEXT(""));
+                        MsiSetProperty(product, L"VersionNT64", L"");
                         x64Neg   = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
                         p->winX64= (x64Pos == true && x64Neg == false);
                 }
 
-                trace << i << TEXT("[dir = ") << p->keyDirectory;
+                trace << i << L"[dir = " << p->keyDirectory;
                 if(!p->condition.empty())
-                        trace << TEXT(", condition = ") << p->condition;
-                trace << TEXT("]: ") << p->component << endl;
+                        trace << L", condition = " << p->condition;
+                trace << L"]: " << p->component << endl;
         }
         trace << endl;
         MsiCloseHandle(product);
 
-        trace << TEXT("File count = ") << file->count << endl << endl;
+        trace << L"File count = " << file->count << endl << endl;
         for(i=0; i<file->count; i++)
         {
                 MsiFile::tagFile *p = &file->array[i];
@@ -305,11 +305,11 @@ MsiUtils::LoadDatabase()
                 if(p->attributes & msidbFileAttributesNoncompressed)
                         p->compressed = false;
 
-                trace << p->sequence << TEXT("[comp = ") << p->keyComponent
-                        << TEXT(", dir = ") << p->keyDirectory;
+                trace << p->sequence << L"[comp = " << p->keyComponent
+                        << L", dir = " << p->keyDirectory;
                 if(p->compressed)
-                        trace << TEXT(", cab = ") << p->keyCabinet;
-                trace << TEXT("]: ") << p->filename << endl;
+                        trace << L", cab = " << p->keyCabinet;
+                trace << L"]: " << p->filename << endl;
         }
         trace << endl;
         return true;
@@ -327,7 +327,7 @@ MsiUtils::ExtractTo(
         WCHAR buffer[MAX_PATH];
         GetFullPathName(theDirectory, MAX_PATH, buffer, NULL);
         theDirectory = buffer;
-        trace << TEXT("Extract to: ") << theDirectory << endl << endl;
+        trace << L"Extract to: " << theDirectory << endl << endl;
         if(!VerifyDirectory(theDirectory))
                 return false;
 
@@ -362,8 +362,8 @@ MsiUtils::ExtractTo(
         if(countTodo != countDone)
         {
                 trace << endl
-                        << TEXT("Error: ") << (countTodo - countDone)
-                        << TEXT(" files are not extracted") << endl;
+                        << L"Error: " << (countTodo - countDone)
+                        << L" files are not extracted" << endl;
                 return false;
         }
         return true;
@@ -391,7 +391,7 @@ MsiUtils::CopyFile(
                 : (targetRootDirectory + pathSeperator + pDirectory->targetDirectory
                                        + pathSeperator + p->filename);
 
-        trace << source << endl << TEXT("=> ") << target << endl << endl;
+        trace << source << endl << L"=> " << target << endl << endl;
         BOOL b = ::CopyFile(source.c_str(), target.c_str(), FALSE);
         if(b)
                 countDone ++;
@@ -416,19 +416,19 @@ MsiUtils::ExtractFile(
         {
                 cabinet->Extract(pFile->keyCabinet);
                 sourceCabinet = pCabinet->tempName;
-                trace << TEXT("Extract ") << pCabinet->cabinet
-                        << TEXT(" to ") << pCabinet->tempName << endl;
+                trace << L"Extract " << pCabinet->cabinet
+                        << L" to " << pCabinet->tempName << endl;
         }
         else
         {
                 sourceCabinet = sourceRootDirectory + pCabinet->cabinet;
-                trace << TEXT("cabinet: ") << sourceCabinet << endl;
+                trace << L"cabinet: " << sourceCabinet << endl;
         }
 
         DWORD attributes = GetFileAttributes(sourceCabinet.c_str());
         if(attributes == INVALID_FILE_ATTRIBUTES)
         {
-                trace << TEXT("Error: cabinet not found") << endl;
+                trace << L"Error: cabinet not found" << endl;
                 return;
         }
 
@@ -456,7 +456,7 @@ MsiUtils::VerifyDirectory(
         wcscpy_s(buffer, MAX_PATH, s.c_str());
 
         string::size_type index = string::npos;
-        if(s[1] == TEXT(':') && s[2] == pathSeperator)
+        if(s[1] == L':' && s[2] == pathSeperator)
         {
                 // it is "C:\path\"
                 index = s.find(pathSeperator, 3);
@@ -470,7 +470,7 @@ MsiUtils::VerifyDirectory(
 
         while(index != string::npos && index < MAX_PATH)
         {
-                buffer[index] = TEXT('\0');
+                buffer[index] = L'\0';
                 attributes = GetFileAttributes(buffer);
                 if(attributes == INVALID_FILE_ATTRIBUTES)
                 {
@@ -537,8 +537,8 @@ MsiUtils::CabinetCallback(
                 }
 
                 wcscpy_s(cabinetInfo->FullTargetName, MAX_PATH, targetFilename.c_str());
-                trace << TEXT("... ") << p->filename
-                        << TEXT("\t") << targetFilename << endl;
+                trace << L"... " << p->filename
+                        << L"\t" << targetFilename << endl;
 
                 msiUtils->countDone ++;
                 return FILEOP_DOIT;

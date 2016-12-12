@@ -116,7 +116,7 @@ CDataObject::~CDataObject()
         delete [] array;
 
         // RemoveDirectory(tempFolder) recursively.
-        tempFolder[ wcslen(tempFolder) + 1 ] = TEXT('\0'); // SHFileOp requires double zero ending
+        tempFolder[ wcslen(tempFolder) + 1 ] = L'\0'; // SHFileOp requires double zero ending
         SHFILEOPSTRUCT op;
         ZeroMemory(&op, sizeof(op));
         op.hwnd = NULL;
@@ -213,7 +213,7 @@ CDataObject::ReadFile(
 
                 WCHAR temp[MAX_PATH];
                 GetTempPath(MAX_PATH, temp);
-                GetTempFileName(temp, TEXT("cac"), 0, tempFolder);
+                GetTempFileName(temp, L"cac", 0, tempFolder);
                 DeleteFile(tempFolder);
                 CreateDirectory(tempFolder, NULL);
 
@@ -221,7 +221,7 @@ CDataObject::ReadFile(
         }
         WCHAR tempPath[MAX_PATH], tempFile[MAX_PATH];
         GetTempPath(MAX_PATH, tempPath);
-        GetTempFileName(tempPath, TEXT("cab"), 0, tempFile);
+        GetTempFileName(tempPath, L"cab", 0, tempFile);
 
         MsiDumpFileDetail detail;
         msi->GetFileDetail(index, &detail);
@@ -232,7 +232,7 @@ CDataObject::ReadFile(
         BYTE* buffer = (BYTE*)GlobalAlloc(GMEM_FIXED, detail.filesize);
 
         FILE* f;
-        if(_wfopen_s(&f, filename, TEXT("rb")) != 0)
+        if(_wfopen_s(&f, filename, L"rb") != 0)
         {
                 fread(buffer, detail.filesize, 1, f);
                 fclose(f);
