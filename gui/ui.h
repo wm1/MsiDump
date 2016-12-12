@@ -11,7 +11,6 @@ extern CAppModule _Module;
 #include <atldlgs.h>
 
 #include <stdio.h>
-#include <tchar.h>
 
 #include <CommCtrl.h>
 #include <CommDlg.h>

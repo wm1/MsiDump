@@ -1,7 +1,6 @@
 
 #include <windows.h>
 #include <stdio.h>
-#include <tchar.h>
 #include <oleidl.h>
 #include <shlobj.h>
 #include <shellapi.h>
@@ -117,7 +116,7 @@ CDataObject::~CDataObject()
         delete [] array;
 
         // RemoveDirectory(tempFolder) recursively.
-        tempFolder[ _tcslen(tempFolder) + 1 ] = TEXT('\0'); // SHFileOp requires double zero ending
+        tempFolder[ wcslen(tempFolder) + 1 ] = TEXT('\0'); // SHFileOp requires double zero ending
         SHFILEOPSTRUCT op;
         ZeroMemory(&op, sizeof(op));
         op.hwnd = NULL;
@@ -174,7 +173,7 @@ CDataObject::GetData(
                         MsiDumpFileDetail detail;
                         msi->GetFileDetail(array[i], &detail);
                         desc->nFileSizeLow = detail.filesize;
-                        _tcscpy_s(desc->cFileName, MAX_PATH, detail.filename);
+                        wcscpy_s(desc->cFileName, MAX_PATH, detail.filename);
                 }
                 medium->tymed          = TYMED_HGLOBAL;
                 medium->hGlobal        = (HGLOBAL)group;
@@ -212,7 +211,7 @@ CDataObject::ReadFile(
                 else
                         selectAll = INDIVIDUAL_SELECTED;
 
-                TCHAR temp[MAX_PATH];
+                WCHAR temp[MAX_PATH];
                 GetTempPath(MAX_PATH, temp);
                 GetTempFileName(temp, TEXT("cac"), 0, tempFolder);
                 DeleteFile(tempFolder);
@@ -220,20 +219,20 @@ CDataObject::ReadFile(
 
                 msi->ExtractTo(tempFolder, selectAll, EXTRACT_TO_TREE);
         }
-        TCHAR tempPath[MAX_PATH], tempFile[MAX_PATH];
+        WCHAR tempPath[MAX_PATH], tempFile[MAX_PATH];
         GetTempPath(MAX_PATH, tempPath);
         GetTempFileName(tempPath, TEXT("cab"), 0, tempFile);
 
         MsiDumpFileDetail detail;
         msi->GetFileDetail(index, &detail);
-        TCHAR filename[MAX_PATH];
-        _tcscpy_s(filename, MAX_PATH, tempFolder);
-        _tcscat_s(filename, MAX_PATH, detail.path);
-        _tcscat_s(filename, MAX_PATH, detail.filename);
+        WCHAR filename[MAX_PATH];
+        wcscpy_s(filename, MAX_PATH, tempFolder);
+        wcscat_s(filename, MAX_PATH, detail.path);
+        wcscat_s(filename, MAX_PATH, detail.filename);
         BYTE* buffer = (BYTE*)GlobalAlloc(GMEM_FIXED, detail.filesize);
 
         FILE* f;
-        if(_tfopen_s(&f, filename, TEXT("rb")) != 0)
+        if(_wfopen_s(&f, filename, TEXT("rb")) != 0)
         {
                 fread(buffer, detail.filesize, 1, f);
                 fclose(f);

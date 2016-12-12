@@ -7,7 +7,7 @@ void Drag(IMsiDumpCab*, int selectedCount);
 
 int
 Run(
-        __in_opt LPTSTR lpstrCmdLine = NULL,
+        __in_opt LPWSTR lpstrCmdLine = NULL,
         int    nCmdShow     = SW_SHOWDEFAULT
         )
 {
@@ -34,7 +34,7 @@ int WINAPI
 _tWinMain(
         __in     HINSTANCE hInstance,
         __in_opt HINSTANCE /*hPrevInstance*/,
-        __in     LPTSTR    lpstrCmdLine,
+        __in     LPWSTR    lpstrCmdLine,
         __in     int       nCmdShow
         )
 {
@@ -61,13 +61,13 @@ _tWinMain(
         return nRet;
 }
 
-static LPCTSTR
+static LPCWSTR
 LoadString(
         UINT nTextID
         )
 {
         const static int size = 256;
-        static TCHAR szText[size];
+        static WCHAR szText[size];
         szText[0] = 0;
         ::LoadString(_Module.GetResourceInstance(), nTextID, szText, size);
         return szText;
@@ -194,13 +194,13 @@ CMainFrame::OnDropFiles(
         int   count = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
         if(count != 1) return 0;
 
-        TCHAR filename[MAX_PATH];
+        WCHAR filename[MAX_PATH];
         DragQueryFile(hDrop, 0, filename, MAX_PATH);
         DragFinish(hDrop);
-        size_t len = _tcslen(filename);
-        LPCTSTR extPartial = TEXT(".ms");
+        size_t len = wcslen(filename);
+        LPCWSTR extPartial = TEXT(".ms");
         if(len >= 5  /* eg. "a.msi" */
-                && _tcsnicmp(&filename[len-4], extPartial, _tcslen(extPartial)) == 0)
+                && _tcsnicmp(&filename[len-4], extPartial, wcslen(extPartial)) == 0)
         {
                 LoadMsiFiles(filename);
         }
@@ -261,16 +261,16 @@ CMainFrame::OnExportFileList(
         if(dlg.DoModal() != IDOK) return 0;
 
         FILE* f;
-        if(_tfopen_s(&f, dlg.m_szFileName, TEXT("wt")) == 0) return 0;
+        if(_wfopen_s(&f, dlg.m_szFileName, TEXT("wt")) == 0) return 0;
 
-        _ftprintf(f, TEXT("%4s %15s %9s %-45s %15s %9s\n"),
+        fwprintf(f, TEXT("%4s %15s %9s %-45s %15s %9s\n"),
                 TEXT("num"), TEXT("filename"), TEXT("filesize"), TEXT("path"), TEXT("version"), TEXT("language"));
         int count = m_msi->getCount();
         for(int i = 0; i < count; i++)
         {
                 MsiDumpFileDetail detail;
                 m_msi->GetFileDetail(i, &detail);
-                _ftprintf(f, TEXT("%4d %15s %9d %-45s %15s %9s\n"), i,
+                fwprintf(f, TEXT("%4d %15s %9d %-45s %15s %9s\n"), i,
                         detail.filename, detail.filesize, detail.path, detail.version, detail.language);
         }
         fclose(f);
@@ -294,7 +294,7 @@ LRESULT CMainFrame::OnExtractFiles(
         else
                 selectAll = INDIVIDUAL_SELECTED;
 
-        LPCTSTR title = LoadString(IDS_INFO_SELECT_DEST_FOLDER);
+        LPCWSTR title = LoadString(IDS_INFO_SELECT_DEST_FOLDER);
         CFolderDialog dlg(m_hWnd, title, BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE);
         if(dlg.DoModal() != IDOK) return 0;
 
@@ -437,17 +437,17 @@ CMainFrame::OnGetDispInfo(
         {
 
         case COLUME_NAME:
-                pItem->pszText = (LPTSTR)detail.filename;
+                pItem->pszText = (LPWSTR)detail.filename;
                 break;
 
         case COLUMN_TYPE:
         {
-                LPCTSTR extension = _tcsrchr(detail.filename, TEXT('.'));
+                LPCWSTR extension = wcsrchr(detail.filename, TEXT('.'));
                 if(extension)
                         extension++;
                 else
                         extension = TEXT("");
-                pItem->pszText = (LPTSTR)extension;
+                pItem->pszText = (LPWSTR)extension;
                 break;
         }
 
@@ -455,41 +455,41 @@ CMainFrame::OnGetDispInfo(
         {
                 if(filesizes[index] == NULL)
                 {
-                        TCHAR filesizeBuffer[20];
-                        _stprintf_s(filesizeBuffer, 20, TEXT("%d"), detail.filesize);
+                        WCHAR filesizeBuffer[20];
+                        swprintf_s(filesizeBuffer, 20, TEXT("%d"), detail.filesize);
                         filesizes[index] = _tcsdup(filesizeBuffer);
                 }
-                pItem->pszText = (LPTSTR)filesizes[index];
+                pItem->pszText = (LPWSTR)filesizes[index];
                 break;
         }
 
         case COLUMN_PATH:
-                pItem->pszText = (LPTSTR)detail.path;
+                pItem->pszText = (LPWSTR)detail.path;
                 break;
 
         case COLUMN_PLATFORM:
         {
-                LPCTSTR win9x   = TEXT("Win9x");
-                LPCTSTR winNT   = TEXT("WinNT");
-                LPCTSTR winX64  = TEXT("WinX64");
-                LPCTSTR winAll  = TEXT("");
-                LPCTSTR platform = (
+                LPCWSTR win9x   = TEXT("Win9x");
+                LPCWSTR winNT   = TEXT("WinNT");
+                LPCWSTR winX64  = TEXT("WinX64");
+                LPCWSTR winAll  = TEXT("");
+                LPCWSTR platform = (
                                 detail.winX64 ? winX64 : (
                                 (detail.winNT && detail.win9x) ? winAll : (
                                 detail.winNT  ? winNT  : (
                                 detail.win9x  ? win9x  : (
                                 winAll))))
                                 );
-                pItem->pszText = (LPTSTR)platform;
+                pItem->pszText = (LPWSTR)platform;
                 break;
         }
 
         case COLUMN_VERSION:
-                pItem->pszText = (LPTSTR)detail.version;
+                pItem->pszText = (LPWSTR)detail.version;
                 break;
 
         case COLUMN_LANGUAGE:
-                pItem->pszText = (LPTSTR)detail.language;
+                pItem->pszText = (LPWSTR)detail.language;
                 break;
 
         default:
@@ -526,7 +526,7 @@ threadWaitDelayLoad(void* parameter)
 
 void
 CMainFrame::LoadMsiFiles(
-        LPCTSTR filename
+        LPCWSTR filename
         )
 {
         Cleanup();
@@ -542,7 +542,7 @@ CMainFrame::LoadMsiFiles(
         int i;
         for(i=0; i<count; i++)
                 LVindex[i] = i;
-        filesizes = new LPCTSTR[count];
+        filesizes = new LPCWSTR[count];
         for(i=0; i<count; i++)
                 filesizes[i] = NULL;
 
@@ -582,15 +582,15 @@ CMainFrame::Cleanup()
 
 void
 CMainFrame::SetCaption(
-        LPCTSTR caption
+        LPCWSTR caption
         )
 {
-        LPCTSTR title = LoadString(IDR_MAINFRAME);
+        LPCWSTR title = LoadString(IDR_MAINFRAME);
 
-        TCHAR buffer[MAX_PATH];
+        WCHAR buffer[MAX_PATH];
         if(caption)
         {
-                _stprintf_s(buffer, MAX_PATH, TEXT("%s - %s"), title, PathFindFileName(caption));
+                swprintf_s(buffer, MAX_PATH, TEXT("%s - %s"), title, PathFindFileName(caption));
                 SetWindowText(buffer);
         } else
                 SetWindowText(title);
@@ -601,17 +601,17 @@ CMainFrame::SetCaption(
 void
 CMainFrame::UpdateStatusbar(int part)
 {
-        TCHAR buffer[MAX_PATH];
+        WCHAR buffer[MAX_PATH];
         switch(part)
         {
         case ID_STATUSBAR_SELECTED:
                 #pragma warning(suppress: 4774) // warning C4774: 'swprintf_s' : format string expected in argument 3 is not a string literal
-                _stprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_SELECTED),
+                swprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_SELECTED),
                         m_list.GetSelectedCount(), selectedFileSize/1024);
                 break;
         case ID_STATUSBAR_TOTAL:
                 #pragma warning(suppress: 4774) // warning C4774: 'swprintf_s' : format string expected in argument 3 is not a string literal
-                _stprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_TOTAL),
+                swprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_TOTAL),
                         m_msi->getCount(), totalFileSize/1024);
                 break;
         }
@@ -655,25 +655,25 @@ CMainFrame::sortCallback(
 
         case COLUME_NAME:
         {
-                retval = _tcsicmp(detail1.filename, detail2.filename);
+                retval = _wcsicmp(detail1.filename, detail2.filename);
                 break;
         }
 
         case COLUMN_TYPE:
         {
-                LPCTSTR ext1 = _tcsrchr(detail1.filename, TEXT('.'));
+                LPCWSTR ext1 = wcsrchr(detail1.filename, TEXT('.'));
                 if(ext1)
                         ext1++;
                 else
                         ext1 = TEXT("");
 
-                LPCTSTR ext2 = _tcsrchr(detail2.filename, TEXT('.'));
+                LPCWSTR ext2 = wcsrchr(detail2.filename, TEXT('.'));
                 if(ext2)
                         ext2++;
                 else
                         ext2 = TEXT("");
 
-                retval = _tcsicmp(ext1, ext2);
+                retval = _wcsicmp(ext1, ext2);
                 break;
         }
 
@@ -695,7 +695,7 @@ CMainFrame::sortCallback(
                         retval = 0;
                         break;
                 }
-                retval = _tcsicmp(detail1.path, detail2.path);
+                retval = _wcsicmp(detail1.path, detail2.path);
                 break;
         }
 
@@ -720,13 +720,13 @@ CMainFrame::sortCallback(
 
         case COLUMN_VERSION:
         {
-                retval = _tcsicmp(detail1.version, detail2.version);
+                retval = _wcsicmp(detail1.version, detail2.version);
                 break;
         }
 
         case COLUMN_LANGUAGE:
         {
-                retval = _tcsicmp(detail1.language, detail2.language);
+                retval = _wcsicmp(detail1.language, detail2.language);
                 break;
         }
 

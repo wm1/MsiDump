@@ -1,8 +1,8 @@
 
 #pragma once
 
-void parseArgs(int argc, LPCTSTR argv[]);
-void usage(LPCTSTR exe);
+void parseArgs(int argc, LPCWSTR argv[]);
+void usage(LPCWSTR exe);
 void listHeader();
 void listRecord(int num, MsiDumpFileDetail* detail);
 
@@ -22,7 +22,7 @@ struct _args {
 
         // options for cmd_list
         //
-        LPCTSTR list_format;
+        LPCWSTR list_format;
 
         // options for cmd_extract
         //
@@ -30,11 +30,11 @@ struct _args {
 
         // archive file name
         //
-        LPCTSTR filename;
+        LPCWSTR filename;
 
         // path_to_extract
         //
-        LPCTSTR path_to_extract;
+        LPCWSTR path_to_extract;
 };
 
 extern _args args;

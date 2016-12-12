@@ -2,7 +2,6 @@
 #include <windows.h>
 #include <objbase.h>
 #include <stdio.h>
-#include <tchar.h>
 
 #include "MsiDumpPublic.h"
 #include "parseArgs.h"
@@ -15,12 +14,12 @@ public:
 } initCOM;
 
 int __cdecl
-_tmain(int argc, LPCTSTR argv[])
+wmain(int argc, LPCWSTR argv[])
 {
         parseArgs(argc, argv);
         if(args.cmd == cmd_help)
         {
-                LPCTSTR exe = argv[0];
+                LPCWSTR exe = argv[0];
                 usage(exe);
                 return ERROR_SUCCESS;
         }
@@ -32,13 +31,13 @@ _tmain(int argc, LPCTSTR argv[])
         DWORD fileAttr = GetFileAttributes(args.filename);
         if(fileAttr == INVALID_FILE_ATTRIBUTES)
         {
-                _ftprintf(stderr, TEXT("error: file not found: %s\n"), args.filename);
+                fwprintf(stderr, TEXT("error: file not found: %s\n"), args.filename);
                 return ERROR_FILE_NOT_FOUND;
         }
 
         if(!msi->Open(args.filename))
         {
-                _ftprintf(stderr, TEXT("error: fail to open msi package: %s\n"), args.filename);
+                fwprintf(stderr, TEXT("error: fail to open msi package: %s\n"), args.filename);
                 msi->Release();
                 return ERROR_INSTALL_PACKAGE_OPEN_FAILED;
         }
@@ -58,12 +57,12 @@ _tmain(int argc, LPCTSTR argv[])
         {
                 enumFlatFolder flatFolder = (args.extract_full_path ? EXTRACT_TO_TREE : EXTRACT_TO_FLAT_FOLDER);
 
-                TCHAR filename[MAX_PATH];
+                WCHAR filename[MAX_PATH];
                 GetFullPathName(args.path_to_extract, MAX_PATH, filename, NULL);
                 bool b = msi->ExtractTo(filename, ALL_SELECTED, flatFolder);
                 if(!b)
                 {
-                        _ftprintf(stderr, TEXT("error: fail to extract msi file. check out trace.txt for details\n"));
+                        fwprintf(stderr, TEXT("error: fail to extract msi file. check out trace.txt for details\n"));
                         msi->Close();
                         msi->Release();
                         return ERROR_INSTALL_FAILURE;

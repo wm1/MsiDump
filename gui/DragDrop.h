@@ -64,7 +64,7 @@ private:
         int          count;
         int         *array;
         bool         extracted;
-        TCHAR        tempFolder[MAX_PATH];
+        WCHAR        tempFolder[MAX_PATH];
         HGLOBAL      ReadFile(int index);
 };
 

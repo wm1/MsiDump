@@ -14,7 +14,7 @@ char*  trace_file =
 ;
 
 ////////////////////////////////////////////////////////////////////////
-TCHAR pathSeperator = TEXT('\\');
+WCHAR pathSeperator = TEXT('\\');
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -40,12 +40,12 @@ MsiUtils::Release()
 
 bool
 MsiUtils::DoOpen(
-        LPCTSTR filename
+        LPCWSTR filename
         )
 {
         Close();
-        LPTSTR pFilePart;
-        TCHAR  buffer[MAX_PATH];
+        LPWSTR pFilePart;
+        WCHAR  buffer[MAX_PATH];
         GetFullPathName(filename, MAX_PATH, buffer, &pFilePart);
         if(!pFilePart)
         {
@@ -62,13 +62,13 @@ MsiUtils::DoOpen(
 
         msiFilename = buffer;
 
-        LPCTSTR fileExt = _tcsrchr(buffer, TEXT('.'));
+        LPCWSTR fileExt = wcsrchr(buffer, TEXT('.'));
         if(!fileExt)
                 return false;
 
-        if(_tcsicmp(fileExt, TEXT(".msi")) == 0)
+        if(_wcsicmp(fileExt, TEXT(".msi")) == 0)
                 db_type = installer_database;
-        else if(_tcsicmp(fileExt, TEXT(".msm")) == 0)
+        else if(_wcsicmp(fileExt, TEXT(".msm")) == 0)
                 db_type = merge_module;
         else
                 return false;
@@ -137,7 +137,7 @@ MsiUtils::LoadSummary()
         INT       data;
         FILETIME  filetime;
         DWORD     size = MAX_PATH;
-        TCHAR     buffer[MAX_PATH];
+        WCHAR     buffer[MAX_PATH];
         UINT      r;
 
         compressed  = false;
@@ -177,10 +177,10 @@ MsiUtils::LoadDatabase()
         trace << endl;
 
         MSIHANDLE product;
-        TCHAR     packageName[30];
+        WCHAR     packageName[30];
         DWORD     size = MAX_PATH;
-        TCHAR     buffer[MAX_PATH];
-        _stprintf_s(packageName, 30, TEXT("#%d"), (int)database);
+        WCHAR     buffer[MAX_PATH];
+        swprintf_s(packageName, 30, TEXT("#%d"), (int)database);
         r = MsiOpenPackageEx(packageName, MSIOPENPACKAGEFLAGS_IGNOREMACHINESTATE, &product);
         if(r != ERROR_SUCCESS)
                 return FALSE;
@@ -239,7 +239,7 @@ MsiUtils::LoadDatabase()
                         // package or individual files are built for. Therefore what we're
                         // doing here is guess at our best effort
                         //
-                        LPCTSTR condition = p->condition.c_str();
+                        LPCWSTR condition = p->condition.c_str();
 
                         MsiSetProperty(product, TEXT("Version9X"), TEXT("490"));
                         MsiSetProperty(product, TEXT("VersionNT"), TEXT(""));
@@ -317,14 +317,14 @@ MsiUtils::LoadDatabase()
 
 bool
 MsiUtils::ExtractTo(
-        LPCTSTR           theDirectory,
+        LPCWSTR           theDirectory,
         enumSelectAll     selectAll,
         enumFlatFolder    flatFolder
         )
 {
         if(delayLoading) return false;
 
-        TCHAR buffer[MAX_PATH];
+        WCHAR buffer[MAX_PATH];
         GetFullPathName(theDirectory, MAX_PATH, buffer, NULL);
         theDirectory = buffer;
         trace << TEXT("Extract to: ") << theDirectory << endl << endl;
@@ -452,8 +452,8 @@ MsiUtils::VerifyDirectory(
         if(s[s.length()-1] != pathSeperator)
                 s.append(1, pathSeperator);
 
-        TCHAR  buffer[MAX_PATH];
-        _tcscpy_s(buffer, MAX_PATH, s.c_str());
+        WCHAR  buffer[MAX_PATH];
+        wcscpy_s(buffer, MAX_PATH, s.c_str());
 
         string::size_type index = string::npos;
         if(s[1] == TEXT(':') && s[2] == pathSeperator)
@@ -536,7 +536,7 @@ MsiUtils::CabinetCallback(
                         targetFilename = msiUtils->targetRootDirectory + pathSeperator + d->targetDirectory + pathSeperator + p->filename;
                 }
 
-                _tcscpy_s(cabinetInfo->FullTargetName, MAX_PATH, targetFilename.c_str());
+                wcscpy_s(cabinetInfo->FullTargetName, MAX_PATH, targetFilename.c_str());
                 trace << TEXT("... ") << p->filename
                         << TEXT("\t") << targetFilename << endl;
 
@@ -554,7 +554,7 @@ MsiUtils::LocateFile(
         )
 {
         for(int i=0; i<file->count; i++)
-                if(_tcsicmp(file->array[i].file.c_str(), filename.c_str()) == 0)
+                if(_wcsicmp(file->array[i].file.c_str(), filename.c_str()) == 0)
                 {
                         *pIndex = i;
                         return true;

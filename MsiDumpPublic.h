@@ -21,11 +21,11 @@
 
 struct MsiDumpFileDetail
 {
-        LPCTSTR filename;
+        LPCWSTR filename;
         int     filesize;
-        LPCTSTR path;
-        LPCTSTR version;
-        LPCTSTR language;
+        LPCWSTR path;
+        LPCWSTR version;
+        LPCWSTR language;
         bool    win9x;    // Should the file be installed on Windows 95/98/Me?
         bool    winNT;    // Should be installed on Windows NT/2000/XP/2003?
         bool    winX64;
@@ -47,12 +47,12 @@ class IMsiDumpCab
 {
 public:
         virtual void Release() = 0;
-        virtual bool Open(LPCTSTR filename) = 0;
+        virtual bool Open(LPCWSTR filename) = 0;
         virtual void Close() = 0;
         virtual int  getCount() = 0;
         virtual bool GetFileDetail(int index, MsiDumpFileDetail *detail) = 0;
         virtual void setSelected(int index, bool select) = 0;
-        virtual bool ExtractTo(LPCTSTR directory, enumSelectAll selectAll, enumFlatFolder flatFolder) = 0;
+        virtual bool ExtractTo(LPCWSTR directory, enumSelectAll selectAll, enumFlatFolder flatFolder) = 0;
 
         //
         // delayed open:
@@ -62,7 +62,7 @@ public:
         // this is usefull if you want a fast responsive UI. however keep in mind that
         // GetFileDetail will return different data during stage 1 and stage 2
         //
-        virtual bool DelayedOpen(LPCTSTR filename, HANDLE event) = 0;
+        virtual bool DelayedOpen(LPCWSTR filename, HANDLE event) = 0;
 
 };
 

@@ -3,7 +3,6 @@
 
 #include <windows.h>
 #include <wtypes.h>
-#include <tchar.h>
 #include <process.h>
 #include <string>
 #include <fstream>
@@ -76,24 +75,24 @@ private:
         friend class MsiCabinet;
         friend IMsiDumpCab* MsiDumpCreateObject();
         friend void __cdecl threadLoadDatabase(void* parameter);
-        bool DoOpen(LPCTSTR filename);
+        bool DoOpen(LPCWSTR filename);
 
 public:
         void Release();
-        bool Open(LPCTSTR filename)
+        bool Open(LPCWSTR filename)
         {
                 delayLoading = false;
                 delayEvent   = NULL;
                 return DoOpen(filename);
         }
-        bool DelayedOpen(LPCTSTR filename, HANDLE event)
+        bool DelayedOpen(LPCWSTR filename, HANDLE event)
         {
                 delayLoading = true;
                 delayEvent   = event;
                 return DoOpen(filename);
         }
         void Close();
-        bool ExtractTo(LPCTSTR theDirectory, enumSelectAll selectAll, enumFlatFolder flatFolder);
+        bool ExtractTo(LPCWSTR theDirectory, enumSelectAll selectAll, enumFlatFolder flatFolder);
 
         int  getCount();
         void setSelected(int index, bool select);
