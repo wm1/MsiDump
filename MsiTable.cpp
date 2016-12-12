@@ -35,16 +35,16 @@ MsiQuery::MsiQuery(
         ended       = true;
         record      = NULL;
 
-        if(!msiUtils->IsOpened())
+        if (!msiUtils->IsOpened())
                 return;
 
         UINT r;
         r = MsiDatabaseOpenView(msiUtils->database, sql.c_str(), &view);
-        if(r != ERROR_SUCCESS)
+        if (r != ERROR_SUCCESS)
                 return;
 
         r = MsiViewExecute(view, 0);
-        if(r != ERROR_SUCCESS)
+        if (r != ERROR_SUCCESS)
         {
                 MsiCloseHandle(view);
                 return;
@@ -56,21 +56,21 @@ MsiQuery::MsiQuery(
 
 MsiQuery::~MsiQuery()
 {
-        if(viewCreated)
+        if (viewCreated)
                 MsiCloseHandle(view);
 }
 
 MSIHANDLE
 MsiQuery::Next()
 {
-        if(ended)
+        if (ended)
                 return NULL;
 
         MsiCloseHandle(record);
 
         UINT r;
         r = MsiViewFetch(view, &record);
-        if(r == ERROR_SUCCESS)
+        if (r == ERROR_SUCCESS)
                 return record;
 
         ended = true;
@@ -96,17 +96,17 @@ MsiTable::~MsiTable()
 string
 MsiTable::getPrimaryKey()
 {
-        if(name == L"_Tables")
+        if (name == L"_Tables")
                 return L"Name";
 
-        if(name == L"_Columns")
+        if (name == L"_Columns")
                 return L"Table";
 
         MSIHANDLE record;
         UINT r;
         string s;
         r = MsiDatabaseGetPrimaryKeys(msiUtils->database, name.c_str(), &record);
-        if(r != ERROR_SUCCESS)
+        if (r != ERROR_SUCCESS)
                 return s;  // it is a empty string
 
         DWORD size = MAX_PATH;
@@ -122,14 +122,14 @@ int
 MsiTable::CountRows()
 {
         string primaryKey = getPrimaryKey();
-        if(primaryKey.empty())
+        if (primaryKey.empty())
                 primaryKey = L"*";
 
         string sql = L"SELECT " + primaryKey + L" FROM " + name;
 
         MsiQuery q(msiUtils, sql);
         int row_count = 0;
-        while(q.Next() != NULL)
+        while (q.Next() != NULL)
                 row_count++;
 
         return row_count;
@@ -143,7 +143,7 @@ MsiFile::MsiFile(
         : MsiTable(msiUtils, L"File")
 {
         array = NULL;
-        if(count == 0) return;
+        if (count == 0) return;
 
         MSIHANDLE record;
         DWORD size = MAX_PATH;
@@ -151,7 +151,7 @@ MsiFile::MsiFile(
         array = new tagFile[count];
         MsiQuery q(msiUtils, L"SELECT File, Component_, FileName, FileSize, Attributes, Sequence, Version, Language FROM File ORDER BY Sequence");
 
-        for(tagFile* p = array; (record = q.Next()) != NULL; p++)
+        for (tagFile* p = array; (record = q.Next()) != NULL; p++)
         {
                 size = MAX_PATH;
                 MsiRecordGetString(record, 1, buffer, &size);
@@ -183,7 +183,7 @@ MsiFile::MsiFile(
 
 MsiFile::~MsiFile()
 {
-        if(count != 0)
+        if (count != 0)
                 delete[] array;
 }
 
@@ -195,7 +195,7 @@ MsiSimpleFile::MsiSimpleFile(
         : MsiTable(msiUtils, L"File")
 {
         array = NULL;
-        if(count == 0) return;
+        if (count == 0) return;
 
         MSIHANDLE record;
         DWORD size = MAX_PATH;
@@ -203,7 +203,7 @@ MsiSimpleFile::MsiSimpleFile(
         array = new tagFile[count];
         MsiQuery q(msiUtils, L"SELECT FileName, FileSize FROM File ORDER BY Sequence");
 
-        for(tagFile* p = array; (record = q.Next()) != NULL; p++)
+        for (tagFile* p = array; (record = q.Next()) != NULL; p++)
         {
                 size = MAX_PATH;
                 MsiRecordGetString(record, 1, buffer, &size);
@@ -217,7 +217,7 @@ MsiSimpleFile::MsiSimpleFile(
 
 MsiSimpleFile::~MsiSimpleFile()
 {
-        if(count != 0)
+        if (count != 0)
                 delete[] array;
 }
 
@@ -229,7 +229,7 @@ MsiComponent::MsiComponent(
         : MsiTable(msiUtils, L"Component")
 {
         array = NULL;
-        if(count == 0) return;
+        if (count == 0) return;
 
         MSIHANDLE record;
         DWORD size = MAX_PATH;
@@ -237,7 +237,7 @@ MsiComponent::MsiComponent(
         array = new tagComponent[count];
         MsiQuery q(msiUtils, L"SELECT Component, Directory_, Condition FROM Component");
 
-        for(tagComponent* p = array; (record = q.Next()) != NULL; p++)
+        for (tagComponent* p = array; (record = q.Next()) != NULL; p++)
         {
                 size = MAX_PATH;
                 MsiRecordGetString(record, 1, buffer, &size);
@@ -255,7 +255,7 @@ MsiComponent::MsiComponent(
 
 MsiComponent::~MsiComponent()
 {
-        if(count != 0)
+        if (count != 0)
                 delete[] array;
 }
 
@@ -267,7 +267,7 @@ MsiDirectory::MsiDirectory(
         : MsiTable(msiUtils, L"Directory")
 {
         array = NULL;
-        if(count == 0) return;
+        if (count == 0) return;
 
         MSIHANDLE record;
         DWORD size = MAX_PATH;
@@ -275,7 +275,7 @@ MsiDirectory::MsiDirectory(
         array = new tagDirectory[count];
         MsiQuery q(msiUtils, L"SELECT Directory FROM Directory");
 
-        for(tagDirectory* p = array; (record = q.Next()) != NULL; p++)
+        for (tagDirectory* p = array; (record = q.Next()) != NULL; p++)
         {
                 size = MAX_PATH;
                 MsiRecordGetString(record, 1, buffer, &size);
@@ -285,7 +285,7 @@ MsiDirectory::MsiDirectory(
 
 MsiDirectory::~MsiDirectory()
 {
-        if(count != 0)
+        if (count != 0)
                 delete[] array;
 }
 
@@ -297,7 +297,7 @@ MsiCabinet::MsiCabinet(
         : MsiTable(msiUtils, L"Media")
 {
         array = NULL;
-        if(msiUtils->db_type == MsiUtils::merge_module)
+        if (msiUtils->db_type == MsiUtils::merge_module)
         {
                 count = 1;
                 array = new tagCabinet[count];
@@ -310,7 +310,7 @@ MsiCabinet::MsiCabinet(
                 return;
         }
 
-        if(count == 0) return;
+        if (count == 0) return;
 
         MSIHANDLE record;
         DWORD size = MAX_PATH;
@@ -318,7 +318,7 @@ MsiCabinet::MsiCabinet(
         array = new tagCabinet[count];
         MsiQuery q(msiUtils, L"SELECT DiskId, LastSequence, Cabinet FROM Media");
 
-        for(tagCabinet* p = array; (record = q.Next()) != NULL; p++)
+        for (tagCabinet* p = array; (record = q.Next()) != NULL; p++)
         {
                 p->diskId       = MsiRecordGetInteger(record, 1);
                 p->lastSequence = MsiRecordGetInteger(record, 2);
@@ -335,12 +335,12 @@ MsiCabinet::MsiCabinet(
 
 MsiCabinet::~MsiCabinet()
 {
-        if(count == 0)
+        if (count == 0)
                 return;
 
-        for(int i=0; i<count; i++)
+        for (int i=0; i<count; i++)
         {
-                if(!array[i].tempName.empty())
+                if (!array[i].tempName.empty())
                         DeleteFile(array[i].tempName.c_str());
         }
         delete[] array;
@@ -352,7 +352,7 @@ MsiCabinet::Extract(
         )
 {
         tagCabinet *p = &array[index];
-        if(!p->tempName.empty())
+        if (!p->tempName.empty())
                 return;
 
         WCHAR tempPath[MAX_PATH], tempFile[MAX_PATH];
@@ -365,13 +365,13 @@ MsiCabinet::Extract(
         MsiQuery  q(msiUtils, sql);
         MSIHANDLE record = q.Next();
         DWORD     size   = MsiRecordDataSize(record, 1);
-        if(size == 0) return;
+        if (size == 0) return;
 
         BYTE     *buffer = new BYTE[size];
         MsiRecordReadStream(record, 1, (char*)buffer, &size);
 
         FILE* file;
-        if(_wfopen_s(&file, tempFile, L"wb") == 0) return;
+        if (_wfopen_s(&file, tempFile, L"wb") == 0) return;
         fwrite(buffer, sizeof(BYTE), size, file);
         fclose(file);
         delete[] buffer;

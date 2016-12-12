@@ -16,9 +16,9 @@ Run(
 
         CMainFrame wndMain(lpstrCmdLine);
 
-        if(wndMain.CreateEx() == NULL)
+        if (wndMain.CreateEx() == NULL)
         {
-                ATLTRACE(_T("Main window creation failed!\n"));
+                ATLTRACE(L"Main window creation failed!\n");
                 return 0;
         }
 
@@ -121,12 +121,12 @@ CMainFrame::OnCreate(
         filesizes = NULL;
         Cleanup();
 
-        if(CmdLine && *CmdLine)
+        if (CmdLine && *CmdLine)
         {
                 LPWSTR *szArglist;
                 int nArgs;
                 szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
-                if(szArglist)
+                if (szArglist)
                 {
                         LoadMsiFiles(szArglist[1]);
                         LocalFree(szArglist);
@@ -144,16 +144,16 @@ CMainFrame::OnIdle()
         UIEnable(IDM_EXTRACT_FILES,   enable);
         UIEnable(IDM_EXPORT_FILELIST, enable);
 
-        if(selectionChanged)
+        if (selectionChanged)
         {
                 selectionChanged = false;
                 UpdateStatusbar(ID_STATUSBAR_SELECTED);
         }
 
-        if(totalFileSize == 0)
+        if (totalFileSize == 0)
         {
                 int count = m_msi->getCount();
-                for(int i = 0; i < count; i++)
+                for (int i = 0; i < count; i++)
                 {
                         MsiDumpFileDetail detail;
                         m_msi->GetFileDetail(i, &detail);
@@ -173,7 +173,7 @@ CMainFrame::OnSetCursor(
         BOOL&  /*bHandled*/
         )
 {
-        if(waitCursor)
+        if (waitCursor)
         {
                 SetCursor(hWaitCursor);
                 return TRUE;
@@ -192,15 +192,15 @@ CMainFrame::OnDropFiles(
 {
         HDROP hDrop = (HDROP)wParam;
         int   count = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
-        if(count != 1) return 0;
+        if (count != 1) return 0;
 
         WCHAR filename[MAX_PATH];
         DragQueryFile(hDrop, 0, filename, MAX_PATH);
         DragFinish(hDrop);
         size_t len = wcslen(filename);
         LPCWSTR extPartial = L".ms";
-        if(len >= 5  /* eg. "a.msi" */
-                && _tcsnicmp(&filename[len-4], extPartial, wcslen(extPartial)) == 0)
+        if (len >= 5  /* eg. "a.msi" */
+                && _wcsnicmp(&filename[len-4], extPartial, wcslen(extPartial)) == 0)
         {
                 LoadMsiFiles(filename);
         }
@@ -235,7 +235,7 @@ CMainFrame::OnFileOpen(
                 OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
                 LoadString(IDS_OPEN_FILE_FILTER)
                 );
-        if(dlg.DoModal() == IDOK)
+        if (dlg.DoModal() == IDOK)
         {
                 waitCursor = true;
                 LoadMsiFiles(dlg.m_szFileName);
@@ -251,22 +251,22 @@ CMainFrame::OnExportFileList(
         BOOL& /*bHandled*/
         )
 {
-        if(m_msi->getCount() == 0) return 0;
+        if (m_msi->getCount() == 0) return 0;
         CFileDialog dlg(FALSE, // TRUE for FileOpen, FALSE for FileSaveAs
                 L"txt",
                 NULL,
                 OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
                 LoadString(IDS_EXPORT_FILELIST_FILTER)
                 );
-        if(dlg.DoModal() != IDOK) return 0;
+        if (dlg.DoModal() != IDOK) return 0;
 
         FILE* f;
-        if(_wfopen_s(&f, dlg.m_szFileName, L"wt") == 0) return 0;
+        if (_wfopen_s(&f, dlg.m_szFileName, L"wt") == 0) return 0;
 
         fwprintf(f, L"%4s %15s %9s %-45s %15s %9s\n",
                 L"num", L"filename", L"filesize", L"path", L"version", L"language");
         int count = m_msi->getCount();
-        for(int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
                 MsiDumpFileDetail detail;
                 m_msi->GetFileDetail(i, &detail);
@@ -284,19 +284,19 @@ LRESULT CMainFrame::OnExtractFiles(
         BOOL& /*bHandled*/
         )
 {
-        if(m_msi->getCount() == 0)
+        if (m_msi->getCount() == 0)
                 return 0;
 
         int selectedCount = m_list.GetSelectedCount();
         enumSelectAll selectAll;
-        if(selectedCount == 0 || selectedCount == m_msi->getCount())
+        if (selectedCount == 0 || selectedCount == m_msi->getCount())
                 selectAll = ALL_SELECTED;
         else
                 selectAll = INDIVIDUAL_SELECTED;
 
         LPCWSTR title = LoadString(IDS_INFO_SELECT_DEST_FOLDER);
         CFolderDialog dlg(m_hWnd, title, BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE);
-        if(dlg.DoModal() != IDOK) return 0;
+        if (dlg.DoModal() != IDOK) return 0;
 
         waitCursor = true;
         m_msi->ExtractTo(dlg.m_szFolderPath, selectAll, EXTRACT_TO_TREE);
@@ -332,7 +332,7 @@ CMainFrame::OnItemChanged(
         LPNMLISTVIEW pnmv = (LPNMLISTVIEW)pnmh;
         bool bOldState = TEST_FLAG(pnmv->uOldState, LVIS_SELECTED);
         bool bNewState = TEST_FLAG(pnmv->uNewState, LVIS_SELECTED);
-        if(TEST_FLAG(pnmv->uChanged, LVIF_STATE)
+        if (TEST_FLAG(pnmv->uChanged, LVIF_STATE)
                 && (bOldState != bNewState))
         {
                 MsiDumpFileDetail detail;
@@ -342,10 +342,10 @@ CMainFrame::OnItemChanged(
                 // If the iItem member of the structure pointed to by pnmv is -1,
                 //the change has been applied to all items in the list view.
                 //
-                if(iItem == -1)
+                if (iItem == -1)
                 {
                         int count = m_msi->getCount();
-                        for(iItem=0; iItem<count; iItem++)
+                        for (iItem=0; iItem<count; iItem++)
                                 m_msi->setSelected(iItem, bNewState);
 
                         selectedFileSize =
@@ -359,7 +359,7 @@ CMainFrame::OnItemChanged(
                 int index = LVindex[iItem];
                 m_msi->GetFileDetail(index, &detail);
                 m_msi->setSelected(index, bNewState);
-                if(bNewState == false)
+                if (bNewState == false)
                 {
                         // the item is de-selected
                         detail.filesize = -detail.filesize;
@@ -380,20 +380,20 @@ CMainFrame::OnODStateChanged(
         LPNMLVODSTATECHANGE pnmv = (LPNMLVODSTATECHANGE)pnmh;
         bool bOldState = TEST_FLAG(pnmv->uOldState, LVIS_SELECTED);
         bool bNewState = TEST_FLAG(pnmv->uNewState, LVIS_SELECTED);
-        if(bOldState == bNewState)
+        if (bOldState == bNewState)
                 return 0;
 
         selectionChanged = true;
-        for(int iItem=pnmv->iFrom; iItem<=pnmv->iTo; iItem++)
+        for (int iItem=pnmv->iFrom; iItem<=pnmv->iTo; iItem++)
         {
                 MsiDumpFileDetail detail;
                 int index = LVindex[iItem];
                 m_msi->GetFileDetail(index, &detail);
-                if(detail.selected == bNewState)
+                if (detail.selected == bNewState)
                         continue;
 
                 m_msi->setSelected(index, bNewState);
-                if(bNewState == false)
+                if (bNewState == false)
                 {
                         // the item is de-selected
                         detail.filesize = -detail.filesize;
@@ -424,7 +424,7 @@ CMainFrame::OnGetDispInfo(
         NMLVDISPINFO *pDispInfo = (NMLVDISPINFO*)pnmh;
         LPLVITEM      pItem     = &pDispInfo->item;
 
-        if(!TEST_FLAG(pItem->mask, LVIF_TEXT))
+        if (!TEST_FLAG(pItem->mask, LVIF_TEXT))
         {
                 return 0;
         }
@@ -443,7 +443,7 @@ CMainFrame::OnGetDispInfo(
         case COLUMN_TYPE:
         {
                 LPCWSTR extension = wcsrchr(detail.filename, L'.');
-                if(extension)
+                if (extension)
                         extension++;
                 else
                         extension = L"";
@@ -453,11 +453,11 @@ CMainFrame::OnGetDispInfo(
 
         case COLUMN_SIZE:
         {
-                if(filesizes[index] == NULL)
+                if (filesizes[index] == NULL)
                 {
                         WCHAR filesizeBuffer[20];
                         swprintf_s(filesizeBuffer, 20, L"%d", detail.filesize);
-                        filesizes[index] = _tcsdup(filesizeBuffer);
+                        filesizes[index] = _wcsdup(filesizeBuffer);
                 }
                 pItem->pszText = (LPWSTR)filesizes[index];
                 break;
@@ -508,7 +508,7 @@ CMainFrame::OnRightClick(
         BOOL&   /*bHandled*/
         )
 {
-        if(idCtrl == IDC_LIST_VIEW)
+        if (idCtrl == IDC_LIST_VIEW)
                 return 0;
         return S_FALSE;
 }
@@ -532,7 +532,7 @@ CMainFrame::LoadMsiFiles(
         Cleanup();
         delayLoading = true;
         _beginthread(threadWaitDelayLoad, 0, this);
-        if(!m_msi->DelayedOpen(filename, delayEvent))
+        if (!m_msi->DelayedOpen(filename, delayEvent))
                 return;
 
         totalFileSize = 0;
@@ -540,14 +540,14 @@ CMainFrame::LoadMsiFiles(
         m_list.SetItemCountEx(count, LVSICF_NOINVALIDATEALL);
         LVindex = new int[count];
         int i;
-        for(i=0; i<count; i++)
+        for (i=0; i<count; i++)
                 LVindex[i] = i;
         filesizes = new LPCWSTR[count];
-        for(i=0; i<count; i++)
+        for (i=0; i<count; i++)
                 filesizes[i] = NULL;
 
         SetCaption(filename);
-        if(sortColumn != -1)
+        if (sortColumn != -1)
                 sort();
 }
 
@@ -557,18 +557,18 @@ CMainFrame::Cleanup()
         m_msi->Close();
         m_list.DeleteAllItems();
 
-        if(LVindex)
+        if (LVindex)
         {
                 delete []LVindex;
                 LVindex = NULL;
         }
 
-        if(filesizes)
+        if (filesizes)
         {
                 int count = m_msi->getCount();
-                for(int i=0; i<count; i++)
+                for (int i=0; i<count; i++)
                 {
-                        if(filesizes[i])
+                        if (filesizes[i])
                                 free((void*)filesizes[i]);
                 }
                 delete []filesizes;
@@ -588,12 +588,13 @@ CMainFrame::SetCaption(
         LPCWSTR title = LoadString(IDR_MAINFRAME);
 
         WCHAR buffer[MAX_PATH];
-        if(caption)
+        if (caption)
         {
                 swprintf_s(buffer, MAX_PATH, L"%s - %s", title, PathFindFileName(caption));
                 SetWindowText(buffer);
         } else
                 SetWindowText(title);
+
         UpdateStatusbar(ID_STATUSBAR_SELECTED);
         UpdateStatusbar(ID_STATUSBAR_TOTAL);
 }
@@ -609,6 +610,7 @@ CMainFrame::UpdateStatusbar(int part)
                 swprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_SELECTED),
                         m_list.GetSelectedCount(), selectedFileSize/1024);
                 break;
+
         case ID_STATUSBAR_TOTAL:
                 #pragma warning(suppress: 4774) // warning C4774: 'swprintf_s' : format string expected in argument 3 is not a string literal
                 swprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_TOTAL),
@@ -625,7 +627,7 @@ void
 CMainFrame::sort()
 {
         int count = m_msi->getCount();
-        if(count == 0) return;
+        if (count == 0) return;
 
         _this_qsort = this;
         qsort(LVindex, count, sizeof(*LVindex), sortCallback);
@@ -662,13 +664,13 @@ CMainFrame::sortCallback(
         case COLUMN_TYPE:
         {
                 LPCWSTR ext1 = wcsrchr(detail1.filename, L'.');
-                if(ext1)
+                if (ext1)
                         ext1++;
                 else
                         ext1 = L"";
 
                 LPCWSTR ext2 = wcsrchr(detail2.filename, L'.');
-                if(ext2)
+                if (ext2)
                         ext2++;
                 else
                         ext2 = L"";
@@ -682,15 +684,15 @@ CMainFrame::sortCallback(
                 int size1 = detail1.filesize;
                 int size2 = detail2.filesize;
 
-                if     (size1  < size2) retval = -1;
-                else if(size1 == size2) retval = 0;
-                else                    retval = 1;
+                if      (size1  < size2) retval = -1;
+                else if (size1 == size2) retval = 0;
+                else                     retval = 1;
                 break;
         }
 
         case COLUMN_PATH:
         {
-                if(detail1.path == NULL || detail2.path == 0)
+                if (detail1.path == NULL || detail2.path == 0)
                 {
                         retval = 0;
                         break;
@@ -711,9 +713,9 @@ CMainFrame::sortCallback(
                 if (detail2.winNT  ) plat2 |= 2;
                 if (detail2.winX64 ) plat2 |= 4;
 
-                if     (plat1  < plat2) retval = -1;
-                else if(plat1 == plat2) retval = 0;
-                else                    retval = 1;
+                if      (plat1  < plat2) retval = -1;
+                else if (plat1 == plat2) retval = 0;
+                else                     retval = 1;
 
                 break;
         }

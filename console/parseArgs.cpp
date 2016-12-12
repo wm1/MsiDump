@@ -21,7 +21,7 @@ void parseArgs(int argc, LPCWSTR argv[])
         args.list_format = L"nfsp";
         args.extract_full_path = true;
 
-        if(argc == 1)
+        if (argc == 1)
         {
                 args.cmd = cmd_help;
                 return;
@@ -33,24 +33,24 @@ void parseArgs(int argc, LPCWSTR argv[])
         // check whether the first argument start with '-'.
         // if so, it is new syntax, else it is legacy syntax
         //
-        if(!isSeparator(cmd[0]))
+        if (!isSeparator(cmd[0]))
         {
                 // legacy syntax
                 //
-                if(argc == 2)
+                if (argc == 2)
                 {
                         args.cmd = cmd_list;
                         args.filename = argv[1];
                 }
-                else if(argc == 3 || argc == 4)
+                else if (argc == 3 || argc == 4)
                 {
                         args.cmd = cmd_extract;
                         args.filename = argv[1];
                         args.path_to_extract = argv[2];
-                        if(argc == 4)
+                        if (argc == 4)
                         {
                                 LPCWSTR arg3 = argv[3];
-                                if(isSeparator(arg3[0]) && arg3[1] == L'f')
+                                if (isSeparator(arg3[0]) && arg3[1] == L'f')
                                         args.extract_full_path = false;
                         }
                 }
@@ -60,15 +60,15 @@ void parseArgs(int argc, LPCWSTR argv[])
         //
         // new syntax
         //
-        if(wcscmp(&cmd[1], L"list") == 0)
+        if (wcscmp(&cmd[1], L"list") == 0)
         {
                 args.cmd = cmd_list;
         }
-        else if(wcscmp(&cmd[1], L"extract") == 0)
+        else if (wcscmp(&cmd[1], L"extract") == 0)
         {
                 args.cmd = cmd_extract;
         }
-        else if(wcscmp(&cmd[1], L"help") == 0
+        else if (wcscmp(&cmd[1], L"help") == 0
                 || wcscmp(&cmd[1], L"h") == 0
                 || wcscmp(&cmd[1], L"?") == 0)
         {
@@ -82,9 +82,9 @@ void parseArgs(int argc, LPCWSTR argv[])
         }
 
         int current_arg = 2;
-        while(current_arg < argc && isSeparator(argv[current_arg][0]))
+        while (current_arg < argc && isSeparator(argv[current_arg][0]))
         {
-                if(!parseOption(argv[current_arg]))
+                if (!parseOption(argv[current_arg]))
                 {
                         fwprintf(stderr, L"error: unrecognized parameter %s\n", argv[current_arg]);
                         args.cmd = cmd_invalid;
@@ -93,7 +93,7 @@ void parseArgs(int argc, LPCWSTR argv[])
                 current_arg++;
         }
 
-        if(current_arg >= argc)
+        if (current_arg >= argc)
         {
                 fwprintf(stderr, L"error: msi file is not supplied\n");
                 args.cmd = cmd_invalid;
@@ -102,9 +102,9 @@ void parseArgs(int argc, LPCWSTR argv[])
         args.filename = argv[current_arg];
         current_arg++;
 
-        if(args.cmd == cmd_extract)
+        if (args.cmd == cmd_extract)
         {
-                if(current_arg >= argc)
+                if (current_arg >= argc)
                 {
                         fwprintf(stderr, L"error: path to extract is not supplied\n");
                         args.cmd = cmd_invalid;
@@ -130,10 +130,10 @@ bool findOptionWithValue(LPCWSTR option, LPCWSTR name, LPCWSTR *value)
         option ++; // skip leading separator
 
         size_t cName = wcslen(name);
-        if(wcsncmp(option, name, cName) == 0)
+        if (wcsncmp(option, name, cName) == 0)
         {
                 size_t cOption = wcslen(option);
-                if(cOption > cName && option[cName] == L':')
+                if (cOption > cName && option[cName] == L':')
                 {
                         *value = &option[cName+1];
                         return true;
@@ -144,17 +144,17 @@ bool findOptionWithValue(LPCWSTR option, LPCWSTR name, LPCWSTR *value)
 
 bool parseOption(LPCWSTR option)
 {
-        if(args.cmd == cmd_list)
+        if (args.cmd == cmd_list)
         {
                 LPCWSTR list_format;
-                if(findOptionWithValue(option, L"format", &list_format))
+                if (findOptionWithValue(option, L"format", &list_format))
                 {
                         args.list_format = list_format;
                         size_t len = wcslen(list_format);
-                        for(int i=0; i<len; i++)
+                        for (int i=0; i<len; i++)
                         {
                                 WCHAR c = list_format[i];
-                                if(wcschr(L"nfspvl", c) == NULL)
+                                if (wcschr(L"nfspvl", c) == NULL)
                                 {
                                         fwprintf(stderr, L"error: unrecognized char \"%c\" in %s\n", c, option);
                                         return false;
@@ -163,14 +163,14 @@ bool parseOption(LPCWSTR option)
                 } else
                         return false;
         }
-        else if(args.cmd == cmd_extract)
+        else if (args.cmd == cmd_extract)
         {
                 LPCWSTR extract_full_path;
-                if(findOptionWithValue(option, L"full_path", &extract_full_path))
+                if (findOptionWithValue(option, L"full_path", &extract_full_path))
                 {
-                        if(wcscmp(extract_full_path, L"no") == 0)
+                        if (wcscmp(extract_full_path, L"no") == 0)
                                 args.extract_full_path = false;
-                        else if(wcscmp(extract_full_path, L"yes") == 0)
+                        else if (wcscmp(extract_full_path, L"yes") == 0)
                                 args.extract_full_path = true;
                         else
                         {
@@ -203,17 +203,17 @@ void usage(LPCWSTR exe)
                 exe);
 
         wprintf(L"Legacy Usage:\n"
-                        L"  %s msiFile                  - list\n"
-                        L"  %s msiFile extractPath      - extract\n"
-                        L"  %s msiFile extractPath -f   - extract -full_path:no\n",
-                        exe, exe, exe
-                        );
+                L"  %s msiFile                  - list\n"
+                L"  %s msiFile extractPath      - extract\n"
+                L"  %s msiFile extractPath -f   - extract -full_path:no\n",
+                exe, exe, exe
+                );
 }
 
 void listHeader()
 {
         LPCWSTR format = args.list_format;
-        while(*format != 0)
+        while (*format != 0)
         {
                 switch(*format)
                 {
@@ -233,7 +233,7 @@ void listHeader()
 void listRecord(int num, MsiDumpFileDetail* detail)
 {
         LPCWSTR format = args.list_format;
-        while(*format != 0)
+        while (*format != 0)
         {
                 switch(*format)
                 {

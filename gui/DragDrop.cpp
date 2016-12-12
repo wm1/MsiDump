@@ -21,9 +21,9 @@ CDropSource::QueryContinueDrag(
         DWORD grfKeyState
         )
 {
-        if(fEscapePressed)
+        if (fEscapePressed)
                 return DRAGDROP_S_CANCEL;
-        if(grfKeyState & (MK_LBUTTON | MK_RBUTTON))
+        if (grfKeyState & (MK_LBUTTON | MK_RBUTTON))
                 return S_OK;
         return DRAGDROP_S_DROP;
 }
@@ -56,11 +56,11 @@ CEnumFormatetc::Next(
         ULONG     *pceltFetched
         )
 {
-        if(current == count)
+        if (current == count)
                 return S_FALSE;
 
         *rgelt = array[current++];
-        if(pceltFetched)
+        if (pceltFetched)
                 *pceltFetched = 1;
         return S_OK;
 }
@@ -95,16 +95,16 @@ CDataObject::CDataObject(
         extracted = false;
         array     = new int[count];
         int current = 0;
-        for(int i=0; i<msi->getCount(); i++)
+        for (int i=0; i<msi->getCount(); i++)
         {
                 MsiDumpFileDetail detail;
                 msi->GetFileDetail(i, &detail);
-                if(detail.selected)
+                if (detail.selected)
                         array[current++] = i;
-                if(current == count) break;
+                if (current == count) break;
         }
 
-        if(CF_FILEDESCRIPTOR !=0)
+        if (CF_FILEDESCRIPTOR !=0)
                 return;
 
         formats[0].cfFormat = CF_FILEDESCRIPTOR = (CLIPFORMAT)RegisterClipboardFormat(CFSTR_FILEDESCRIPTOR);
@@ -133,7 +133,7 @@ CDataObject::EnumFormatEtc(
         IEnumFORMATETC **ppenumFormatetc
         )
 {
-        if(dwDirection == DATADIR_SET)
+        if (dwDirection == DATADIR_SET)
                 return E_NOTIMPL;
 
         *ppenumFormatetc = (IEnumFORMATETC*)
@@ -147,24 +147,24 @@ CDataObject::GetData(
         STGMEDIUM *medium
         )
 {
-        if(format == NULL || medium == NULL)
+        if (format == NULL || medium == NULL)
                 return E_INVALIDARG;
 
-        if(format->cfFormat == CF_FILEDESCRIPTOR)
+        if (format->cfFormat == CF_FILEDESCRIPTOR)
         {
-                if(format->ptd != NULL)
+                if (format->ptd != NULL)
                         return E_INVALIDARG;
-                if((format->dwAspect & DVASPECT_CONTENT) == 0)
+                if ((format->dwAspect & DVASPECT_CONTENT) == 0)
                         return DV_E_DVASPECT;
-                if(format->lindex != -1)
+                if (format->lindex != -1)
                         return DV_E_LINDEX;
-                if(format->tymed != TYMED_HGLOBAL)
+                if (format->tymed != TYMED_HGLOBAL)
                         return DV_E_TYMED;
 
                 FILEGROUPDESCRIPTOR* group = (FILEGROUPDESCRIPTOR*)GlobalAlloc(GMEM_FIXED,
                         sizeof(FILEGROUPDESCRIPTOR) + (count-1)*sizeof(FILEDESCRIPTOR));
                 group->cItems = count;
-                for(int i=0; i<count; i++)
+                for (int i=0; i<count; i++)
                 {
                         FILEDESCRIPTOR* desc = &group->fgd[i];
                         desc->dwFlags        = FD_FILESIZE;
@@ -179,13 +179,13 @@ CDataObject::GetData(
                 medium->hGlobal        = (HGLOBAL)group;
                 medium->pUnkForRelease = NULL;
         }
-        else if(format->cfFormat == CF_FILECONTENTS)
+        else if (format->cfFormat == CF_FILECONTENTS)
         {
-                if(format->ptd != NULL)
+                if (format->ptd != NULL)
                         return E_INVALIDARG;
-                if((format->dwAspect & DVASPECT_CONTENT) == 0)
+                if ((format->dwAspect & DVASPECT_CONTENT) == 0)
                         return DV_E_DVASPECT;
-                if((format->tymed & TYMED_HGLOBAL) == 0)
+                if ((format->tymed & TYMED_HGLOBAL) == 0)
                         return DV_E_TYMED;
 
                 medium->tymed          = TYMED_HGLOBAL;
@@ -202,11 +202,11 @@ CDataObject::ReadFile(
         int index
         )
 {
-        if(!extracted)
+        if (!extracted)
         {
                 extracted = true;
                 enumSelectAll selectAll;
-                if(count == msi->getCount())
+                if (count == msi->getCount())
                         selectAll = ALL_SELECTED;
                 else
                         selectAll = INDIVIDUAL_SELECTED;
@@ -232,7 +232,7 @@ CDataObject::ReadFile(
         BYTE* buffer = (BYTE*)GlobalAlloc(GMEM_FIXED, detail.filesize);
 
         FILE* f;
-        if(_wfopen_s(&f, filename, L"rb") != 0)
+        if (_wfopen_s(&f, filename, L"rb") != 0)
         {
                 fread(buffer, detail.filesize, 1, f);
                 fclose(f);
