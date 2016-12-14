@@ -3,9 +3,27 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MsiDump", "console\MsiDump.vcxproj", "{9CBD7DFA-1754-4A9D-93D7-857A9D17CB1B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MsiDump", "console\MsiDump.vcxproj", "{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MsiDumpCab", "gui\MsiDumpCab.vcxproj", "{23F47152-3B78-4369-8050-E4AD865825DE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build Common", "Build Common", "{5F80C6EB-2FB3-4BC4-AF0E-F1E870606C81}"
+	ProjectSection(SolutionItems) = preProject
+		msbuild\common.build.post.props = msbuild\common.build.post.props
+		msbuild\common.build.pre.props = msbuild\common.build.pre.props
+		msbuild\common.build.version.props = msbuild\common.build.version.props
+		version.inc = version.inc
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{D78C3A54-B2DF-45A4-A0FC-05D0AB7BF87D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "wtl", "wtl", "{5944EB0D-1FE2-45D9-B51B-000DB1035780}"
+	ProjectSection(SolutionItems) = preProject
+		deps\wtl\atlapp.h = deps\wtl\atlapp.h
+		deps\wtl\atlctrls.h = deps\wtl\atlctrls.h
+		deps\wtl\atldlgs.h = deps\wtl\atldlgs.h
+		deps\wtl\atlframe.h = deps\wtl\atlframe.h
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,14 +33,14 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9CBD7DFA-1754-4A9D-93D7-857A9D17CB1B}.Debug|x64.ActiveCfg = Debug|x64
-		{9CBD7DFA-1754-4A9D-93D7-857A9D17CB1B}.Debug|x64.Build.0 = Debug|x64
-		{9CBD7DFA-1754-4A9D-93D7-857A9D17CB1B}.Debug|x86.ActiveCfg = Debug|Win32
-		{9CBD7DFA-1754-4A9D-93D7-857A9D17CB1B}.Debug|x86.Build.0 = Debug|Win32
-		{9CBD7DFA-1754-4A9D-93D7-857A9D17CB1B}.Release|x64.ActiveCfg = Release|x64
-		{9CBD7DFA-1754-4A9D-93D7-857A9D17CB1B}.Release|x64.Build.0 = Release|x64
-		{9CBD7DFA-1754-4A9D-93D7-857A9D17CB1B}.Release|x86.ActiveCfg = Release|Win32
-		{9CBD7DFA-1754-4A9D-93D7-857A9D17CB1B}.Release|x86.Build.0 = Release|Win32
+		{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}.Debug|x64.ActiveCfg = Debug|x64
+		{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}.Debug|x64.Build.0 = Debug|x64
+		{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}.Debug|x86.ActiveCfg = Debug|Win32
+		{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}.Debug|x86.Build.0 = Debug|Win32
+		{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}.Release|x64.ActiveCfg = Release|x64
+		{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}.Release|x64.Build.0 = Release|x64
+		{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}.Release|x86.ActiveCfg = Release|Win32
+		{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}.Release|x86.Build.0 = Release|Win32
 		{23F47152-3B78-4369-8050-E4AD865825DE}.Debug|x64.ActiveCfg = Debug|x64
 		{23F47152-3B78-4369-8050-E4AD865825DE}.Debug|x64.Build.0 = Debug|x64
 		{23F47152-3B78-4369-8050-E4AD865825DE}.Debug|x86.ActiveCfg = Debug|Win32
@@ -31,5 +49,8 @@ Global
 		{23F47152-3B78-4369-8050-E4AD865825DE}.Release|x64.Build.0 = Release|x64
 		{23F47152-3B78-4369-8050-E4AD865825DE}.Release|x86.ActiveCfg = Release|Win32
 		{23F47152-3B78-4369-8050-E4AD865825DE}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5944EB0D-1FE2-45D9-B51B-000DB1035780} = {D78C3A54-B2DF-45A4-A0FC-05D0AB7BF87D}
 	EndGlobalSection
 EndGlobal

@@ -17,7 +17,7 @@
     <ResourceCompile Include="..\version.rc" />
   </ItemGroup>
   <PropertyGroup>
-    <ProjectGuid>{9CBD7DFA-1754-4A9D-93D7-857A9D17CB1B}</ProjectGuid>
+    <ProjectGuid>{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}</ProjectGuid>
     <ProjectName>MsiDump</ProjectName>
     <TargetName>MsiDump</TargetName>
   </PropertyGroup>

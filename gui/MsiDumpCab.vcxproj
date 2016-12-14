@@ -12,6 +12,7 @@
     <ClInclude Include="CUnknown.h" />
     <ClInclude Include="DragDrop.h" />
     <ClInclude Include="MainFrame.h" />
+    <ClInclude Include="Resource.h" />
     <ClInclude Include="ui.h" />
     <ClInclude Include="..\MsiTable.h" />
     <ClInclude Include="..\MsiUtils.h" />
