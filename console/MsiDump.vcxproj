@@ -18,8 +18,6 @@
   </ItemGroup>
   <PropertyGroup>
     <ProjectGuid>{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}</ProjectGuid>
-    <ProjectName>MsiDump</ProjectName>
-    <TargetName>MsiDump</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>

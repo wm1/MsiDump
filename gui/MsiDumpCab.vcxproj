@@ -23,8 +23,6 @@
   </ItemGroup>
   <PropertyGroup>
     <ProjectGuid>{23F47152-3B78-4369-8050-E4AD865825DE}</ProjectGuid>
-    <ProjectName>MsiDumpCab</ProjectName>
-    <TargetName>MsiDumpCab</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
