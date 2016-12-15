@@ -18,8 +18,7 @@ CDropSource::CDropSource()
 STDMETHODIMP
 CDropSource::QueryContinueDrag(
         BOOL  fEscapePressed,
-        DWORD grfKeyState
-        )
+        DWORD grfKeyState)
 {
         if (fEscapePressed)
                 return DRAGDROP_S_CANCEL;
@@ -39,9 +38,8 @@ CDropSource::GiveFeedback(
 //////////////////////////////////////////////////////////////////////////
 
 CEnumFormatetc::CEnumFormatetc(
-        FORMATETC *_array,
-        int        _count
-        )
+        FORMATETC* _array,
+        int        _count)
         : INIT_IUNKNOWN(IID_IEnumFORMATETC)
 {
         array   = _array;
@@ -51,10 +49,9 @@ CEnumFormatetc::CEnumFormatetc(
 
 STDMETHODIMP
 CEnumFormatetc::Next(
-        ULONG      /*celt*/,
-        FORMATETC *rgelt,
-        ULONG     *pceltFetched
-        )
+        ULONG /*celt*/,
+        FORMATETC* rgelt,
+        ULONG*     pceltFetched)
 {
         if (current == count)
                 return S_FALSE;
@@ -75,54 +72,52 @@ CEnumFormatetc::Reset()
 //////////////////////////////////////////////////////////////////////////
 
 FORMATETC
-CDataObject::formats[2] =
-{
+CDataObject::formats[2] = {
         {0 /*FILEDESCRIPTOR*/, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL},
-        {0 /*FILECONTENTS  */, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL}
-};
+        {0 /*FILECONTENTS  */, NULL, DVASPECT_CONTENT, -1, TYMED_HGLOBAL}};
 
 CLIPFORMAT CDataObject::CF_FILEDESCRIPTOR = 0;
 CLIPFORMAT CDataObject::CF_FILECONTENTS   = 0;
 
 CDataObject::CDataObject(
-        IMsiDumpCab *_msi,
-        int          _selectedCount
-        )
+        IMsiDumpCab* _msi,
+        int          _selectedCount)
         : INIT_IUNKNOWN(IID_IDataObject)
 {
-        msi       = _msi;
-        count     = _selectedCount;
-        extracted = false;
-        array     = new int[count];
+        msi         = _msi;
+        count       = _selectedCount;
+        extracted   = false;
+        array       = new int[count];
         int current = 0;
-        for (int i=0; i<msi->getCount(); i++)
+        for (int i = 0; i < msi->getCount(); i++)
         {
                 MsiDumpFileDetail detail;
                 msi->GetFileDetail(i, &detail);
                 if (detail.selected)
                         array[current++] = i;
-                if (current == count) break;
+                if (current == count)
+                        break;
         }
 
-        if (CF_FILEDESCRIPTOR !=0)
+        if (CF_FILEDESCRIPTOR != 0)
                 return;
 
         formats[0].cfFormat = CF_FILEDESCRIPTOR = (CLIPFORMAT)RegisterClipboardFormat(CFSTR_FILEDESCRIPTOR);
-        formats[1].cfFormat = CF_FILECONTENTS   = (CLIPFORMAT)RegisterClipboardFormat(CFSTR_FILECONTENTS);
+        formats[1].cfFormat = CF_FILECONTENTS = (CLIPFORMAT)RegisterClipboardFormat(CFSTR_FILECONTENTS);
 }
 
 CDataObject::~CDataObject()
 {
-        delete [] array;
+        delete[] array;
 
         // RemoveDirectory(tempFolder) recursively.
-        tempFolder[ wcslen(tempFolder) + 1 ] = L'\0'; // SHFileOp requires double zero ending
+        tempFolder[wcslen(tempFolder) + 1] = L'\0'; // SHFileOp requires double zero ending
         SHFILEOPSTRUCT op;
         ZeroMemory(&op, sizeof(op));
-        op.hwnd = NULL;
-        op.wFunc = FO_DELETE;
-        op.pFrom = tempFolder;
-        op.pTo = NULL;
+        op.hwnd   = NULL;
+        op.wFunc  = FO_DELETE;
+        op.pFrom  = tempFolder;
+        op.pTo    = NULL;
         op.fFlags = FOF_NOCONFIRMATION | FOF_SILENT;
         SHFileOperation(&op);
 }
@@ -130,22 +125,19 @@ CDataObject::~CDataObject()
 STDMETHODIMP
 CDataObject::EnumFormatEtc(
         DWORD            dwDirection,
-        IEnumFORMATETC **ppenumFormatetc
-        )
+        IEnumFORMATETC** ppenumFormatetc)
 {
         if (dwDirection == DATADIR_SET)
                 return E_NOTIMPL;
 
-        *ppenumFormatetc = (IEnumFORMATETC*)
-                new CEnumFormatetc(formats, sizeof(formats) / sizeof(formats[0]));
+        *ppenumFormatetc = (IEnumFORMATETC*)new CEnumFormatetc(formats, sizeof(formats) / sizeof(formats[0]));
         return S_OK;
 }
 
 STDMETHODIMP
 CDataObject::GetData(
-        FORMATETC *format,
-        STGMEDIUM *medium
-        )
+        FORMATETC* format,
+        STGMEDIUM* medium)
 {
         if (format == NULL || medium == NULL)
                 return E_INVALIDARG;
@@ -162,9 +154,9 @@ CDataObject::GetData(
                         return DV_E_TYMED;
 
                 FILEGROUPDESCRIPTOR* group = (FILEGROUPDESCRIPTOR*)GlobalAlloc(GMEM_FIXED,
-                        sizeof(FILEGROUPDESCRIPTOR) + (count-1)*sizeof(FILEDESCRIPTOR));
+                                                                               sizeof(FILEGROUPDESCRIPTOR) + (count - 1) * sizeof(FILEDESCRIPTOR));
                 group->cItems = count;
-                for (int i=0; i<count; i++)
+                for (int i = 0; i < count; i++)
                 {
                         FILEDESCRIPTOR* desc = &group->fgd[i];
                         desc->dwFlags        = FD_FILESIZE;
@@ -199,8 +191,7 @@ CDataObject::GetData(
 
 HGLOBAL
 CDataObject::ReadFile(
-        int index
-        )
+        int index)
 {
         if (!extracted)
         {
@@ -244,15 +235,13 @@ CDataObject::ReadFile(
 //
 // this is the exposed function to do drag & drop
 
-void
-Drag(
-        IMsiDumpCab *msi,
-        int         selectedCount
-        )
+void Drag(
+        IMsiDumpCab* msi,
+        int          selectedCount)
 {
-        CDataObject *dataObject = new CDataObject(msi, selectedCount);
-        CDropSource *dropSource = new CDropSource;
-        DWORD effect = DROPEFFECT_COPY;
+        CDataObject* dataObject = new CDataObject(msi, selectedCount);
+        CDropSource* dropSource = new CDropSource;
+        DWORD        effect     = DROPEFFECT_COPY;
         DoDragDrop(dataObject, dropSource, effect, &effect);
         dropSource->Release();
         dataObject->Release();

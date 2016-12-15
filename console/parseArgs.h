@@ -14,8 +14,8 @@ enum _cmds
         cmd_invalid
 };
 
-struct _args {
-
+struct _args
+{
         // command
         //
         _cmds cmd;
@@ -38,4 +38,3 @@ struct _args {
 };
 
 extern _args args;
-

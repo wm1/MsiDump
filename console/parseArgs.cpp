@@ -5,7 +5,7 @@
 #include "parseArgs.h"
 
 bool parseOption(LPCWSTR option);
-bool findOptionWithValue(LPCWSTR option, LPCWSTR name, LPCWSTR *value);
+bool findOptionWithValue(LPCWSTR option, LPCWSTR name, LPCWSTR* value);
 bool isSeparator(WCHAR c);
 
 _args args;
@@ -17,8 +17,8 @@ void parseArgs(int argc, LPCWSTR argv[])
 {
         // default command and options
         //
-        args.cmd = cmd_invalid;
-        args.list_format = L"nfsp";
+        args.cmd               = cmd_invalid;
+        args.list_format       = L"nfsp";
         args.extract_full_path = true;
 
         if (argc == 1)
@@ -39,13 +39,13 @@ void parseArgs(int argc, LPCWSTR argv[])
                 //
                 if (argc == 2)
                 {
-                        args.cmd = cmd_list;
+                        args.cmd      = cmd_list;
                         args.filename = argv[1];
                 }
                 else if (argc == 3 || argc == 4)
                 {
-                        args.cmd = cmd_extract;
-                        args.filename = argv[1];
+                        args.cmd             = cmd_extract;
+                        args.filename        = argv[1];
                         args.path_to_extract = argv[2];
                         if (argc == 4)
                         {
@@ -68,9 +68,7 @@ void parseArgs(int argc, LPCWSTR argv[])
         {
                 args.cmd = cmd_extract;
         }
-        else if (wcscmp(&cmd[1], L"help") == 0
-                || wcscmp(&cmd[1], L"h") == 0
-                || wcscmp(&cmd[1], L"?") == 0)
+        else if (wcscmp(&cmd[1], L"help") == 0 || wcscmp(&cmd[1], L"h") == 0 || wcscmp(&cmd[1], L"?") == 0)
         {
                 args.cmd = cmd_help;
                 return;
@@ -125,9 +123,9 @@ bool isSeparator(WCHAR c)
 //
 // return the 'value' string after the colon mark if 'name' matches
 //
-bool findOptionWithValue(LPCWSTR option, LPCWSTR name, LPCWSTR *value)
+bool findOptionWithValue(LPCWSTR option, LPCWSTR name, LPCWSTR* value)
 {
-        option ++; // skip leading separator
+        option++; // skip leading separator
 
         size_t cName = wcslen(name);
         if (wcsncmp(option, name, cName) == 0)
@@ -135,7 +133,7 @@ bool findOptionWithValue(LPCWSTR option, LPCWSTR name, LPCWSTR *value)
                 size_t cOption = wcslen(option);
                 if (cOption > cName && option[cName] == L':')
                 {
-                        *value = &option[cName+1];
+                        *value = &option[cName + 1];
                         return true;
                 }
         }
@@ -150,8 +148,8 @@ bool parseOption(LPCWSTR option)
                 if (findOptionWithValue(option, L"format", &list_format))
                 {
                         args.list_format = list_format;
-                        size_t len = wcslen(list_format);
-                        for (int i=0; i<len; i++)
+                        size_t len       = wcslen(list_format);
+                        for (int i = 0; i < len; i++)
                         {
                                 WCHAR c = list_format[i];
                                 if (wcschr(L"nfspvl", c) == NULL)
@@ -160,7 +158,8 @@ bool parseOption(LPCWSTR option)
                                         return false;
                                 }
                         }
-                } else
+                }
+                else
                         return false;
         }
         else if (args.cmd == cmd_extract)
@@ -177,7 +176,8 @@ bool parseOption(LPCWSTR option)
                                 fwprintf(stderr, L"error: unrecognized specifier \"%s\" in %s\n", extract_full_path, option);
                                 return false;
                         }
-                } else
+                }
+                else
                         return false;
         }
         return true;
@@ -198,16 +198,14 @@ void usage(LPCWSTR exe)
                 L"\n"
                 L"  options for -extract:\n"
                 L"    -full_path:yes|no     extract files with full path (DEFAULT:yes)\n"
-                L"\n"
-                ,
+                L"\n",
                 exe);
 
         wprintf(L"Legacy Usage:\n"
                 L"  %s msiFile                  - list\n"
                 L"  %s msiFile extractPath      - extract\n"
                 L"  %s msiFile extractPath -f   - extract -full_path:no\n",
-                exe, exe, exe
-                );
+                exe, exe, exe);
 }
 
 void listHeader()
@@ -215,14 +213,26 @@ void listHeader()
         LPCWSTR format = args.list_format;
         while (*format != 0)
         {
-                switch(*format)
+                switch (*format)
                 {
-                case L'n': wprintf(L"%4s",   L"num");      break;
-                case L'f': wprintf(L"%15s",  L"filename"); break;
-                case L's': wprintf(L"%9s",   L"filesize"); break;
-                case L'p': wprintf(L"%-45s", L"path");     break;
-                case L'v': wprintf(L"%15s",  L"version");  break;
-                case L'l': wprintf(L"%9s",   L"language"); break;
+                case L'n':
+                        wprintf(L"%4s", L"num");
+                        break;
+                case L'f':
+                        wprintf(L"%15s", L"filename");
+                        break;
+                case L's':
+                        wprintf(L"%9s", L"filesize");
+                        break;
+                case L'p':
+                        wprintf(L"%-45s", L"path");
+                        break;
+                case L'v':
+                        wprintf(L"%15s", L"version");
+                        break;
+                case L'l':
+                        wprintf(L"%9s", L"language");
+                        break;
                 }
                 wprintf(L" ");
                 format++;
@@ -235,18 +245,29 @@ void listRecord(int num, MsiDumpFileDetail* detail)
         LPCWSTR format = args.list_format;
         while (*format != 0)
         {
-                switch(*format)
+                switch (*format)
                 {
-                case L'n': wprintf(L"%4d",   num             ); break;
-                case L'f': wprintf(L"%15s",  detail->filename); break;
-                case L's': wprintf(L"%9d",   detail->filesize); break;
-                case L'p': wprintf(L"%-45s", detail->path    ); break;
-                case L'v': wprintf(L"%15s",  detail->version ); break;
-                case L'l': wprintf(L"%9s",   detail->language); break;
+                case L'n':
+                        wprintf(L"%4d", num);
+                        break;
+                case L'f':
+                        wprintf(L"%15s", detail->filename);
+                        break;
+                case L's':
+                        wprintf(L"%9d", detail->filesize);
+                        break;
+                case L'p':
+                        wprintf(L"%-45s", detail->path);
+                        break;
+                case L'v':
+                        wprintf(L"%15s", detail->version);
+                        break;
+                case L'l':
+                        wprintf(L"%9s", detail->language);
+                        break;
                 }
                 wprintf(L" ");
                 format++;
         }
         wprintf(L"\n");
 }
-

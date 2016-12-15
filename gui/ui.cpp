@@ -5,11 +5,9 @@ CAppModule _Module;
 
 void Drag(IMsiDumpCab*, int selectedCount);
 
-int
-Run(
-        __in_opt LPWSTR lpstrCmdLine = NULL,
-        int    nCmdShow     = SW_SHOWDEFAULT
-        )
+int Run(
+        LPWSTR lpstrCmdLine = NULL,
+        int    nCmdShow     = SW_SHOWDEFAULT)
 {
         CMessageLoop theLoop;
         _Module.AddMessageLoop(&theLoop);
@@ -32,16 +30,16 @@ Run(
 
 int WINAPI
 _tWinMain(
-        __in     HINSTANCE hInstance,
-        __in_opt HINSTANCE /*hPrevInstance*/,
-        __in     LPWSTR    lpstrCmdLine,
-        __in     int       nCmdShow
-        )
+        HINSTANCE hInstance,
+        HINSTANCE /*hPrevInstance*/,
+        LPWSTR lpstrCmdLine,
+        int    nCmdShow)
 {
         // I am using Drag and Drop, therefore I must use OleInitialize
         HRESULT hRes = OleInitialize(NULL);
         ATLASSERT(SUCCEEDED(hRes));
-        if (FAILED(hRes)) return 0;
+        if (FAILED(hRes))
+                return 0;
 
         // this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
         // ::DefWindowProc(NULL, 0, 0, 0L); // n.b. no longer a problem with WTL 7.0
@@ -50,7 +48,8 @@ _tWinMain(
 
         hRes = _Module.Init(NULL, hInstance);
         ATLASSERT(SUCCEEDED(hRes));
-        if (FAILED(hRes)) return 0;
+        if (FAILED(hRes))
+                return 0;
 
         int nRet = Run(lpstrCmdLine, nCmdShow);
 
@@ -63,11 +62,10 @@ _tWinMain(
 
 static LPCWSTR
 LoadString(
-        UINT nTextID
-        )
+        UINT nTextID)
 {
         const static int size = 256;
-        static WCHAR szText[size];
+        static WCHAR     szText[size];
         szText[0] = 0;
         ::LoadString(_Module.GetResourceInstance(), nTextID, szText, size);
         return szText;
@@ -75,10 +73,10 @@ LoadString(
 
 LRESULT
 CMainFrame::OnCreate(
-        UINT   /*uMsg*/,
+        UINT /*uMsg*/,
         WPARAM /*wParam*/,
         LPARAM /*lParam*/,
-        BOOL&  /*bHandled*/
+        BOOL& /*bHandled*/
         )
 {
         CreateSimpleStatusBar();
@@ -96,35 +94,35 @@ CMainFrame::OnCreate(
         ::DragAcceptFiles(m_hWnd, TRUE);
 
         m_hWndClient = m_list.Create(m_hWnd, rcDefault,
-                NULL, WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_OWNERDATA,
-                WS_EX_CLIENTEDGE,
-                IDC_LIST_VIEW);
+                                     NULL, WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_OWNERDATA,
+                                     WS_EX_CLIENTEDGE,
+                                     IDC_LIST_VIEW);
         m_list.SetExtendedListViewStyle(LVS_EX_FULLROWSELECT | LVS_EX_HEADERDRAGDROP);
-        m_list.InsertColumn(COLUME_NAME,     LoadString(IDS_LISTVIEW_COLUMN_NAME),     0, 140, -1);
-        m_list.InsertColumn(COLUMN_TYPE,     LoadString(IDS_LISTVIEW_COLUMN_TYPE),     0,  40, -1);
-        m_list.InsertColumn(COLUMN_SIZE,     LoadString(IDS_LISTVIEW_COLUMN_SIZE),     LVCFMT_RIGHT, 90, -1);
-        m_list.InsertColumn(COLUMN_PATH,     LoadString(IDS_LISTVIEW_COLUMN_PATH),     0, 400, -1);
-        m_list.InsertColumn(COLUMN_PLATFORM, LoadString(IDS_LISTVIEW_COLUMN_PLATFORM), 0,  60, -1);
-        m_list.InsertColumn(COLUMN_VERSION,  LoadString(IDS_LISTVIEW_COLUMN_VERSION),  0, 100, -1);
-        m_list.InsertColumn(COLUMN_LANGUAGE, LoadString(IDS_LISTVIEW_COLUMN_LANGUAGE), 0,  80, -1);
-        sortColumn = -1;
+        m_list.InsertColumn(COLUME_NAME, LoadString(IDS_LISTVIEW_COLUMN_NAME), 0, 140, -1);
+        m_list.InsertColumn(COLUMN_TYPE, LoadString(IDS_LISTVIEW_COLUMN_TYPE), 0, 40, -1);
+        m_list.InsertColumn(COLUMN_SIZE, LoadString(IDS_LISTVIEW_COLUMN_SIZE), LVCFMT_RIGHT, 90, -1);
+        m_list.InsertColumn(COLUMN_PATH, LoadString(IDS_LISTVIEW_COLUMN_PATH), 0, 400, -1);
+        m_list.InsertColumn(COLUMN_PLATFORM, LoadString(IDS_LISTVIEW_COLUMN_PLATFORM), 0, 60, -1);
+        m_list.InsertColumn(COLUMN_VERSION, LoadString(IDS_LISTVIEW_COLUMN_VERSION), 0, 100, -1);
+        m_list.InsertColumn(COLUMN_LANGUAGE, LoadString(IDS_LISTVIEW_COLUMN_LANGUAGE), 0, 80, -1);
+        sortColumn  = -1;
         hWaitCursor = LoadCursor(NULL, IDC_WAIT);
-        waitCursor = false;
+        waitCursor  = false;
 
-        delayEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+        delayEvent   = CreateEvent(NULL, FALSE, FALSE, NULL);
         delayLoading = false;
 
         UpdateLayout();
 
-        m_msi = MsiDumpCreateObject();
-        LVindex = NULL;
+        m_msi     = MsiDumpCreateObject();
+        LVindex   = NULL;
         filesizes = NULL;
         Cleanup();
 
         if (CmdLine && *CmdLine)
         {
-                LPWSTR *szArglist;
-                int nArgs;
+                LPWSTR* szArglist;
+                int     nArgs;
                 szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
                 if (szArglist)
                 {
@@ -136,12 +134,11 @@ CMainFrame::OnCreate(
         return 0;
 }
 
-BOOL
-CMainFrame::OnIdle()
+BOOL CMainFrame::OnIdle()
 {
         BOOL enable = (m_msi->getCount() != 0);
-        UIEnable(ID_EDIT_SELECT_ALL,  enable);
-        UIEnable(IDM_EXTRACT_FILES,   enable);
+        UIEnable(ID_EDIT_SELECT_ALL, enable);
+        UIEnable(IDM_EXTRACT_FILES, enable);
         UIEnable(IDM_EXPORT_FILELIST, enable);
 
         if (selectionChanged)
@@ -167,10 +164,10 @@ CMainFrame::OnIdle()
 
 LRESULT
 CMainFrame::OnSetCursor(
-        UINT   /*uMsg*/,
+        UINT /*uMsg*/,
         WPARAM /*wParam*/,
         LPARAM /*lParam*/,
-        BOOL&  /*bHandled*/
+        BOOL& /*bHandled*/
         )
 {
         if (waitCursor)
@@ -184,23 +181,24 @@ CMainFrame::OnSetCursor(
 
 LRESULT
 CMainFrame::OnDropFiles(
-        UINT   /*uMsg*/,
+        UINT /*uMsg*/,
         WPARAM wParam,
         LPARAM /*lParam*/,
-        BOOL&  /*bHandled*/
+        BOOL& /*bHandled*/
         )
 {
         HDROP hDrop = (HDROP)wParam;
         int   count = DragQueryFile(hDrop, 0xFFFFFFFF, NULL, 0);
-        if (count != 1) return 0;
+        if (count != 1)
+                return 0;
 
         WCHAR filename[MAX_PATH];
         DragQueryFile(hDrop, 0, filename, MAX_PATH);
         DragFinish(hDrop);
-        size_t len = wcslen(filename);
+        size_t  len        = wcslen(filename);
         LPCWSTR extPartial = L".ms";
-        if (len >= 5  /* eg. "a.msi" */
-                && _wcsnicmp(&filename[len-4], extPartial, wcslen(extPartial)) == 0)
+        if (len >= 5 /* eg. "a.msi" */
+            && _wcsnicmp(&filename[len - 4], extPartial, wcslen(extPartial)) == 0)
         {
                 LoadMsiFiles(filename);
         }
@@ -210,10 +208,10 @@ CMainFrame::OnDropFiles(
 
 LRESULT
 CMainFrame::OnContextMenu(
-        UINT   /*uMsg*/,
+        UINT /*uMsg*/,
         WPARAM /*wParam*/,
         LPARAM lParam,
-        BOOL&  /*bHandled*/
+        BOOL& /*bHandled*/
         )
 {
         HMENU hMenu = GetSubMenu(GetMenu(), 1);
@@ -223,18 +221,17 @@ CMainFrame::OnContextMenu(
 
 LRESULT
 CMainFrame::OnFileOpen(
-        WORD  /*wNotifyCode*/,
-        WORD  /*wID*/,
-        HWND  /*hWndCtl*/,
+        WORD /*wNotifyCode*/,
+        WORD /*wID*/,
+        HWND /*hWndCtl*/,
         BOOL& /*bHandled*/
         )
 {
         CFileDialog dlg(TRUE, // TRUE for FileOpen, FALSE for FileSaveAs
-                L"msi",
-                NULL,
-                OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-                LoadString(IDS_OPEN_FILE_FILTER)
-                );
+                        L"msi",
+                        NULL,
+                        OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+                        LoadString(IDS_OPEN_FILE_FILTER));
         if (dlg.DoModal() == IDOK)
         {
                 waitCursor = true;
@@ -245,58 +242,61 @@ CMainFrame::OnFileOpen(
 
 LRESULT
 CMainFrame::OnExportFileList(
-        WORD  /*wNotifyCode*/,
-        WORD  /*wID*/,
-        HWND  /*hWndCtl*/,
+        WORD /*wNotifyCode*/,
+        WORD /*wID*/,
+        HWND /*hWndCtl*/,
         BOOL& /*bHandled*/
         )
 {
-        if (m_msi->getCount() == 0) return 0;
+        if (m_msi->getCount() == 0)
+                return 0;
         CFileDialog dlg(FALSE, // TRUE for FileOpen, FALSE for FileSaveAs
-                L"txt",
-                NULL,
-                OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
-                LoadString(IDS_EXPORT_FILELIST_FILTER)
-                );
-        if (dlg.DoModal() != IDOK) return 0;
+                        L"txt",
+                        NULL,
+                        OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,
+                        LoadString(IDS_EXPORT_FILELIST_FILTER));
+        if (dlg.DoModal() != IDOK)
+                return 0;
 
         FILE* f;
-        if (_wfopen_s(&f, dlg.m_szFileName, L"wt") == 0) return 0;
+        if (_wfopen_s(&f, dlg.m_szFileName, L"wt") == 0)
+                return 0;
 
         fwprintf(f, L"%4s %15s %9s %-45s %15s %9s\n",
-                L"num", L"filename", L"filesize", L"path", L"version", L"language");
+                 L"num", L"filename", L"filesize", L"path", L"version", L"language");
         int count = m_msi->getCount();
         for (int i = 0; i < count; i++)
         {
                 MsiDumpFileDetail detail;
                 m_msi->GetFileDetail(i, &detail);
                 fwprintf(f, L"%4d %15s %9d %-45s %15s %9s\n", i,
-                        detail.filename, detail.filesize, detail.path, detail.version, detail.language);
+                         detail.filename, detail.filesize, detail.path, detail.version, detail.language);
         }
         fclose(f);
         return 0;
 }
 
 LRESULT CMainFrame::OnExtractFiles(
-        WORD  /*wNotifyCode*/,
-        WORD  /*wID*/,
-        HWND  /*hWndCtl*/,
+        WORD /*wNotifyCode*/,
+        WORD /*wID*/,
+        HWND /*hWndCtl*/,
         BOOL& /*bHandled*/
         )
 {
         if (m_msi->getCount() == 0)
                 return 0;
 
-        int selectedCount = m_list.GetSelectedCount();
+        int           selectedCount = m_list.GetSelectedCount();
         enumSelectAll selectAll;
         if (selectedCount == 0 || selectedCount == m_msi->getCount())
                 selectAll = ALL_SELECTED;
         else
                 selectAll = INDIVIDUAL_SELECTED;
 
-        LPCWSTR title = LoadString(IDS_INFO_SELECT_DEST_FOLDER);
+        LPCWSTR       title = LoadString(IDS_INFO_SELECT_DEST_FOLDER);
         CFolderDialog dlg(m_hWnd, title, BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE);
-        if (dlg.DoModal() != IDOK) return 0;
+        if (dlg.DoModal() != IDOK)
+                return 0;
 
         waitCursor = true;
         m_msi->ExtractTo(dlg.m_szFolderPath, selectAll, EXTRACT_TO_TREE);
@@ -306,14 +306,14 @@ LRESULT CMainFrame::OnExtractFiles(
 
 LRESULT
 CMainFrame::OnColumnClick(
-        int     /*idCtrl*/,
+        int /*idCtrl*/,
         LPNMHDR pnmh,
-        BOOL&   /*bHandled*/
+        BOOL& /*bHandled*/
         )
 {
         LPNMLISTVIEW pnmv = (LPNMLISTVIEW)pnmh;
-        sortAscending = (sortColumn != pnmv->iSubItem) ? true : (!sortAscending);
-        sortColumn = pnmv->iSubItem;
+        sortAscending     = (sortColumn != pnmv->iSubItem) ? true : (!sortAscending);
+        sortColumn        = pnmv->iSubItem;
         sort();
         m_list.SetSelectedColumn(sortColumn);
         return 0;
@@ -324,20 +324,19 @@ CMainFrame::OnColumnClick(
 
 LRESULT
 CMainFrame::OnItemChanged(
-        int     /*idCtrl*/,
+        int /*idCtrl*/,
         LPNMHDR pnmh,
-        BOOL&   /*bHandled*/
+        BOOL& /*bHandled*/
         )
 {
-        LPNMLISTVIEW pnmv = (LPNMLISTVIEW)pnmh;
-        bool bOldState = TEST_FLAG(pnmv->uOldState, LVIS_SELECTED);
-        bool bNewState = TEST_FLAG(pnmv->uNewState, LVIS_SELECTED);
-        if (TEST_FLAG(pnmv->uChanged, LVIF_STATE)
-                && (bOldState != bNewState))
+        LPNMLISTVIEW pnmv      = (LPNMLISTVIEW)pnmh;
+        bool         bOldState = TEST_FLAG(pnmv->uOldState, LVIS_SELECTED);
+        bool         bNewState = TEST_FLAG(pnmv->uNewState, LVIS_SELECTED);
+        if (TEST_FLAG(pnmv->uChanged, LVIF_STATE) && (bOldState != bNewState))
         {
                 MsiDumpFileDetail detail;
-                int iItem = pnmv->iItem;
-                selectionChanged = true;
+                int               iItem = pnmv->iItem;
+                selectionChanged        = true;
 
                 // If the iItem member of the structure pointed to by pnmv is -1,
                 //the change has been applied to all items in the list view.
@@ -345,13 +344,13 @@ CMainFrame::OnItemChanged(
                 if (iItem == -1)
                 {
                         int count = m_msi->getCount();
-                        for (iItem=0; iItem<count; iItem++)
+                        for (iItem = 0; iItem < count; iItem++)
                                 m_msi->setSelected(iItem, bNewState);
 
                         selectedFileSize =
                                 (bNewState == false)
-                                ? 0
-                                : totalFileSize;
+                                        ? 0
+                                        : totalFileSize;
 
                         return 0;
                 }
@@ -372,22 +371,22 @@ CMainFrame::OnItemChanged(
 
 LRESULT
 CMainFrame::OnODStateChanged(
-        int     /*idCtrl*/,
+        int /*idCtrl*/,
         LPNMHDR pnmh,
-        BOOL&   /*bHandled*/
+        BOOL& /*bHandled*/
         )
 {
-        LPNMLVODSTATECHANGE pnmv = (LPNMLVODSTATECHANGE)pnmh;
-        bool bOldState = TEST_FLAG(pnmv->uOldState, LVIS_SELECTED);
-        bool bNewState = TEST_FLAG(pnmv->uNewState, LVIS_SELECTED);
+        LPNMLVODSTATECHANGE pnmv      = (LPNMLVODSTATECHANGE)pnmh;
+        bool                bOldState = TEST_FLAG(pnmv->uOldState, LVIS_SELECTED);
+        bool                bNewState = TEST_FLAG(pnmv->uNewState, LVIS_SELECTED);
         if (bOldState == bNewState)
                 return 0;
 
         selectionChanged = true;
-        for (int iItem=pnmv->iFrom; iItem<=pnmv->iTo; iItem++)
+        for (int iItem = pnmv->iFrom; iItem <= pnmv->iTo; iItem++)
         {
                 MsiDumpFileDetail detail;
-                int index = LVindex[iItem];
+                int               index = LVindex[iItem];
                 m_msi->GetFileDetail(index, &detail);
                 if (detail.selected == bNewState)
                         continue;
@@ -405,9 +404,9 @@ CMainFrame::OnODStateChanged(
 
 LRESULT
 CMainFrame::OnBeginDrag(
-        int     /*idCtrl*/,
+        int /*idCtrl*/,
         LPNMHDR /*pnmh*/,
-        BOOL&   /*bHandled*/
+        BOOL& /*bHandled*/
         )
 {
         Drag(m_msi, m_list.GetSelectedCount());
@@ -416,12 +415,12 @@ CMainFrame::OnBeginDrag(
 
 LRESULT
 CMainFrame::OnGetDispInfo(
-        int     /*idCtrl*/,
+        int /*idCtrl*/,
         LPNMHDR pnmh,
-        BOOL&   /*bHandled*/
+        BOOL& /*bHandled*/
         )
 {
-        NMLVDISPINFO *pDispInfo = (NMLVDISPINFO*)pnmh;
+        NMLVDISPINFO* pDispInfo = (NMLVDISPINFO*)pnmh;
         LPLVITEM      pItem     = &pDispInfo->item;
 
         if (!TEST_FLAG(pItem->mask, LVIF_TEXT))
@@ -430,10 +429,10 @@ CMainFrame::OnGetDispInfo(
         }
 
         MsiDumpFileDetail detail;
-        int index = LVindex[pItem->iItem];
+        int               index = LVindex[pItem->iItem];
         m_msi->GetFileDetail(index, &detail);
 
-        switch(pItem->iSubItem)
+        switch (pItem->iSubItem)
         {
 
         case COLUME_NAME:
@@ -447,7 +446,7 @@ CMainFrame::OnGetDispInfo(
                         extension++;
                 else
                         extension = L"";
-                pItem->pszText = (LPWSTR)extension;
+                pItem->pszText    = (LPWSTR)extension;
                 break;
         }
 
@@ -469,17 +468,23 @@ CMainFrame::OnGetDispInfo(
 
         case COLUMN_PLATFORM:
         {
-                LPCWSTR win9x   = L"Win9x";
-                LPCWSTR winNT   = L"WinNT";
-                LPCWSTR winX64  = L"WinX64";
-                LPCWSTR winAll  = L"";
-                LPCWSTR platform = (
-                                detail.winX64 ? winX64 : (
-                                (detail.winNT && detail.win9x) ? winAll : (
-                                detail.winNT  ? winNT  : (
-                                detail.win9x  ? win9x  : (
-                                winAll))))
-                                );
+                LPCWSTR win9x  = L"Win9x";
+                LPCWSTR winNT  = L"WinNT";
+                LPCWSTR winX64 = L"WinX64";
+                LPCWSTR winAll = L"";
+
+                LPCWSTR platform;
+                if (detail.winX64)
+                        platform = winX64;
+                else if (detail.winNT && detail.win9x)
+                        platform = winAll;
+                else if (detail.winNT)
+                        platform = winNT;
+                else if (detail.win9x)
+                        platform = win9x;
+                else
+                        platform = winAll;
+
                 pItem->pszText = (LPWSTR)platform;
                 break;
         }
@@ -503,9 +508,9 @@ CMainFrame::OnGetDispInfo(
 
 LRESULT
 CMainFrame::OnRightClick(
-        int     idCtrl,
+        int idCtrl,
         LPNMHDR /*pnmh*/,
-        BOOL&   /*bHandled*/
+        BOOL& /*bHandled*/
         )
 {
         if (idCtrl == IDC_LIST_VIEW)
@@ -513,21 +518,18 @@ CMainFrame::OnRightClick(
         return S_FALSE;
 }
 
-extern "C" void __cdecl
-threadWaitDelayLoad(void* parameter)
+extern "C" void __cdecl threadWaitDelayLoad(void* parameter)
 {
         CMainFrame* _this = (CMainFrame*)parameter;
         WaitForSingleObject(_this->delayEvent, INFINITE);
         _this->delayLoading = false;
-        _this->waitCursor = false;
+        _this->waitCursor   = false;
         SetCursor(NULL);
         InvalidateRect(_this->m_hWndClient, NULL, TRUE);
 }
 
-void
-CMainFrame::LoadMsiFiles(
-        LPCWSTR filename
-        )
+void CMainFrame::LoadMsiFiles(
+        LPCWSTR filename)
 {
         Cleanup();
         delayLoading = true;
@@ -536,14 +538,14 @@ CMainFrame::LoadMsiFiles(
                 return;
 
         totalFileSize = 0;
-        int count = m_msi->getCount();
+        int count     = m_msi->getCount();
         m_list.SetItemCountEx(count, LVSICF_NOINVALIDATEALL);
         LVindex = new int[count];
         int i;
-        for (i=0; i<count; i++)
+        for (i             = 0; i < count; i++)
                 LVindex[i] = i;
-        filesizes = new LPCWSTR[count];
-        for (i=0; i<count; i++)
+        filesizes          = new LPCWSTR[count];
+        for (i               = 0; i < count; i++)
                 filesizes[i] = NULL;
 
         SetCaption(filename);
@@ -551,27 +553,26 @@ CMainFrame::LoadMsiFiles(
                 sort();
 }
 
-void
-CMainFrame::Cleanup()
+void CMainFrame::Cleanup()
 {
         m_msi->Close();
         m_list.DeleteAllItems();
 
         if (LVindex)
         {
-                delete []LVindex;
+                delete[] LVindex;
                 LVindex = NULL;
         }
 
         if (filesizes)
         {
                 int count = m_msi->getCount();
-                for (int i=0; i<count; i++)
+                for (int i = 0; i < count; i++)
                 {
                         if (filesizes[i])
                                 free((void*)filesizes[i]);
                 }
-                delete []filesizes;
+                delete[] filesizes;
                 filesizes = NULL;
         }
 
@@ -580,10 +581,8 @@ CMainFrame::Cleanup()
         SetCaption(NULL);
 }
 
-void
-CMainFrame::SetCaption(
-        LPCWSTR caption
-        )
+void CMainFrame::SetCaption(
+        LPCWSTR caption)
 {
         LPCWSTR title = LoadString(IDR_MAINFRAME);
 
@@ -592,42 +591,41 @@ CMainFrame::SetCaption(
         {
                 swprintf_s(buffer, MAX_PATH, L"%s - %s", title, PathFindFileName(caption));
                 SetWindowText(buffer);
-        } else
+        }
+        else
                 SetWindowText(title);
 
         UpdateStatusbar(ID_STATUSBAR_SELECTED);
         UpdateStatusbar(ID_STATUSBAR_TOTAL);
 }
 
-void
-CMainFrame::UpdateStatusbar(int part)
+void CMainFrame::UpdateStatusbar(int part)
 {
         WCHAR buffer[MAX_PATH];
-        switch(part)
+        switch (part)
         {
         case ID_STATUSBAR_SELECTED:
-                #pragma warning(suppress: 4774) // warning C4774: 'swprintf_s' : format string expected in argument 3 is not a string literal
+#pragma warning(suppress : 4774) // warning C4774: 'swprintf_s' : format string expected in argument 3 is not a string literal
                 swprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_SELECTED),
-                        m_list.GetSelectedCount(), selectedFileSize/1024);
+                           m_list.GetSelectedCount(), selectedFileSize / 1024);
                 break;
 
         case ID_STATUSBAR_TOTAL:
-                #pragma warning(suppress: 4774) // warning C4774: 'swprintf_s' : format string expected in argument 3 is not a string literal
+#pragma warning(suppress : 4774) // warning C4774: 'swprintf_s' : format string expected in argument 3 is not a string literal
                 swprintf_s(buffer, MAX_PATH, LoadString(IDS_STATUSBAR_TOTAL),
-                        m_msi->getCount(), totalFileSize/1024);
+                           m_msi->getCount(), totalFileSize / 1024);
                 break;
         }
         m_statusbar.SetText(part, buffer, 0);
 }
 
-static
-CMainFrame* _this_qsort;
+static CMainFrame* _this_qsort;
 
-void
-CMainFrame::sort()
+void CMainFrame::sort()
 {
         int count = m_msi->getCount();
-        if (count == 0) return;
+        if (count == 0)
+                return;
 
         _this_qsort = this;
         qsort(LVindex, count, sizeof(*LVindex), sortCallback);
@@ -635,11 +633,9 @@ CMainFrame::sort()
         m_list.SetItemCountEx(count, LVSICF_NOINVALIDATEALL);
 }
 
-int __cdecl
-CMainFrame::sortCallback(
-        const void *elem1,
-        const void *elem2
-        )
+int __cdecl CMainFrame::sortCallback(
+        const void* elem1,
+        const void* elem2)
 {
         CMainFrame* _this = _this_qsort;
 
@@ -650,9 +646,9 @@ CMainFrame::sortCallback(
         _this->m_msi->GetFileDetail(i1, &detail1);
         _this->m_msi->GetFileDetail(i2, &detail2);
 
-        int retval = 0;
+        int     retval     = 0;
         Columns sortColumn = (Columns)_this->sortColumn;
-        switch(sortColumn)
+        switch (sortColumn)
         {
 
         case COLUME_NAME:
@@ -684,9 +680,12 @@ CMainFrame::sortCallback(
                 int size1 = detail1.filesize;
                 int size2 = detail2.filesize;
 
-                if      (size1  < size2) retval = -1;
-                else if (size1 == size2) retval = 0;
-                else                     retval = 1;
+                if (size1 < size2)
+                        retval = -1;
+                else if (size1 == size2)
+                        retval = 0;
+                else
+                        retval = 1;
                 break;
         }
 
@@ -705,17 +704,26 @@ CMainFrame::sortCallback(
         {
                 int plat1 = 0, plat2 = 0;
 
-                if (detail1.win9x  ) plat1 |= 1;
-                if (detail1.winNT  ) plat1 |= 2;
-                if (detail1.winX64 ) plat1 |= 4;
+                if (detail1.win9x)
+                        plat1 |= 1;
+                if (detail1.winNT)
+                        plat1 |= 2;
+                if (detail1.winX64)
+                        plat1 |= 4;
 
-                if (detail2.win9x  ) plat2 |= 1;
-                if (detail2.winNT  ) plat2 |= 2;
-                if (detail2.winX64 ) plat2 |= 4;
+                if (detail2.win9x)
+                        plat2 |= 1;
+                if (detail2.winNT)
+                        plat2 |= 2;
+                if (detail2.winX64)
+                        plat2 |= 4;
 
-                if      (plat1  < plat2) retval = -1;
-                else if (plat1 == plat2) retval = 0;
-                else                     retval = 1;
+                if (plat1 < plat2)
+                        retval = -1;
+                else if (plat1 == plat2)
+                        retval = 0;
+                else
+                        retval = 1;
 
                 break;
         }

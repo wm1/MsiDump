@@ -27,9 +27,8 @@ FOREACH(
 */
 
 MsiQuery::MsiQuery(
-        MsiUtils *msiUtils,
-        string    sql
-        )
+        MsiUtils* msiUtils,
+        string    sql)
 {
         viewCreated = false;
         ended       = true;
@@ -80,9 +79,8 @@ MsiQuery::Next()
 ////////////////////////////////////////////////////////////////////////
 
 MsiTable::MsiTable(
-        MsiUtils *theMsiUtils,
-        string    tableName
-        )
+        MsiUtils* theMsiUtils,
+        string    tableName)
 {
         msiUtils = theMsiUtils;
         name     = tableName;
@@ -103,11 +101,11 @@ MsiTable::getPrimaryKey()
                 return L"Table";
 
         MSIHANDLE record;
-        UINT r;
-        string s;
+        UINT      r;
+        string    s;
         r = MsiDatabaseGetPrimaryKeys(msiUtils->database, name.c_str(), &record);
         if (r != ERROR_SUCCESS)
-                return s;  // it is a empty string
+                return s; // it is a empty string
 
         DWORD size = MAX_PATH;
         WCHAR buffer[MAX_PATH];
@@ -118,8 +116,7 @@ MsiTable::getPrimaryKey()
         return s;
 }
 
-int
-MsiTable::CountRows()
+int MsiTable::CountRows()
 {
         string primaryKey = getPrimaryKey();
         if (primaryKey.empty())
@@ -128,7 +125,7 @@ MsiTable::CountRows()
         string sql = L"SELECT " + primaryKey + L" FROM " + name;
 
         MsiQuery q(msiUtils, sql);
-        int row_count = 0;
+        int      row_count = 0;
         while (q.Next() != NULL)
                 row_count++;
 
@@ -138,16 +135,16 @@ MsiTable::CountRows()
 ////////////////////////////////////////////////////////////////////////
 
 MsiFile::MsiFile(
-        MsiUtils *msiUtils
-        )
+        MsiUtils* msiUtils)
         : MsiTable(msiUtils, L"File")
 {
         array = NULL;
-        if (count == 0) return;
+        if (count == 0)
+                return;
 
         MSIHANDLE record;
-        DWORD size = MAX_PATH;
-        WCHAR buffer[MAX_PATH];
+        DWORD     size = MAX_PATH;
+        WCHAR     buffer[MAX_PATH];
         array = new tagFile[count];
         MsiQuery q(msiUtils, L"SELECT File, Component_, FileName, FileSize, Attributes, Sequence, Version, Language FROM File ORDER BY Sequence");
 
@@ -165,7 +162,7 @@ MsiFile::MsiFile(
                 MsiRecordGetString(record, 3, buffer, &size);
                 // the format here is: "shortname | longname"
                 LPCWSTR verticalBar = wcschr(buffer, L'|');
-                p->filename = (verticalBar ? verticalBar + 1 : buffer);
+                p->filename         = (verticalBar ? verticalBar + 1 : buffer);
 
                 p->filesize   = MsiRecordGetInteger(record, 4);
                 p->attributes = MsiRecordGetInteger(record, 5);
@@ -190,16 +187,16 @@ MsiFile::~MsiFile()
 ////////////////////////////////////////////////////////////////////////
 
 MsiSimpleFile::MsiSimpleFile(
-        MsiUtils *msiUtils
-        )
+        MsiUtils* msiUtils)
         : MsiTable(msiUtils, L"File")
 {
         array = NULL;
-        if (count == 0) return;
+        if (count == 0)
+                return;
 
         MSIHANDLE record;
-        DWORD size = MAX_PATH;
-        WCHAR buffer[MAX_PATH];
+        DWORD     size = MAX_PATH;
+        WCHAR     buffer[MAX_PATH];
         array = new tagFile[count];
         MsiQuery q(msiUtils, L"SELECT FileName, FileSize FROM File ORDER BY Sequence");
 
@@ -209,9 +206,9 @@ MsiSimpleFile::MsiSimpleFile(
                 MsiRecordGetString(record, 1, buffer, &size);
                 // the format here is: "shortname | longname"
                 LPCWSTR verticalBar = wcschr(buffer, L'|');
-                p->filename = (verticalBar ? verticalBar + 1 : buffer);
+                p->filename         = (verticalBar ? verticalBar + 1 : buffer);
 
-                p->filesize   = MsiRecordGetInteger(record, 2);
+                p->filesize = MsiRecordGetInteger(record, 2);
         }
 }
 
@@ -224,16 +221,16 @@ MsiSimpleFile::~MsiSimpleFile()
 ////////////////////////////////////////////////////////////////////////
 
 MsiComponent::MsiComponent(
-        MsiUtils *msiUtils
-        )
+        MsiUtils* msiUtils)
         : MsiTable(msiUtils, L"Component")
 {
         array = NULL;
-        if (count == 0) return;
+        if (count == 0)
+                return;
 
         MSIHANDLE record;
-        DWORD size = MAX_PATH;
-        WCHAR buffer[MAX_PATH];
+        DWORD     size = MAX_PATH;
+        WCHAR     buffer[MAX_PATH];
         array = new tagComponent[count];
         MsiQuery q(msiUtils, L"SELECT Component, Directory_, Condition FROM Component");
 
@@ -262,16 +259,16 @@ MsiComponent::~MsiComponent()
 ////////////////////////////////////////////////////////////////////////
 
 MsiDirectory::MsiDirectory(
-        MsiUtils *msiUtils
-        )
+        MsiUtils* msiUtils)
         : MsiTable(msiUtils, L"Directory")
 {
         array = NULL;
-        if (count == 0) return;
+        if (count == 0)
+                return;
 
         MSIHANDLE record;
-        DWORD size = MAX_PATH;
-        WCHAR buffer[MAX_PATH];
+        DWORD     size = MAX_PATH;
+        WCHAR     buffer[MAX_PATH];
         array = new tagDirectory[count];
         MsiQuery q(msiUtils, L"SELECT Directory FROM Directory");
 
@@ -292,29 +289,29 @@ MsiDirectory::~MsiDirectory()
 ////////////////////////////////////////////////////////////////////////
 
 MsiCabinet::MsiCabinet(
-        MsiUtils *msiUtils
-        )
+        MsiUtils* msiUtils)
         : MsiTable(msiUtils, L"Media")
 {
         array = NULL;
         if (msiUtils->db_type == MsiUtils::merge_module)
         {
-                count = 1;
-                array = new tagCabinet[count];
-                tagCabinet* p = array;
-                p->diskId = 0;
+                count           = 1;
+                array           = new tagCabinet[count];
+                tagCabinet* p   = array;
+                p->diskId       = 0;
                 p->lastSequence = 0;
-                p->embedded = true;
-                p->cabinet = L"MergeModule.CABinet";
+                p->embedded     = true;
+                p->cabinet      = L"MergeModule.CABinet";
                 p->tempName.erase();
                 return;
         }
 
-        if (count == 0) return;
+        if (count == 0)
+                return;
 
         MSIHANDLE record;
-        DWORD size = MAX_PATH;
-        WCHAR buffer[MAX_PATH];
+        DWORD     size = MAX_PATH;
+        WCHAR     buffer[MAX_PATH];
         array = new tagCabinet[count];
         MsiQuery q(msiUtils, L"SELECT DiskId, LastSequence, Cabinet FROM Media");
 
@@ -326,7 +323,7 @@ MsiCabinet::MsiCabinet(
                 size = MAX_PATH;
                 MsiRecordGetString(record, 3, buffer, &size);
                 p->embedded = (buffer[0] == L'#');
-                p->cabinet = (p->embedded ? buffer+1 : buffer);
+                p->cabinet  = (p->embedded ? buffer + 1 : buffer);
 
                 // w2k3 ddk stl does not support basic_string::clear(). use erase instead
                 p->tempName.erase();
@@ -338,7 +335,7 @@ MsiCabinet::~MsiCabinet()
         if (count == 0)
                 return;
 
-        for (int i=0; i<count; i++)
+        for (int i = 0; i < count; i++)
         {
                 if (!array[i].tempName.empty())
                         DeleteFile(array[i].tempName.c_str());
@@ -346,12 +343,10 @@ MsiCabinet::~MsiCabinet()
         delete[] array;
 }
 
-void
-MsiCabinet::Extract(
-        int index
-        )
+void MsiCabinet::Extract(
+        int index)
 {
-        tagCabinet *p = &array[index];
+        tagCabinet* p = &array[index];
         if (!p->tempName.empty())
                 return;
 
@@ -360,22 +355,23 @@ MsiCabinet::Extract(
         GetTempFileName(tempPath, L"cab", 0, tempFile);
         p->tempName = tempFile;
 
-        string sql = L"SELECT Data FROM _Streams WHERE Name=\'";;
-        sql = sql + p->cabinet + L'\'';
+        string sql = L"SELECT Data FROM _Streams WHERE Name=\'";
+        sql        = sql + p->cabinet + L'\'';
         MsiQuery  q(msiUtils, sql);
         MSIHANDLE record = q.Next();
         DWORD     size   = MsiRecordDataSize(record, 1);
-        if (size == 0) return;
+        if (size == 0)
+                return;
 
-        BYTE     *buffer = new BYTE[size];
+        BYTE* buffer = new BYTE[size];
         MsiRecordReadStream(record, 1, (char*)buffer, &size);
 
         FILE* file;
-        if (_wfopen_s(&file, tempFile, L"wb") == 0) return;
+        if (_wfopen_s(&file, tempFile, L"wb") == 0)
+                return;
         fwrite(buffer, sizeof(BYTE), size, file);
         fclose(file);
         delete[] buffer;
-
 }
 
 ////////////////////////////////////////////////////////////////////////

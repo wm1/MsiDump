@@ -26,19 +26,20 @@ struct MsiDumpFileDetail
         LPCWSTR path;
         LPCWSTR version;
         LPCWSTR language;
-        bool    win9x;    // Should the file be installed on Windows 95/98/Me?
-        bool    winNT;    // Should be installed on Windows NT/2000/XP/2003?
+        bool    win9x; // Should the file be installed on Windows 95/98/Me?
+        bool    winNT; // Should be installed on Windows NT/2000/XP/2003?
         bool    winX64;
         bool    selected;
 };
 
-
-enum enumSelectAll {
+enum enumSelectAll
+{
         ALL_SELECTED,
         INDIVIDUAL_SELECTED
 };
 
-enum enumFlatFolder {
+enum enumFlatFolder
+{
         EXTRACT_TO_FLAT_FOLDER,
         EXTRACT_TO_TREE
 };
@@ -46,12 +47,12 @@ enum enumFlatFolder {
 class IMsiDumpCab
 {
 public:
-        virtual void Release() = 0;
+        virtual void Release()              = 0;
         virtual bool Open(LPCWSTR filename) = 0;
-        virtual void Close() = 0;
-        virtual int  getCount() = 0;
-        virtual bool GetFileDetail(int index, MsiDumpFileDetail *detail) = 0;
-        virtual void setSelected(int index, bool select) = 0;
+        virtual void Close()                = 0;
+        virtual int  getCount()             = 0;
+        virtual bool GetFileDetail(int index, MsiDumpFileDetail* detail) = 0;
+        virtual void setSelected(int index, bool select)                 = 0;
         virtual bool ExtractTo(LPCWSTR directory, enumSelectAll selectAll, enumFlatFolder flatFolder) = 0;
 
         //
@@ -63,7 +64,6 @@ public:
         // GetFileDetail will return different data during stage 1 and stage 2
         //
         virtual bool DelayedOpen(LPCWSTR filename, HANDLE event) = 0;
-
 };
 
-IMsiDumpCab *MsiDumpCreateObject();
+IMsiDumpCab* MsiDumpCreateObject();

@@ -9,12 +9,11 @@
 class InitCOM
 {
 public:
-        InitCOM()  { CoInitialize(NULL); }
-        ~InitCOM() { CoUninitialize();   }
+        InitCOM() { CoInitialize(NULL); }
+        ~InitCOM() { CoUninitialize(); }
 } initCOM;
 
-int __cdecl
-wmain(int argc, LPCWSTR argv[])
+int __cdecl wmain(int argc, LPCWSTR argv[])
 {
         parseArgs(argc, argv);
         if (args.cmd == cmd_help)
@@ -26,7 +25,7 @@ wmain(int argc, LPCWSTR argv[])
         else if (args.cmd == cmd_invalid)
                 return E_INVALIDARG;
 
-        IMsiDumpCab *msi = MsiDumpCreateObject();
+        IMsiDumpCab* msi = MsiDumpCreateObject();
 
         DWORD fileAttr = GetFileAttributes(args.filename);
         if (fileAttr == INVALID_FILE_ATTRIBUTES)
@@ -46,7 +45,7 @@ wmain(int argc, LPCWSTR argv[])
         {
                 listHeader();
                 int count = msi->getCount();
-                for (int i=0; i<count; i++)
+                for (int i = 0; i < count; i++)
                 {
                         MsiDumpFileDetail detail;
                         msi->GetFileDetail(i, &detail);
