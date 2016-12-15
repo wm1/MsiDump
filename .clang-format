@@ -1,0 +1,27 @@
+
+# "%USERPROFILE%/.vscode/extensions/ms-vscode.cpptools-0.9.3/bin/../LLVM/bin/clang-format.exe"
+# -style="{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 8, BreakBeforeBraces: Allman,
+#           AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0 }"
+# -fallback-style="LLVM"
+# -sort-includes=0
+
+# Base "Visual Studio" style
+#
+BasedOnStyle : LLVM
+UseTab : Never
+IndentWidth : 8
+BreakBeforeBraces : Allman
+AllowShortIfStatementsOnASingleLine : false
+IndentCaseLabels : false
+ColumnLimit : 0
+SortIncludes : false
+
+# My personal preference
+#
+AccessModifierOffset : -8
+AlignAfterOpenBracket : Align
+AlignConsecutiveAssignments : true
+AlignConsecutiveDeclarations : true
+ConstructorInitializerIndentWidth : 8
+ContinuationIndentWidth : 8
+PointerAlignment : Left
