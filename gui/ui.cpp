@@ -6,13 +6,13 @@ CAppModule _Module;
 void Drag(IMsiDumpCab*, int selectedCount);
 
 int Run(
-        LPWSTR lpstrCmdLine = NULL,
-        int    nCmdShow     = SW_SHOWDEFAULT)
+        PWSTR pstrCmdLine = NULL,
+        int   nCmdShow    = SW_SHOWDEFAULT)
 {
         CMessageLoop theLoop;
         _Module.AddMessageLoop(&theLoop);
 
-        CMainFrame wndMain(lpstrCmdLine);
+        CMainFrame wndMain(pstrCmdLine);
 
         if (wndMain.CreateEx() == NULL)
         {
@@ -32,8 +32,8 @@ int WINAPI
 _tWinMain(
         HINSTANCE hInstance,
         HINSTANCE /*hPrevInstance*/,
-        LPWSTR lpstrCmdLine,
-        int    nCmdShow)
+        PWSTR pstrCmdLine,
+        int   nCmdShow)
 {
         // I am using Drag and Drop, therefore I must use OleInitialize
         HRESULT hRes = OleInitialize(NULL);
@@ -51,7 +51,7 @@ _tWinMain(
         if (FAILED(hRes))
                 return 0;
 
-        int nRet = Run(lpstrCmdLine, nCmdShow);
+        int nRet = Run(pstrCmdLine, nCmdShow);
 
         _Module.Term();
 
@@ -60,7 +60,7 @@ _tWinMain(
         return nRet;
 }
 
-static LPCWSTR
+static PCWSTR
 LoadString(
         UINT nTextID)
 {
@@ -121,8 +121,8 @@ CMainFrame::OnCreate(
 
         if (CmdLine && *CmdLine)
         {
-                LPWSTR* szArglist;
-                int     nArgs;
+                PWSTR* szArglist;
+                int    nArgs;
                 szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
                 if (szArglist)
                 {
@@ -195,8 +195,8 @@ CMainFrame::OnDropFiles(
         WCHAR filename[MAX_PATH];
         DragQueryFile(hDrop, 0, filename, MAX_PATH);
         DragFinish(hDrop);
-        size_t  len        = wcslen(filename);
-        LPCWSTR extPartial = L".ms";
+        size_t len        = wcslen(filename);
+        PCWSTR extPartial = L".ms";
         if (len >= 5 /* eg. "a.msi" */
             && _wcsnicmp(&filename[len - 4], extPartial, wcslen(extPartial)) == 0)
         {
@@ -293,7 +293,7 @@ LRESULT CMainFrame::OnExtractFiles(
         else
                 selectAll = INDIVIDUAL_SELECTED;
 
-        LPCWSTR       title = LoadString(IDS_INFO_SELECT_DEST_FOLDER);
+        PCWSTR        title = LoadString(IDS_INFO_SELECT_DEST_FOLDER);
         CFolderDialog dlg(m_hWnd, title, BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE);
         if (dlg.DoModal() != IDOK)
                 return 0;
@@ -436,17 +436,17 @@ CMainFrame::OnGetDispInfo(
         {
 
         case COLUME_NAME:
-                pItem->pszText = (LPWSTR)detail.filename;
+                pItem->pszText = (PWSTR)detail.filename;
                 break;
 
         case COLUMN_TYPE:
         {
-                LPCWSTR extension = wcsrchr(detail.filename, L'.');
+                PCWSTR extension = wcsrchr(detail.filename, L'.');
                 if (extension)
                         extension++;
                 else
                         extension = L"";
-                pItem->pszText    = (LPWSTR)extension;
+                pItem->pszText    = (PWSTR)extension;
                 break;
         }
 
@@ -458,22 +458,22 @@ CMainFrame::OnGetDispInfo(
                         swprintf_s(filesizeBuffer, 20, L"%d", detail.filesize);
                         filesizes[index] = _wcsdup(filesizeBuffer);
                 }
-                pItem->pszText = (LPWSTR)filesizes[index];
+                pItem->pszText = (PWSTR)filesizes[index];
                 break;
         }
 
         case COLUMN_PATH:
-                pItem->pszText = (LPWSTR)detail.path;
+                pItem->pszText = (PWSTR)detail.path;
                 break;
 
         case COLUMN_PLATFORM:
         {
-                LPCWSTR win9x  = L"Win9x";
-                LPCWSTR winNT  = L"WinNT";
-                LPCWSTR winX64 = L"WinX64";
-                LPCWSTR winAll = L"";
+                PCWSTR win9x  = L"Win9x";
+                PCWSTR winNT  = L"WinNT";
+                PCWSTR winX64 = L"WinX64";
+                PCWSTR winAll = L"";
 
-                LPCWSTR platform;
+                PCWSTR platform;
                 if (detail.winX64)
                         platform = winX64;
                 else if (detail.winNT && detail.win9x)
@@ -485,16 +485,16 @@ CMainFrame::OnGetDispInfo(
                 else
                         platform = winAll;
 
-                pItem->pszText = (LPWSTR)platform;
+                pItem->pszText = (PWSTR)platform;
                 break;
         }
 
         case COLUMN_VERSION:
-                pItem->pszText = (LPWSTR)detail.version;
+                pItem->pszText = (PWSTR)detail.version;
                 break;
 
         case COLUMN_LANGUAGE:
-                pItem->pszText = (LPWSTR)detail.language;
+                pItem->pszText = (PWSTR)detail.language;
                 break;
 
         default:
@@ -529,7 +529,7 @@ extern "C" void __cdecl threadWaitDelayLoad(void* parameter)
 }
 
 void CMainFrame::LoadMsiFiles(
-        LPCWSTR filename)
+        PCWSTR filename)
 {
         Cleanup();
         delayLoading = true;
@@ -544,7 +544,7 @@ void CMainFrame::LoadMsiFiles(
         int i;
         for (i             = 0; i < count; i++)
                 LVindex[i] = i;
-        filesizes          = new LPCWSTR[count];
+        filesizes          = new PCWSTR[count];
         for (i               = 0; i < count; i++)
                 filesizes[i] = NULL;
 
@@ -582,9 +582,9 @@ void CMainFrame::Cleanup()
 }
 
 void CMainFrame::SetCaption(
-        LPCWSTR caption)
+        PCWSTR caption)
 {
-        LPCWSTR title = LoadString(IDR_MAINFRAME);
+        PCWSTR title = LoadString(IDR_MAINFRAME);
 
         WCHAR buffer[MAX_PATH];
         if (caption)
@@ -659,13 +659,13 @@ int __cdecl CMainFrame::sortCallback(
 
         case COLUMN_TYPE:
         {
-                LPCWSTR ext1 = wcsrchr(detail1.filename, L'.');
+                PCWSTR ext1 = wcsrchr(detail1.filename, L'.');
                 if (ext1)
                         ext1++;
                 else
                         ext1 = L"";
 
-                LPCWSTR ext2 = wcsrchr(detail2.filename, L'.');
+                PCWSTR ext2 = wcsrchr(detail2.filename, L'.');
                 if (ext2)
                         ext2++;
                 else

@@ -4,8 +4,8 @@
 #include "MsiDumpPublic.h"
 #include "parseArgs.h"
 
-bool parseOption(LPCWSTR option);
-bool findOptionWithValue(LPCWSTR option, LPCWSTR name, LPCWSTR* value);
+bool parseOption(PCWSTR option);
+bool findOptionWithValue(PCWSTR option, PCWSTR name, PCWSTR* value);
 bool isSeparator(WCHAR c);
 
 _args args;
@@ -13,7 +13,7 @@ _args args;
 //
 // Usage: MsiDump.exe command [options] msiFile [path_to_extract]
 //
-void parseArgs(int argc, LPCWSTR argv[])
+void parseArgs(int argc, PCWSTR argv[])
 {
         // default command and options
         //
@@ -27,7 +27,7 @@ void parseArgs(int argc, LPCWSTR argv[])
                 return;
         }
 
-        LPCWSTR cmd = argv[1];
+        PCWSTR cmd = argv[1];
 
         //
         // check whether the first argument start with '-'.
@@ -49,7 +49,7 @@ void parseArgs(int argc, LPCWSTR argv[])
                         args.path_to_extract = argv[2];
                         if (argc == 4)
                         {
-                                LPCWSTR arg3 = argv[3];
+                                PCWSTR arg3 = argv[3];
                                 if (isSeparator(arg3[0]) && arg3[1] == L'f')
                                         args.extract_full_path = false;
                         }
@@ -123,7 +123,7 @@ bool isSeparator(WCHAR c)
 //
 // return the 'value' string after the colon mark if 'name' matches
 //
-bool findOptionWithValue(LPCWSTR option, LPCWSTR name, LPCWSTR* value)
+bool findOptionWithValue(PCWSTR option, PCWSTR name, PCWSTR* value)
 {
         option++; // skip leading separator
 
@@ -140,11 +140,11 @@ bool findOptionWithValue(LPCWSTR option, LPCWSTR name, LPCWSTR* value)
         return false;
 }
 
-bool parseOption(LPCWSTR option)
+bool parseOption(PCWSTR option)
 {
         if (args.cmd == cmd_list)
         {
-                LPCWSTR list_format;
+                PCWSTR list_format;
                 if (findOptionWithValue(option, L"format", &list_format))
                 {
                         args.list_format = list_format;
@@ -164,7 +164,7 @@ bool parseOption(LPCWSTR option)
         }
         else if (args.cmd == cmd_extract)
         {
-                LPCWSTR extract_full_path;
+                PCWSTR extract_full_path;
                 if (findOptionWithValue(option, L"full_path", &extract_full_path))
                 {
                         if (wcscmp(extract_full_path, L"no") == 0)
@@ -183,7 +183,7 @@ bool parseOption(LPCWSTR option)
         return true;
 }
 
-void usage(LPCWSTR exe)
+void usage(PCWSTR exe)
 {
         wprintf(L"Usage:\n"
                 L"  %s command [options] msiFile [path_to_extract]\n"
@@ -210,7 +210,7 @@ void usage(LPCWSTR exe)
 
 void listHeader()
 {
-        LPCWSTR format = args.list_format;
+        PCWSTR format = args.list_format;
         while (*format != 0)
         {
                 switch (*format)
@@ -242,7 +242,7 @@ void listHeader()
 
 void listRecord(int num, MsiDumpFileDetail* detail)
 {
-        LPCWSTR format = args.list_format;
+        PCWSTR format = args.list_format;
         while (*format != 0)
         {
                 switch (*format)

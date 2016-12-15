@@ -75,24 +75,24 @@ private:
         friend class MsiCabinet;
         friend IMsiDumpCab* MsiDumpCreateObject();
         friend void __cdecl threadLoadDatabase(void* parameter);
-        bool DoOpen(LPCWSTR filename);
+        bool DoOpen(PCWSTR filename);
 
 public:
         void Release();
-        bool Open(LPCWSTR filename)
+        bool Open(PCWSTR filename)
         {
                 delayLoading = false;
                 delayEvent   = NULL;
                 return DoOpen(filename);
         }
-        bool DelayedOpen(LPCWSTR filename, HANDLE event)
+        bool DelayedOpen(PCWSTR filename, HANDLE event)
         {
                 delayLoading = true;
                 delayEvent   = event;
                 return DoOpen(filename);
         }
         void Close();
-        bool ExtractTo(LPCWSTR theDirectory, enumSelectAll selectAll, enumFlatFolder flatFolder);
+        bool ExtractTo(PCWSTR theDirectory, enumSelectAll selectAll, enumFlatFolder flatFolder);
 
         int  getCount();
         void setSelected(int index, bool select);

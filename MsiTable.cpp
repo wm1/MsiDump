@@ -9,7 +9,7 @@ Here is the original implementation of MsiQuery:
 
 void
 FOREACH(
-        LPCWSTR sql,
+        PCWSTR  sql,
         foreach pFunc,
         void   *param
         )
@@ -161,8 +161,8 @@ MsiFile::MsiFile(
                 size = MAX_PATH;
                 MsiRecordGetString(record, 3, buffer, &size);
                 // the format here is: "shortname | longname"
-                LPCWSTR verticalBar = wcschr(buffer, L'|');
-                p->filename         = (verticalBar ? verticalBar + 1 : buffer);
+                PCWSTR verticalBar = wcschr(buffer, L'|');
+                p->filename        = (verticalBar ? verticalBar + 1 : buffer);
 
                 p->filesize   = MsiRecordGetInteger(record, 4);
                 p->attributes = MsiRecordGetInteger(record, 5);
@@ -205,8 +205,8 @@ MsiSimpleFile::MsiSimpleFile(
                 size = MAX_PATH;
                 MsiRecordGetString(record, 1, buffer, &size);
                 // the format here is: "shortname | longname"
-                LPCWSTR verticalBar = wcschr(buffer, L'|');
-                p->filename         = (verticalBar ? verticalBar + 1 : buffer);
+                PCWSTR verticalBar = wcschr(buffer, L'|');
+                p->filename        = (verticalBar ? verticalBar + 1 : buffer);
 
                 p->filesize = MsiRecordGetInteger(record, 2);
         }

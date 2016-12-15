@@ -84,22 +84,22 @@ public:
                 return 0;
         }
 
-        CMainFrame(LPCWSTR cmdLine) { CmdLine = cmdLine; }
+        CMainFrame(PCWSTR cmdLine) { CmdLine = cmdLine; }
         ~CMainFrame() { m_msi->Release(); }
 
 private:
-        void SetCaption(LPCWSTR caption);
+        void SetCaption(PCWSTR caption);
         void Cleanup();
-        void LoadMsiFiles(LPCWSTR filename);
+        void LoadMsiFiles(PCWSTR filename);
         void UpdateStatusbar(int part);
 
         CListViewCtrl  m_list;
         int*           LVindex;   // map ListView[iItem] to getfiledetail(index)
-        LPCWSTR*       filesizes; // store listview.iItem[COLUMN_SIZE]
+        PCWSTR*        filesizes; // store listview.iItem[COLUMN_SIZE]
         CStatusBarCtrl m_statusbar;
         IMsiDumpCab*   m_msi;
 
-        LPCWSTR   CmdLine;
+        PCWSTR    CmdLine;
         ULONGLONG totalFileSize;
         ULONGLONG selectedFileSize;
         bool      selectionChanged;

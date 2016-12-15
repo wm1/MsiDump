@@ -13,12 +13,12 @@ public:
         ~InitCOM() { CoUninitialize(); }
 } initCOM;
 
-int __cdecl wmain(int argc, LPCWSTR argv[])
+int __cdecl wmain(int argc, PCWSTR argv[])
 {
         parseArgs(argc, argv);
         if (args.cmd == cmd_help)
         {
-                LPCWSTR exe = argv[0];
+                PCWSTR exe = argv[0];
                 usage(exe);
                 return ERROR_SUCCESS;
         }

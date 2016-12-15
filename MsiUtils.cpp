@@ -37,11 +37,11 @@ void MsiUtils::Release()
 }
 
 bool MsiUtils::DoOpen(
-        LPCWSTR filename)
+        PCWSTR filename)
 {
         Close();
-        LPWSTR pFilePart;
-        WCHAR  buffer[MAX_PATH];
+        PWSTR pFilePart;
+        WCHAR buffer[MAX_PATH];
         GetFullPathName(filename, MAX_PATH, buffer, &pFilePart);
         if (!pFilePart)
         {
@@ -55,7 +55,7 @@ bool MsiUtils::DoOpen(
 
         msiFilename = buffer;
 
-        LPCWSTR fileExt = wcsrchr(buffer, L'.');
+        PCWSTR fileExt = wcsrchr(buffer, L'.');
         if (!fileExt)
                 return false;
 
@@ -252,7 +252,7 @@ bool MsiUtils::LoadDatabase()
                         // package or individual files are built for. Therefore what we're
                         // doing here is guess at our best effort
                         //
-                        LPCWSTR condition = p->condition.c_str();
+                        PCWSTR condition = p->condition.c_str();
 
                         MsiSetProperty(product, L"Version9X", L"490");
                         MsiSetProperty(product, L"VersionNT", L"");
@@ -331,7 +331,7 @@ bool MsiUtils::LoadDatabase()
 }
 
 bool MsiUtils::ExtractTo(
-        LPCWSTR        theDirectory,
+        PCWSTR         theDirectory,
         enumSelectAll  selectAll,
         enumFlatFolder flatFolder)
 {
