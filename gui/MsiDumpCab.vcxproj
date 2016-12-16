@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(SolutionDir)\msbuild\common.cpp.pre.props"/>
+  <Import Project="$(SolutionDir)\msbuild\user.cpp.pre.props"/>
   <ItemGroup>
     <ClCompile Include="DragDrop.cpp" />
     <ClCompile Include="ui.cpp" />
@@ -29,13 +30,11 @@
       <AdditionalIncludeDirectories>..\deps\wtl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>msi.lib;setupapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <AdditionalManifestDependencies>type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'</AdditionalManifestDependencies>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>..;..\deps\wtl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>PROJ=$(ProjectName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <Import Project="$(SolutionDir)\msbuild\common.cpp.post.props"/>

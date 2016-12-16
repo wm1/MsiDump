@@ -9,9 +9,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MsiDumpCab", "gui\MsiDumpCa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build Common", "Build Common", "{5F80C6EB-2FB3-4BC4-AF0E-F1E870606C81}"
 	ProjectSection(SolutionItems) = preProject
-		msbuild\common.build.post.props = msbuild\common.build.post.props
-		msbuild\common.build.pre.props = msbuild\common.build.pre.props
-		msbuild\common.build.version.props = msbuild\common.build.version.props
+		msbuild\common.cpp.post.props = msbuild\common.cpp.post.props
+		msbuild\common.cpp.pre.props = msbuild\common.cpp.pre.props
+		msbuild\user.cpp.pre.props = msbuild\user.cpp.pre.props
 		version.inc = version.inc
 	EndProjectSection
 EndProject
