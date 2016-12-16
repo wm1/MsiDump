@@ -21,6 +21,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <PROJECT_VERSION>$([System.Text.RegularExpressions.Regex]::Match(
+                          $([System.IO.File]::ReadAllText("version.inc")),
+                          "PROJECT_VERSION=(.*)"
+                        ).get_Groups().get_Item(1))</PROJECT_VERSION>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -64,6 +68,9 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>PROJECT_VERSION=$(PROJECT_VERSION);PROJECT_VERSION_COMMA=$(PROJECT_VERSION.Replace('.', ','));%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <!-- For Debug ONLY -->
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
@@ -94,5 +101,4 @@
       <PreprocessorDefinitions>WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
-  <Import Project="common.build.version.props" />
 </Project>
