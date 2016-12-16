@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(SolutionDir)\msbuild\common.build.pre.props"/>
+  <Import Project="$(SolutionDir)\msbuild\common.cpp.pre.props"/>
   <ItemGroup>
     <ClCompile Include="MsiDump.cpp" />
     <ClCompile Include="ParseArgs.cpp" />
@@ -28,6 +28,5 @@
       <PreprocessorDefinitions>PROJ=$(ProjectName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
-  <!-- Careful reordering these. Some default props (contained in these files) are order sensitive. -->
-  <Import Project="$(SolutionDir)\msbuild\common.build.post.props"/>
+  <Import Project="$(SolutionDir)\msbuild\common.cpp.post.props"/>
 </Project>
