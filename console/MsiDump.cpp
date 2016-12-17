@@ -1,9 +1,4 @@
-
-#include <windows.h>
-#include <objbase.h>
-#include <stdio.h>
-
-#include "MsiDumpPublic.h"
+#include "precomp.h"
 #include "parseArgs.h"
 
 class InitCOM

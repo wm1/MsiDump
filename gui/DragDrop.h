@@ -1,5 +1,5 @@
 
-#include "CUnknown.h"
+#pragma once
 
 class CDropSource
         : public IDropSource

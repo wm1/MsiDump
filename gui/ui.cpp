@@ -1,5 +1,17 @@
 
-#include "ui.h"
+#include "precomp.h"
+
+#include <atlbase.h>
+#include <atlapp.h>
+#include <atlwin.h>
+
+#include <atlframe.h>
+#include <atlctrls.h>
+#include <atldlgs.h>
+
+#include "Resource.h"
+#include "AboutDlg.h"
+#include "MainFrame.h"
 
 CAppModule _Module;
 
@@ -318,9 +330,6 @@ CMainFrame::OnColumnClick(
         m_list.SetSelectedColumn(sortColumn);
         return 0;
 }
-
-#define TEST_FLAG(field, flag) \
-        ((field & flag) == flag)
 
 LRESULT
 CMainFrame::OnItemChanged(

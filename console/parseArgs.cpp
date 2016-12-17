@@ -1,7 +1,4 @@
-#include <windows.h>
-#include <stdio.h>
-
-#include "MsiDumpPublic.h"
+#include "precomp.h"
 #include "parseArgs.h"
 
 bool parseOption(PCWSTR option);

@@ -1,11 +1,6 @@
-
-#include <windows.h>
-#include <stdio.h>
-#include <oleidl.h>
+#include "precomp.h"
 #include <shlobj.h>
-#include <shellapi.h>
-
-#include "MsiDumpPublic.h"
+#include "CUnknown.h"
 #include "dragdrop.h"
 
 //////////////////////////////////////////////////////////////////////////

@@ -1,30 +1,4 @@
-
-#include "MsiUtils.h"
-
-////////////////////////////////////////////////////////////////////////
-
-/*
-
-Here is the original implementation of MsiQuery:
-
-void
-FOREACH(
-        PCWSTR  sql,
-        foreach pFunc,
-        void   *param
-        )
-{
-        MSIHANDLE view, record;
-        MsiDatabaseOpenView(database, sql, &view);
-        MsiViewExecute(view, 0);
-        while(MsiViewFetch(view, &record) != ERROR_NO_MORE_ITEMS)
-        {
-                (*pFunc)(record, param);
-                MsiCloseHandle(record);
-        }
-        MsiCloseHandle(view);
-}
-*/
+#include "precomp.h"
 
 MsiQuery::MsiQuery(
         MsiUtils* msiUtils,
