@@ -15,6 +15,7 @@ using namespace std;
 #define ofstream wofstream
 #endif
 
+#include <propidlbase.h>
 #include <msiquery.h>
 #include <msidefs.h>
 #include <setupapi.h>

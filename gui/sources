@@ -15,8 +15,8 @@ USE_WTL = 1
 SOURCES =              \
         $(SOURCES)     \
         DragDrop.cpp   \
-        ui.cpp         \
-        ui.rc
+        MainFrame.cpp  \
+        MainFrame.rc
 
 TARGETLIBS =                          \
         $(SDK_LIB_PATH)\msi.lib       \

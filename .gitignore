@@ -23,6 +23,10 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
+buildfre.*
+buildchk.*
+objfre/
+objchk/
 
 # VSCode editor configurations
 .vscode/

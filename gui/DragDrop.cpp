@@ -1,5 +1,6 @@
 #include "precomp.h"
 #include <shlobj.h>
+#include <shellapi.h>
 #include "CUnknown.h"
 #include "dragdrop.h"
 

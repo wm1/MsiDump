@@ -9,6 +9,8 @@
 #include <atlctrls.h>
 #include <atldlgs.h>
 
+#include <shellapi.h>
+
 #include "Resource.h"
 #include "AboutDlg.h"
 #include "MainFrame.h"
