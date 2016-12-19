@@ -8,13 +8,6 @@
 #include <fstream>
 using namespace std;
 
-#ifdef _UNICODE
-#undef string
-#define string wstring
-#undef ofstream
-#define ofstream wofstream
-#endif
-
 #include <propidlbase.h>
 #include <msiquery.h>
 #include <msidefs.h>
@@ -30,4 +23,4 @@ using namespace std;
 #define SET_FLAG(field, flag) ((field) |= (flag))
 #define CLEAR_FLAG(field, flag) ((field) &= ~(flag))
 
-extern ofstream trace;
+extern wofstream trace;

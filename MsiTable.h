@@ -12,7 +12,7 @@ private:
         bool      viewCreated;
 
 public:
-        MsiQuery(MsiUtils* msiUtils, string sql);
+        MsiQuery(MsiUtils* msiUtils, wstring sql);
         ~MsiQuery();
         MSIHANDLE Next();
 };
@@ -20,16 +20,16 @@ public:
 class MsiTable
 {
 private:
-        int    CountRows();
-        string getPrimaryKey();
+        int     CountRows();
+        wstring getPrimaryKey();
 
 protected:
         int       count;
-        string    name;
+        wstring   name;
         MsiUtils* msiUtils;
 
 public:
-        MsiTable(MsiUtils* theMsiUtils, string tableName);
+        MsiTable(MsiUtils* theMsiUtils, wstring tableName);
         virtual ~MsiTable();
         friend class MsiUtils;
 };
@@ -39,14 +39,14 @@ class MsiFile : public MsiTable
 private:
         struct tagFile
         {
-                string file;
-                string component;
-                string filename;
-                string version;
-                string language;
-                int    filesize; // issue: should be DoubleInteger
-                int    attributes;
-                int    sequence;
+                wstring file;
+                wstring component;
+                wstring filename;
+                wstring version;
+                wstring language;
+                int     filesize; // issue: should be DoubleInteger
+                int     attributes;
+                int     sequence;
 
                 bool compressed;
                 int  keyCabinet; // if(compressed), which .cab file it residents?
@@ -71,8 +71,8 @@ class MsiSimpleFile : public MsiTable
 private:
         struct tagFile
         {
-                string filename;
-                int    filesize;
+                wstring filename;
+                int     filesize;
         } * array;
 
 public:
@@ -86,9 +86,9 @@ class MsiComponent : public MsiTable
 private:
         struct tagComponent
         {
-                string component;
-                string directory;
-                string condition;
+                wstring component;
+                wstring directory;
+                wstring condition;
 
                 int  keyDirectory;
                 bool win9x;
@@ -107,10 +107,10 @@ class MsiDirectory : public MsiTable
 private:
         struct tagDirectory
         {
-                string directory;
+                wstring directory;
 
-                string sourceDirectory;
-                string targetDirectory;
+                wstring sourceDirectory;
+                wstring targetDirectory;
 
                 bool targetDirectoryVerified;
                 bool targetDirectoryExists;
@@ -127,12 +127,12 @@ class MsiCabinet : public MsiTable
 private:
         struct tagCabinet
         {
-                int    diskId;
-                int    lastSequence;
-                string cabinet;
+                int     diskId;
+                int     lastSequence;
+                wstring cabinet;
 
-                bool   embedded; // is it stored within .msi file as a separate stream?
-                string tempName; // if(embedded), already extracted to a temporary location?
+                bool    embedded; // is it stored within .msi file as a separate stream?
+                wstring tempName; // if(embedded), already extracted to a temporary location?
 
                 bool iterated;
         } * array;

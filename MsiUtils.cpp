@@ -1,6 +1,6 @@
 #include "precomp.h"
 
-ofstream trace;
+wofstream trace;
 
 char* trace_file =
 
@@ -395,7 +395,7 @@ void MsiUtils::CopyFile(
         MsiFile::tagFile*           p          = &file->array[index];
         MsiDirectory::tagDirectory* pDirectory = &directory->array[p->keyDirectory];
 
-        string source = pDirectory->sourceDirectory + pathSeperator + p->filename;
+        wstring source = pDirectory->sourceDirectory + pathSeperator + p->filename;
 
         //
         // targetRootDirectory = c:\temp
@@ -404,9 +404,9 @@ void MsiUtils::CopyFile(
         //
         // target = c:\temp\Program Files\Orca\orca.exe
         //
-        string target = (folderFlatten)
-                                ? (targetRootDirectory + pathSeperator + p->filename)
-                                : (targetRootDirectory + pathSeperator + pDirectory->targetDirectory + pathSeperator + p->filename);
+        wstring target = (folderFlatten)
+                                 ? (targetRootDirectory + pathSeperator + p->filename)
+                                 : (targetRootDirectory + pathSeperator + pDirectory->targetDirectory + pathSeperator + p->filename);
 
         trace << source << endl
               << L"=> " << target << endl
@@ -415,7 +415,7 @@ void MsiUtils::CopyFile(
         if (b)
                 countDone++;
         else
-                trace << "Error copy file" << endl;
+                trace << L"Error copy file" << endl;
 }
 
 void MsiUtils::ExtractFile(
@@ -428,7 +428,7 @@ void MsiUtils::ExtractFile(
                 return;
         pCabinet->iterated = true;
 
-        string sourceCabinet;
+        wstring sourceCabinet;
         if (pCabinet->embedded)
         {
                 cabinet->Extract(pFile->keyCabinet);
@@ -456,7 +456,7 @@ void MsiUtils::ExtractFile(
 // the input format must be an full path (e.g. C:\path or \\server\share)
 //
 bool MsiUtils::VerifyDirectory(
-        string s)
+        wstring s)
 {
         CreateDirectory(s.c_str(), NULL);
         DWORD attributes = GetFileAttributes(s.c_str());
@@ -469,7 +469,7 @@ bool MsiUtils::VerifyDirectory(
         WCHAR buffer[MAX_PATH];
         wcscpy_s(buffer, MAX_PATH, s.c_str());
 
-        string::size_type index = string::npos;
+        wstring::size_type index = wstring::npos;
         if (s[1] == L':' && s[2] == pathSeperator)
         {
                 // it is "C:\path\"
@@ -482,7 +482,7 @@ bool MsiUtils::VerifyDirectory(
                 index = s.find(pathSeperator, index + 1);
         }
 
-        while (index != string::npos && index < MAX_PATH)
+        while (index != wstring::npos && index < MAX_PATH)
         {
                 buffer[index] = L'\0';
                 attributes    = GetFileAttributes(buffer);
@@ -536,7 +536,7 @@ MsiUtils::CabinetCallback(
         {
                 MsiFile::tagFile* p = &msiUtils->file->array[index];
 
-                string targetFilename;
+                wstring targetFilename;
                 if (msiUtils->folderFlatten)
                 {
                         targetFilename = msiUtils->targetRootDirectory + pathSeperator + p->filename;
@@ -567,8 +567,8 @@ MsiUtils::CabinetCallback(
 }
 
 bool MsiUtils::LocateFile(
-        string filename,
-        int*   pIndex)
+        wstring filename,
+        int*    pIndex)
 {
         for (int i = 0; i < file->count; i++)
                 if (_wcsicmp(file->array[i].file.c_str(), filename.c_str()) == 0)
@@ -576,7 +576,7 @@ bool MsiUtils::LocateFile(
                         *pIndex = i;
                         return true;
                 }
-        trace << "Error: file not found: " << filename << endl;
+        trace << L"Error: file not found: " << filename << endl;
         return false;
 }
 

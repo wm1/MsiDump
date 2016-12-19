@@ -6,13 +6,13 @@ extern "C" void __cdecl threadLoadDatabase(void* parameter);
 class MsiUtils : public IMsiDumpCab
 {
 private:
-        string    msiFilename;
+        wstring   msiFilename;
         MSIHANDLE database;
         bool      compressed;
         bool      allSelected;
         bool      folderFlatten;
-        string    targetRootDirectory;
-        string    sourceRootDirectory;
+        wstring   targetRootDirectory;
+        wstring   sourceRootDirectory;
         int       countDone;
         bool      delayLoading;
         HANDLE    delayEvent;
@@ -38,8 +38,8 @@ private:
         void LoadSummary();
         void ExtractFile(int index);
         void CopyFile(int index);
-        bool LocateFile(string, int* pIndex);
-        static bool VerifyDirectory(string);
+        bool LocateFile(wstring, int* pIndex);
+        static bool VerifyDirectory(wstring);
         static UINT CALLBACK CabinetCallback(PVOID, UINT, UINT_PTR, UINT_PTR);
         friend class MsiQuery;
         friend class MsiTable;

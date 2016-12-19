@@ -2,7 +2,7 @@
 
 MsiQuery::MsiQuery(
         MsiUtils* msiUtils,
-        string    sql)
+        wstring   sql)
 {
         viewCreated = false;
         ended       = true;
@@ -54,7 +54,7 @@ MsiQuery::Next()
 
 MsiTable::MsiTable(
         MsiUtils* theMsiUtils,
-        string    tableName)
+        wstring   tableName)
 {
         msiUtils = theMsiUtils;
         name     = tableName;
@@ -65,7 +65,7 @@ MsiTable::~MsiTable()
 {
 }
 
-string
+wstring
 MsiTable::getPrimaryKey()
 {
         if (name == L"_Tables")
@@ -76,7 +76,7 @@ MsiTable::getPrimaryKey()
 
         MSIHANDLE record;
         UINT      r;
-        string    s;
+        wstring   s;
         r = MsiDatabaseGetPrimaryKeys(msiUtils->database, name.c_str(), &record);
         if (r != ERROR_SUCCESS)
                 return s; // it is a empty string
@@ -92,11 +92,11 @@ MsiTable::getPrimaryKey()
 
 int MsiTable::CountRows()
 {
-        string primaryKey = getPrimaryKey();
+        wstring primaryKey = getPrimaryKey();
         if (primaryKey.empty())
                 primaryKey = L"*";
 
-        string sql = L"SELECT " + primaryKey + L" FROM " + name;
+        wstring sql = L"SELECT " + primaryKey + L" FROM " + name;
 
         MsiQuery q(msiUtils, sql);
         int      row_count = 0;
@@ -329,8 +329,8 @@ void MsiCabinet::Extract(
         GetTempFileName(tempPath, L"cab", 0, tempFile);
         p->tempName = tempFile;
 
-        string sql = L"SELECT Data FROM _Streams WHERE Name=\'";
-        sql        = sql + p->cabinet + L'\'';
+        wstring sql = L"SELECT Data FROM _Streams WHERE Name=\'";
+        sql         = sql + p->cabinet + L'\'';
         MsiQuery  q(msiUtils, sql);
         MSIHANDLE record = q.Next();
         DWORD     size   = MsiRecordDataSize(record, 1);
