@@ -27,6 +27,7 @@ buildfre.*
 buildchk.*
 objfre/
 objchk/
+ipch/
 
 # VSCode editor configurations
 .vscode/

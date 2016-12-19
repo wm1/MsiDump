@@ -5,17 +5,17 @@
   <ItemGroup>
     <ClCompile Include="MsiDump.cpp" />
     <ClCompile Include="ParseArgs.cpp" />
-    <ClCompile Include="..\MsiTable.cpp" />
-    <ClCompile Include="..\MsiUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ParseArgs.h" />
-    <ClInclude Include="..\MsiTable.h" />
-    <ClInclude Include="..\MsiUtils.h" />
-    <ClInclude Include="..\MsiDumpPublic.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\version.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\lib\CommonLib.vcxproj">
+      <Project>{FDF86403-4770-4F68-B8E4-C505A248696E}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <ProjectGuid>{4C9270B2-D58E-42CE-8481-66A21B1C2B1D}</ProjectGuid>

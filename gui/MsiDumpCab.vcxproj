@@ -5,8 +5,6 @@
   <ItemGroup>
     <ClCompile Include="DragDrop.cpp" />
     <ClCompile Include="MainFrame.cpp" />
-    <ClCompile Include="..\MsiTable.cpp" />
-    <ClCompile Include="..\MsiUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
@@ -14,12 +12,14 @@
     <ClInclude Include="DragDrop.h" />
     <ClInclude Include="MainFrame.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="..\MsiTable.h" />
-    <ClInclude Include="..\MsiUtils.h" />
-    <ClInclude Include="..\MsiDumpPublic.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MainFrame.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\lib\CommonLib.vcxproj">
+      <Project>{FDF86403-4770-4F68-B8E4-C505A248696E}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <ProjectGuid>{23F47152-3B78-4369-8050-E4AD865825DE}</ProjectGuid>
