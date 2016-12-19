@@ -4,8 +4,6 @@
 
 #pragma once
 
-extern "C" void __cdecl threadWaitDelayLoad(void* parameter);
-
 class CMainFrame
         : public CFrameWindowImpl<CMainFrame>,
           public CUpdateUI<CMainFrame>,
@@ -108,7 +106,7 @@ private:
 
         HANDLE delayEvent;
         bool   delayLoading;
-        friend void __cdecl threadWaitDelayLoad(void* parameter);
+        static void __cdecl threadWaitDelayLoad(void* parameter);
 
         // sorting stuff
         int  sortColumn;

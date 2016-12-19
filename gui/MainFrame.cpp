@@ -515,14 +515,14 @@ CMainFrame::OnRightClick(
         return S_FALSE;
 }
 
-extern "C" void __cdecl threadWaitDelayLoad(void* parameter)
+void __cdecl CMainFrame::threadWaitDelayLoad(void* parameter)
 {
         CMainFrame* _this = (CMainFrame*)parameter;
         WaitForSingleObject(_this->delayEvent, INFINITE);
         _this->delayLoading = false;
         _this->waitCursor   = false;
         SetCursor(NULL);
-        InvalidateRect(_this->m_hWndClient, NULL, TRUE);
+        ::InvalidateRect(_this->m_hWndClient, NULL, TRUE);
 }
 
 void CMainFrame::LoadMsiFiles(
@@ -537,13 +537,13 @@ void CMainFrame::LoadMsiFiles(
         totalFileSize = 0;
         int count     = m_msi->getCount();
         m_list.SetItemCountEx(count, LVSICF_NOINVALIDATEALL);
-        LVindex = new int[count];
-        int i;
-        for (i             = 0; i < count; i++)
-                LVindex[i] = i;
-        filesizes          = new PCWSTR[count];
-        for (i               = 0; i < count; i++)
+        LVindex   = new int[count];
+        filesizes = new PCWSTR[count];
+        for (int i = 0; i < count; i++)
+        {
+                LVindex[i]   = i;
                 filesizes[i] = NULL;
+        }
 
         SetCaption(filename);
         if (sortColumn != -1)
