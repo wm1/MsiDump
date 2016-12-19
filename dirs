@@ -1,3 +1,4 @@
 dirs=         \
+     lib      \
      console  \
      gui

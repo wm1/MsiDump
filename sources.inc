@@ -1,10 +1,6 @@
 !include ..\version.inc
 
-SOURCES =                   \
-        ..\MsiUtils.cpp     \
-        ..\MsiTable.cpp
-
-INCLUDES = ..
+INCLUDES = ..\inc
 
 C_DEFINES = $(C_DEFINES) /DUNICODE /D_UNICODE
 
@@ -18,7 +14,7 @@ USE_MSVCRT    = 1
 MFC_INCLUDES  =
 USE_STL       = 1
 
-PRECOMPILED_INCLUDE     = ..\precomp.h
+PRECOMPILED_INCLUDE     = precomp.h
 PRECOMPILED_CXX         = 1
 
 MUI           = 0

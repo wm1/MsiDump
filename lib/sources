@@ -1,0 +1,10 @@
+PROJ       = CommonLib
+
+!include ..\sources.inc
+
+TARGETNAME = $(PROJ)
+TARGETTYPE = LIBRARY
+
+SOURCES =               \
+        MsiUtils.cpp    \
+        MsiTable.cpp
