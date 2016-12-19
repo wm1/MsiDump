@@ -1,20 +1,6 @@
 
 #include "precomp.h"
 
-#include <atlbase.h>
-#include <atlapp.h>
-#include <atlwin.h>
-
-#include <atlframe.h>
-#include <atlctrls.h>
-#include <atldlgs.h>
-
-#include <shellapi.h>
-
-#include "Resource.h"
-#include "AboutDlg.h"
-#include "MainFrame.h"
-
 CAppModule _Module;
 
 void Drag(IMsiDumpCab*, int selectedCount);

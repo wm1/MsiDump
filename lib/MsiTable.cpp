@@ -1,6 +1,4 @@
 #include "precomp.h"
-#include "MsiTable.h"
-#include "MsiUtils.h"
 
 MsiQuery::MsiQuery(
         MsiUtils* msiUtils,

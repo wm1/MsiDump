@@ -1,6 +1,4 @@
 #include "precomp.h"
-#include "parseArgs.h"
-#include <ObjBase.h>
 
 class InitCOM
 {

@@ -1,22 +1,25 @@
 
 #pragma once
 
-#include <windows.h>
-#include <wtypes.h>
-#include <process.h>
+#include <atlbase.h>
+#include <atlapp.h>
+#include <atlwin.h>
+#include <atlframe.h>
+#include <atlctrls.h>
+#include <atldlgs.h>
+#include <shlobj.h>
+#include <shellapi.h>
 #include <string>
 #include <fstream>
 using namespace std;
 
-#include <propidlbase.h>
-#include <msiquery.h>
-#include <msidefs.h>
-#include <setupapi.h>
-
 #include "MsiDumpPublic.h"
+#include "Resource.h"
+#include "CUnknown.h"
+#include "DragDrop.h"
+#include "AboutDlg.h"
+#include "MainFrame.h"
 
 #define TEST_FLAG(field, flag) (((field) & (flag)) != 0)
-#define SET_FLAG(field, flag) ((field) |= (flag))
-#define CLEAR_FLAG(field, flag) ((field) &= ~(flag))
 
 extern wofstream trace;
