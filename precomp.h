@@ -14,8 +14,6 @@ using namespace std;
 #include <setupapi.h>
 
 #include "MsiDumpPublic.h"
-#include "MsiTable.h"
-#include "MsiUtils.h"
 
 #define MSISOURCE_COMPRESSED 0x00000002
 
