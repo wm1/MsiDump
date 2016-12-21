@@ -1,30 +1,32 @@
+## Name
 
-MsiDumpCab
-Extract files out of .msi package 
+MsiDump, MsiDumpCab - expand Windows Installer Package (.msi) files
 
-Sometimes you want the content of a Windows Installer (.msi) package without actually installing it. Here comes MsiDumpCab.exe with friendly UI like WinZip; or use the command line version (MsiDump.exe)
+## Synopsis
+```
+    MsiDumpCab [msiFile]
 
-Usage 1:
-  MsiDumpCab.exe [msiFile]
+    MsiDump command [options] msiFile [path_to_extract]
 
-Usage 2:
-  MsiDump.exe command [options] msiFile [path_to_extract]
+    commands (use one of them):
+        -list                 list msiFile
+        -extract              extract files
+        -help                 this help secreen
 
-  commands:
-    -list                 list msiFile
-    -extract              extract files
+    options for -list:
+        -format:nfspvl        list num, file, size, path, version, lang (DEFAULT:nfsp)
 
-  options for -list:
-    -format:nfspvl        list num, file, size, path, version, lang (DEFAULT:nfsp)
+    options for -extract:
+        -full_path:yes|no     extract files with full path (DEFAULT:yes)
 
-  options for -extract:
-    -full_path:yes|no     extract files with full path (DEFAULT:yes)
+    Legacy Usage:
+        MsiDump msiFile                 - list
+        MsiDump msiFile extractPath     - extract
+        MsiDump msiFile extractPath -f  - extract -full_path:no,
+```
 
-Usage 3 (legacy):
-  MsiDump.exe msiFile [extractPath [-f]]
+## Description
 
-Note 1: Not all files are necessarily embedded inside msi file; instead, a pointer may be embedded and actual files are stored in normal file system. With -extract command, these companioning files must be present at the same location as msi file is. This is not a requirement for -list command though. The same applies to GUI version "Extract files" and "Export file list" commands
+MsiDump is the command line version of the tool;
 
-Note 2: [GUI version only] For very large msi file (e.g. Office 2003) you'll notice that the list view is filled in two stages, i.e. the file name column shows almost immediately; however it takes quite some time for the path column to be filled. It is normal
-
-Note 3: Would you meet any problem, first please look at "trace.txt" at the current folder for any obvious error; next you can get the symbol / source files at \\TKFilToolBox\Tools\20864 and debug it yourself; if it does not work for you, mailto:msidump with a link to the .msi file and trace.txt
+while MsiDumpCab provides a WinZip-like user interface.
