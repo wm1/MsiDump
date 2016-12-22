@@ -29,7 +29,5 @@ TARGETLIBS =                                    \
         $(SDK_LIB_PATH)\shlwapi.lib             \
         $(SDK_LIB_PATH)\uuid.lib
 
-SXS_ASSEMBLY_NAME=Vendor.Product
-SXS_ASSEMBLY_VERSION=1.0
 SXS_MANIFEST_IN_RESOURCES=1
 SXS_APPLICATION_MANIFEST=$(PROJ).exe.Manifest
