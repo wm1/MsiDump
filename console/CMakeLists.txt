@@ -1,6 +1,9 @@
-file(GLOB SOURCES "*.cpp")
+add_definitions(-DPROJ=MsiDump)
 
-add_executable(MsiDump ${SOURCES})
+file(GLOB SOURCES "*.cpp")
+set(RESOURCE "../version.rc")
+
+add_executable(MsiDump ${SOURCES} ${RESOURCE})
 
 target_link_libraries(MsiDump CommonLib)
 target_link_libraries(MsiDump msi)
