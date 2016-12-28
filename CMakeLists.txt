@@ -8,6 +8,8 @@ include_directories(inc)
 add_definitions(-DUNICODE)
 add_definitions(-D_UNICODE)
 
+# Parse "version.inc" file. Save the content to ${PROJECT_VERSION}
+#
 file(STRINGS "version.inc" VersionInc)
 string(REGEX MATCH "PROJECT_VERSION=(.*)" VersionInc ${VersionInc})
 set(PROJECT_VERSION ${CMAKE_MATCH_1})
