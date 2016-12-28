@@ -1,4 +1,4 @@
-file(GLOB SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp")
+set(SOURCES MsiTable.cpp MsiUtils.cpp precomp.cpp)
 
 add_library(CommonLib STATIC ${SOURCES})
 

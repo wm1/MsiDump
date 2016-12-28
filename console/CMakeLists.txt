@@ -1,6 +1,6 @@
 add_definitions(-DPROJ=MsiDump)
 
-file(GLOB SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp")
+set(SOURCES MsiDump.cpp ParseArgs.cpp precomp.cpp)
 set(RESOURCE "../version.rc")
 
 add_executable(MsiDump ${SOURCES} ${RESOURCE})

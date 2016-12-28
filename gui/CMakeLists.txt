@@ -3,7 +3,7 @@ include_directories(../deps/wtl)
 
 add_definitions(-DPROJ=MsiDumpCab)
 
-file(GLOB SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp")
+set(SOURCES DragDrop.cpp MainFrame.cpp precomp.cpp)
 set(RESOURCE "MainFrame.rc")
 set(MANIFEST "MsiDumpCab.exe.manifest")
 
