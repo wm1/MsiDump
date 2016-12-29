@@ -1,8 +1,6 @@
 
 #pragma once
 
-extern "C" void __cdecl threadLoadDatabase(void* parameter);
-
 class MsiUtils : public IMsiDumpCab
 {
 private:
@@ -45,7 +43,7 @@ private:
         friend class MsiTable;
         friend class MsiCabinet;
         friend IMsiDumpCab* MsiDumpCreateObject();
-        friend void __cdecl threadLoadDatabase(void* parameter);
+        static void __cdecl threadLoadDatabase(void* parameter);
         bool DoOpen(PCWSTR filename);
 
 public:

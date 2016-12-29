@@ -640,7 +640,7 @@ MsiDumpCreateObject()
         return (IMsiDumpCab*)msiUtils;
 }
 
-extern "C" void __cdecl threadLoadDatabase(void* parameter)
+void __cdecl MsiUtils::threadLoadDatabase(void* parameter)
 {
         MsiUtils* _this = (MsiUtils*)parameter;
         _this->LoadSummary();
