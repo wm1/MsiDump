@@ -1,6 +1,8 @@
 
 #pragma once
 
+#define _ATL_NO_MSIMG
+#define _ATL_NO_OPENGL
 #include <atlbase.h>
 #include <atlapp.h>
 #include <atlwin.h>
