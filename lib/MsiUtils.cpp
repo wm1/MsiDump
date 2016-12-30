@@ -195,7 +195,19 @@ bool MsiUtils::LoadDatabase()
         if (r != ERROR_SUCCESS)
                 return FALSE;
 
+        // Calculate all files' sizes.
+        //
+        // https://msdn.microsoft.com/en-us/library/windows/desktop/aa368593.aspx
+        // Costing is the process of determining the total disk space requirements for an installation.
+        // (After CostInitialize, FileCost and CostFinalize ..) the costing data (is) available through the Component table.
+        //
         r = MsiDoAction(product, L"CostInitialize");
+        if (r != ERROR_SUCCESS)
+        {
+                MsiCloseHandle(product);
+                return FALSE;
+        }
+        r = MsiDoAction(product, L"FileCost");
         if (r != ERROR_SUCCESS)
         {
                 MsiCloseHandle(product);
@@ -207,6 +219,7 @@ bool MsiUtils::LoadDatabase()
                 MsiCloseHandle(product);
                 return FALSE;
         }
+
         trace << L"Directory count = " << directory->count << endl
               << endl;
         for (i = 0; i < directory->count; i++)
