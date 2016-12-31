@@ -44,7 +44,7 @@ bool MsiUtils::DoOpen(
         DWORD result = GetFullPathName(filename, MAX_PATH, buffer, &pFilePart);
         if (result == 0 || !pFilePart)
         {
-                DWORD error =  GetLastError();
+                DWORD error = GetLastError();
                 trace_error << L"GetFullPathName failed with: " << error << endl;
                 return false;
         }
@@ -94,7 +94,7 @@ bool MsiUtils::DoOpen(
         if (delayLoading == false)
         {
                 simpleFile = NULL;
-                bool b = LoadSummary();
+                bool b     = LoadSummary();
                 if (!b)
                 {
                         Close();
@@ -252,7 +252,7 @@ bool MsiUtils::LoadDatabase()
                 MsiDirectory::tagDirectory* p = &directory->array[i];
 
                 size = MAX_PATH;
-                r = MsiGetSourcePath(product, p->directory.c_str(), buffer, &size);
+                r    = MsiGetSourcePath(product, p->directory.c_str(), buffer, &size);
                 if (r != ERROR_SUCCESS)
                 {
                         trace_error << L"MsiGetSourcePath(" << p->directory.c_str() << ") failed with " << r << endl;
@@ -261,7 +261,7 @@ bool MsiUtils::LoadDatabase()
                 p->sourceDirectory = buffer;
 
                 size = MAX_PATH;
-                r = MsiGetTargetPath(product, p->directory.c_str(), buffer, &size);
+                r    = MsiGetTargetPath(product, p->directory.c_str(), buffer, &size);
                 if (r != ERROR_SUCCESS)
                 {
                         trace_error << L"MsiGetTargetPath(" << p->directory.c_str() << ") failed with " << r << endl;
@@ -430,8 +430,8 @@ bool MsiUtils::ExtractTo(
                 countTodo++;
 
                 bool b = (p->compressed)
-                        ? ExtractFile(i)
-                        : CopyFile(i);
+                                 ? ExtractFile(i)
+                                 : CopyFile(i);
                 if (!b)
                 {
                         break;
@@ -717,7 +717,7 @@ MsiDumpCreateObject()
 void __cdecl MsiUtils::threadLoadDatabase(void* parameter)
 {
         MsiUtils* _this = (MsiUtils*)parameter;
-        bool b;
+        bool      b;
         b = _this->LoadSummary();
         if (!b)
         {

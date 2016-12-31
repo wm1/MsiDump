@@ -346,7 +346,7 @@ bool MsiCabinet::Extract(
         BYTE* buffer = new BYTE[size];
         MsiRecordReadStream(record, 1, (char*)buffer, &size);
 
-        FILE* file;
+        FILE*   file;
         errno_t e = _wfopen_s(&file, tempFile, L"wb");
         if (e != 0)
         {

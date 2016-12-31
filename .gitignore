@@ -31,3 +31,7 @@ ipch/
 
 # VSCode editor configurations
 .vscode/
+
+# trace output from the app
+trace.txt
+/test/data/out/

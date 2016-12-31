@@ -20,5 +20,6 @@ add_definitions(-DPROJECT_VERSION=${PROJECT_VERSION})
 add_definitions(-DPROJECT_VERSION_COMMA=${PROJECT_VERSION_COMMA})
 
 add_subdirectory(lib)
+add_subdirectory(test)
 add_subdirectory(console)
 add_subdirectory(gui)
