@@ -9,5 +9,3 @@ using namespace std;
 
 #include "MsiDumpPublic.h"
 #include "parseArgs.h"
-
-extern wofstream trace;

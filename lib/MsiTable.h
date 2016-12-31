@@ -136,7 +136,7 @@ private:
 
                 bool iterated;
         } * array;
-        void Extract(int index);
+        bool Extract(int index);
 
 public:
         MsiCabinet(MsiUtils* msiUtils);

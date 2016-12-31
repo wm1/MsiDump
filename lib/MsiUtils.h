@@ -33,9 +33,9 @@ private:
         bool IsOpened() { return database != NULL; }
         bool LoadDatabase();
         void DelayLoadDatabase();
-        void LoadSummary();
-        void ExtractFile(int index);
-        void CopyFile(int index);
+        bool LoadSummary();
+        bool ExtractFile(int index);
+        bool CopyFile(int index);
         bool LocateFile(wstring, int* pIndex);
         static bool VerifyDirectory(wstring);
         static UINT CALLBACK CabinetCallback(PVOID, UINT, UINT_PTR, UINT_PTR);

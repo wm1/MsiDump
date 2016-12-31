@@ -20,3 +20,7 @@ using namespace std;
 #define TEST_FLAG(field, flag) (((field) & (flag)) != 0)
 
 extern wofstream trace;
+
+// TODO: implement a different trace_error
+//
+#define trace_error trace << __FUNCTION__ << L" @line " << __LINE__ << L" : "

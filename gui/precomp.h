@@ -23,5 +23,3 @@ using namespace std;
 #include "MainFrame.h"
 
 #define TEST_FLAG(field, flag) (((field) & (flag)) != 0)
-
-extern wofstream trace;

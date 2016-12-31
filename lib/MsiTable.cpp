@@ -317,12 +317,15 @@ MsiCabinet::~MsiCabinet()
         delete[] array;
 }
 
-void MsiCabinet::Extract(
+bool MsiCabinet::Extract(
         int index)
 {
         tagCabinet* p = &array[index];
         if (!p->tempName.empty())
-                return;
+        {
+                // already extracted
+                return true;
+        }
 
         WCHAR tempPath[MAX_PATH], tempFile[MAX_PATH];
         GetTempPath(MAX_PATH, tempPath);
@@ -335,17 +338,25 @@ void MsiCabinet::Extract(
         MSIHANDLE record = q.Next();
         DWORD     size   = MsiRecordDataSize(record, 1);
         if (size == 0)
-                return;
+        {
+                trace_error << L"Cabinet " << p->cabinet << L" size is zero" << endl;
+                return false;
+        }
 
         BYTE* buffer = new BYTE[size];
         MsiRecordReadStream(record, 1, (char*)buffer, &size);
 
         FILE* file;
-        if (_wfopen_s(&file, tempFile, L"wb") == 0)
-                return;
+        errno_t e = _wfopen_s(&file, tempFile, L"wb");
+        if (e != 0)
+        {
+                trace_error << "Trying to create temp file " << tempFile << L" failed with " << e << endl;
+                return false;
+        }
         fwrite(buffer, sizeof(BYTE), size, file);
         fclose(file);
         delete[] buffer;
+        return true;
 }
 
 ////////////////////////////////////////////////////////////////////////
