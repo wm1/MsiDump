@@ -18,9 +18,7 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <PropertyGroup Label="Globals">
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
-  </PropertyGroup>
+  <PropertyGroup Label="Globals" />
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
 
