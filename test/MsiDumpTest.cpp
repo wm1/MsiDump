@@ -16,6 +16,7 @@ PCWSTR source_folder = DATA_FOLDER L"in";
 
 bool CompareFolder(PCWSTR path1, PCWSTR path2);
 bool CompareFile(PCWSTR name1, PCWSTR name2, size_t length);
+bool RemoveFolderRecursively(PCWSTR path);
 
 int __cdecl wmain()
 {
@@ -27,21 +28,17 @@ int __cdecl wmain()
         } initCOM;
 
         trace << L"Extract " << input_msi << L" to " << output_folder << endl;
-        CreateDirectory(output_folder, NULL); // ignore failure
 
         int          main_result = ERROR_SUCCESS;
         IMsiDumpCab* msi         = MsiDumpCreateObject();
-        DWORD        error;
         if (msi == NULL)
         {
                 trace_error << L"internal error" << endl;
                 main_result = ERROR_INSTALL_FAILURE;
                 return main_result;
         }
-        else if (!RemoveDirectory(output_folder))
+        else if (!RemoveFolderRecursively(output_folder))
         {
-                error = GetLastError();
-                trace_error << L"RemoveDirectory(" << output_folder << L") failed with " << error << endl;
                 main_result = ERROR_INSTALL_FAILURE;
         }
         else if (!msi->Open(input_msi))
@@ -222,4 +219,32 @@ bool CompareFile(PCWSTR name1, PCWSTR name2, size_t length)
                 trace_error << L"File contents are different: " << name1 << L", " << name2 << endl;
         }
         return result;
+}
+
+bool RemoveFolderRecursively(PCWSTR path)
+{
+        size_t len   = wcslen(path);
+        PWSTR  zzBuf = new WCHAR[len + 2]; // This string must be double-null terminated
+        wcscpy_s(zzBuf, len + 2, path);
+        zzBuf[len + 1] = L'\0';
+
+        SHFILEOPSTRUCT file_op = {
+                NULL,
+                FO_DELETE,
+                zzBuf,
+                NULL,
+                FOF_NO_UI,
+                FALSE,
+                NULL,
+                NULL};
+
+        int ret = SHFileOperation(&file_op);
+        delete[] zzBuf;
+
+        if (ret != 0)
+        {
+                trace_error << L"RemoveFolder(" << path << L") failed with " << ret << endl;
+                return false;
+        }
+        return true;
 }

@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 #include <objbase.h>
+#include <shellapi.h>
 #include <string>
 #include <fstream>
 #include <iostream>
