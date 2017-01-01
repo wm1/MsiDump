@@ -3,10 +3,6 @@
   <PropertyGroup>
     <OutDir>$(SolutionDir)bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
-    <PROJECT_VERSION>$([System.Text.RegularExpressions.Regex]::Match(
-                          $([System.IO.File]::ReadAllText("$(SolutionDir)version.inc")),
-                          "PROJECT_VERSION=(.*)"
-                        ).get_Groups().get_Item(1))</PROJECT_VERSION>
     <!-- MinimalCoreWin: Do not link various win32 libraries by default -->
     <MinimalCoreWin>KernelOnly</MinimalCoreWin>
   </PropertyGroup>
@@ -22,7 +18,7 @@
       <AdditionalOptions>/VERBOSE:UNUSEDLIBS $(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ResourceCompile>
-      <PreprocessorDefinitions>PROJ=$(ProjectName);PROJECT_VERSION=$(PROJECT_VERSION);PROJECT_VERSION_COMMA=$(PROJECT_VERSION.Replace('.', ','));%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>PROJ=$(ProjectName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

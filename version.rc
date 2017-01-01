@@ -1,9 +1,10 @@
 #include <windows.h>
 #include <ntverp.h>
+#include "version.inc"
 
 #define STRINGLIZE(x)        #x
 #define STRINGLIZE2(x)       STRINGLIZE(x)
-#define PROJECT_VERSION_STR  STRINGLIZE2(PROJECT_VERSION)
+#define PROJECT_VERSION_STR  STRINGLIZE2(PROJ_VER_MAJOR.PROJ_VER_MINOR.PROJ_VER_BUILD.PROJ_VER_PATCH)
 #define PROJECT_STR          STRINGLIZE2(PROJ)
 
 #define VER_FILETYPE                VFT_APP
@@ -11,7 +12,7 @@
 #define VER_FILEDESCRIPTION_STR     "Extract files out of .msi package"
 #define VER_INTERNALNAME_STR        PROJECT_STR ".exe"
 #define VER_FILEVERSION_STR         PROJECT_VERSION_STR
-#define VER_FILEVERSION             PROJECT_VERSION_COMMA
-#define VER_LEGALCOPYRIGHT_STR      "Copyright (C) 2004 weimao"
+#define VER_FILEVERSION             PROJ_VER_MAJOR,PROJ_VER_MINOR,PROJ_VER_BUILD,PROJ_VER_PATCH
+#define VER_LEGALCOPYRIGHT_STR      "Copyright (C) 2004-2017 Wei Mao"
 
 #include <common.ver>
