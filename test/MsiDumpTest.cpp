@@ -92,7 +92,7 @@ public:
                 do
                 {
                         File file;
-                        file.is_folder     = ((find_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0);
+                        file.is_folder     = TEST_FLAG(find_data.dwFileAttributes, FILE_ATTRIBUTE_DIRECTORY);
                         file.name          = find_data.cFileName;
                         file.size.LowPart  = find_data.nFileSizeLow;
                         file.size.HighPart = find_data.nFileSizeHigh;
@@ -223,6 +223,23 @@ bool CompareFile(PCWSTR name1, PCWSTR name2, size_t length)
 
 bool RemoveFolderRecursively(PCWSTR path)
 {
+        DWORD attr = GetFileAttributes(path);
+        if (attr == INVALID_FILE_ATTRIBUTES)
+        {
+                DWORD error = GetLastError();
+                if (error == ERROR_FILE_NOT_FOUND)
+                {
+                        // the folder does not exist. consider remove folder finishes successfully
+                        return true;
+                }
+                trace_error << error << L". " << path << endl;
+                return false;
+        }
+        if (!TEST_FLAG(attr, FILE_ATTRIBUTE_DIRECTORY))
+        {
+                trace_error << path << " is not a directory" << endl;
+                return false;
+        }
         size_t len   = wcslen(path);
         PWSTR  zzBuf = new WCHAR[len + 2]; // This string must be double-null terminated
         wcscpy_s(zzBuf, len + 2, path);
