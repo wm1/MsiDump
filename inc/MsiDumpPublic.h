@@ -47,21 +47,56 @@ enum enumFlatFolder
 class IMsiDumpCab
 {
 public:
+        // Typical usage:
+        //
+        //   p = MsiDumpCreateObject();
+        //   ...
+        //   p->Release();
+        //
         virtual void Release()             = 0;
+
+        // Open the said installer package
+        //
+        //   p->Open();
+        //   ...
+        //   p->Close();
+        //
         virtual bool Open(PCWSTR filename) = 0;
+
+        // Close the package that was previously opened
+        //
         virtual void Close()               = 0;
+
+        // Get the number of files in the installer package
+        //
         virtual int  getCount()            = 0;
+
+        // Get the i-th (0 <= i <= count) file's information.
+        // Note: refer to DelayedOpen() on which fields of the result is valid.
+        //
         virtual bool GetFileDetail(int index, MsiDumpFileDetail* detail) = 0;
+
+        // Mark each file to be extracted later if calling ExtractTo() with INDIVIDUAL_SELECTED
+        //
         virtual void setSelected(int index, bool select)                 = 0;
+
+        // Extract files out
+        //
         virtual bool ExtractTo(PCWSTR directory, enumSelectAll selectAll, enumFlatFolder flatFolder) = 0;
 
+        // By default Open() retrieves a list of file names in the installer package, as well as each file's 
+        // more detailed information, before returning control to the caller.
         //
-        // delayed open:
-        //   stage 1. open the msi file and read out some quick info, e.g. list of filenames
-        //   stage 2. read full info e.g. path, and signal 'event' handle when finish
+        // This causes problem when the installer package is really big e.g. contains thousands of files. It
+        // simply takes too long to finish Open() and the user-interface cannot be refreshed during that time.
         //
-        // this is usefull if you want a fast responsive UI. however keep in mind that
-        // GetFileDetail will return different data during stage 1 and stage 2
+        // The suggested approach for more responsive UI is to do it in two steps:
+        //   1. Call DelayedOpen(event). When it returns, the file names are ready to be displayed on UI
+        //   2. WaitForSingleObject(event). When it returns, more detailed file information can be displayed
+        //
+        // During each step, the caller calls the same GetFileDetail() but:
+        //   1. before the said event is triggered, only file name & file size fields are valid
+        //   2. after the event is set, all fields become valid
         //
         virtual bool DelayedOpen(PCWSTR filename, HANDLE event) = 0;
 };
