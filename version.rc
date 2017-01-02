@@ -1,6 +1,6 @@
 #include <windows.h>
 #include <ntverp.h>
-#include "version.inc"
+#include "version.h"
 
 #define STRINGLIZE(x)        #x
 #define STRINGLIZE2(x)       STRINGLIZE(x)

@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build Common", "Build Commo
 		msbuild\common.cpp.post.props = msbuild\common.cpp.post.props
 		msbuild\common.cpp.pre.props = msbuild\common.cpp.pre.props
 		msbuild\user.cpp.pre.props = msbuild\user.cpp.pre.props
-		version.inc = version.inc
+		version.h = version.h
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{D78C3A54-B2DF-45A4-A0FC-05D0AB7BF87D}"
