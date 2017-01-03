@@ -10,11 +10,11 @@ UMENTRY    = wmain
 
 SOURCES =              \
         ..\version.rc  \
-        MsiDump.cpp    \
-        precomp.cpp
+        MsiDumpTest.cpp
 
 TARGETLIBS =                                    \
         $(OBJ_PATH)\..\lib\$(O)\CommonLib.lib   \
         $(SDK_LIB_PATH)\msi.lib                 \
         $(SDK_LIB_PATH)\setupapi.lib            \
+        $(SDK_LIB_PATH)\shell32.lib             \
         $(SDK_LIB_PATH)\ole32.lib

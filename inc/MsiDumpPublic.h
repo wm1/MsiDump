@@ -53,7 +53,7 @@ public:
         //   ...
         //   p->Release();
         //
-        virtual void Release()             = 0;
+        virtual void Release() = 0;
 
         // Open the said installer package
         //
@@ -65,11 +65,11 @@ public:
 
         // Close the package that was previously opened
         //
-        virtual void Close()               = 0;
+        virtual void Close() = 0;
 
         // Get the number of files in the installer package
         //
-        virtual int  getCount()            = 0;
+        virtual int getCount() = 0;
 
         // Get the i-th (0 <= i <= count) file's information.
         // Note: refer to DelayedOpen() on which fields of the result is valid.
@@ -78,13 +78,13 @@ public:
 
         // Mark each file to be extracted later if calling ExtractTo() with INDIVIDUAL_SELECTED
         //
-        virtual void setSelected(int index, bool select)                 = 0;
+        virtual void setSelected(int index, bool select) = 0;
 
         // Extract files out
         //
         virtual bool ExtractTo(PCWSTR directory, enumSelectAll selectAll, enumFlatFolder flatFolder) = 0;
 
-        // By default Open() retrieves a list of file names in the installer package, as well as each file's 
+        // By default Open() retrieves a list of file names in the installer package, as well as each file's
         // more detailed information, before returning control to the caller.
         //
         // This causes problem when the installer package is really big e.g. contains thousands of files. It
