@@ -17,4 +17,4 @@ TARGETLIBS =                                    \
         $(OBJ_PATH)\..\lib\$(O)\CommonLib.lib   \
         $(SDK_LIB_PATH)\msi.lib                 \
         $(SDK_LIB_PATH)\setupapi.lib            \
-        $(SDK_LIB_PATH)\ole32.lib
+

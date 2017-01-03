@@ -20,13 +20,6 @@ bool RemoveFolderRecursively(PCWSTR path);
 
 int __cdecl wmain()
 {
-        class InitCOM
-        {
-        public:
-                InitCOM() { CoInitialize(NULL); }
-                ~InitCOM() { CoUninitialize(); }
-        } initCOM;
-
         trace << L"Extract " << input_msi << L" to " << output_folder << endl;
 
         int          main_result = ERROR_SUCCESS;

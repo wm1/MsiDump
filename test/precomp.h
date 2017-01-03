@@ -2,7 +2,6 @@
 #pragma once
 
 #include <Windows.h>
-#include <objbase.h>
 #include <string>
 #include <fstream>
 #include <iostream>

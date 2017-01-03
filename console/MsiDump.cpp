@@ -2,13 +2,6 @@
 
 int __cdecl wmain(int argc, PCWSTR argv[])
 {
-        class InitCOM
-        {
-        public:
-                InitCOM() { CoInitialize(NULL); }
-                ~InitCOM() { CoUninitialize(); }
-        } initCOM;
-
         parseArgs(argc, argv);
         if (args.cmd == cmd_help)
         {
