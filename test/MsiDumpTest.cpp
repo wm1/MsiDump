@@ -72,13 +72,23 @@ class Folder
 
         wstring      path;
         vector<File> files;
+        bool         valid;
 
 public:
         Folder(wstring Path)
         {
+                DWORD           attr;
                 DWORD           error;
                 HANDLE          hFind;
                 WIN32_FIND_DATA find_data;
+
+                valid = false;
+                attr  = GetFileAttributes(Path.c_str());
+                if (attr == INVALID_FILE_ATTRIBUTES || !TEST_FLAG(attr, FILE_ATTRIBUTE_DIRECTORY))
+                {
+                        trace_error << Path << " is not a directory" << endl;
+                        return;
+                }
 
                 path  = Path;
                 hFind = FindFirstFile(Path.append(L"\\*").c_str(), &find_data);
@@ -88,6 +98,7 @@ public:
                         trace_error << "FindFirstFile(" << path << L"\\*) failed with " << error << endl;
                         return;
                 }
+                valid = true;
 
                 do
                 {
@@ -110,6 +121,11 @@ public:
 
         bool Equals(Folder& That)
         {
+                if (!valid || !That.valid)
+                {
+                        return false;
+                }
+
                 // Verify the two folders have the same number of child entries
                 //
                 if (files.size() != That.files.size())
@@ -173,6 +189,47 @@ public:
                 }
                 return true;
         }
+
+        bool Remove()
+        {
+                DWORD error;
+
+                if (!valid)
+                {
+                        return false;
+                }
+
+                for (auto p = files.begin(); p != files.end(); p++)
+                {
+                        wstring childPath = path + L"\\" + p->name;
+
+                        if (p->is_folder)
+                        {
+                                Folder childFolder(childPath);
+                                if (!childFolder.Remove())
+                                {
+                                        return false;
+                                }
+                        }
+                        else
+                        {
+                                if (!DeleteFile(childPath.c_str()))
+                                {
+                                        error = GetLastError();
+                                        trace_error << error << L": DeleteFile: " << childPath << endl;
+                                        return false;
+                                }
+                        }
+                }
+
+                if (!RemoveDirectory(path.c_str()))
+                {
+                        error = GetLastError();
+                        trace_error << error << L": RemoveDirectory: " << path << endl;
+                        return false;
+                }
+                return true;
+        }
 };
 
 bool CompareFolder(PCWSTR path1, PCWSTR path2)
@@ -232,36 +289,10 @@ bool RemoveFolderRecursively(PCWSTR path)
                         // the folder does not exist. consider remove folder finishes successfully
                         return true;
                 }
-                trace_error << error << L". " << path << endl;
+                trace_error << error << L": GetFileAttributes: " << path << endl;
                 return false;
         }
-        if (!TEST_FLAG(attr, FILE_ATTRIBUTE_DIRECTORY))
-        {
-                trace_error << path << " is not a directory" << endl;
-                return false;
-        }
-        size_t len   = wcslen(path);
-        PWSTR  zzBuf = new WCHAR[len + 2]; // This string must be double-null terminated
-        wcscpy_s(zzBuf, len + 2, path);
-        zzBuf[len + 1] = L'\0';
 
-        SHFILEOPSTRUCT file_op = {
-                NULL,
-                FO_DELETE,
-                zzBuf,
-                NULL,
-                FOF_NO_UI,
-                FALSE,
-                NULL,
-                NULL};
-
-        int ret = SHFileOperation(&file_op);
-        delete[] zzBuf;
-
-        if (ret != 0)
-        {
-                trace_error << L"RemoveFolder(" << path << L") failed with " << ret << endl;
-                return false;
-        }
-        return true;
+        Folder folder(path);
+        return folder.Remove();
 }
