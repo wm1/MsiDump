@@ -1,4 +1,4 @@
-set(TARGET CommonLib)
+set(TARGET MsiDumpCommon)
 
 set(SOURCES
     MsiTable.cpp

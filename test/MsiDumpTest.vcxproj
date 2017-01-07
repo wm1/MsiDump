@@ -9,7 +9,7 @@
     <ResourceCompile Include="..\version.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\lib\CommonLib.vcxproj">
+    <ProjectReference Include="..\lib\MsiDumpCommon.vcxproj">
       <Project>{FDF86403-4770-4F68-B8E4-C505A248696E}</Project>
     </ProjectReference>
   </ItemGroup>

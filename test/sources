@@ -12,7 +12,7 @@ SOURCES =              \
         ..\version.rc  \
         MsiDumpTest.cpp
 
-TARGETLIBS =                                    \
-        $(OBJ_PATH)\..\lib\$(O)\CommonLib.lib   \
-        $(SDK_LIB_PATH)\msi.lib                 \
-        $(SDK_LIB_PATH)\setupapi.lib            \
+TARGETLIBS =                                            \
+        $(OBJ_PATH)\..\lib\$(O)\MsiDumpCommon.lib       \
+        $(SDK_LIB_PATH)\msi.lib                         \
+        $(SDK_LIB_PATH)\setupapi.lib                    \

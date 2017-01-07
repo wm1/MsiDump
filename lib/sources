@@ -1,4 +1,4 @@
-PROJ       = CommonLib
+PROJ       = MsiDumpCommon
 
 !include ..\sources.inc
 

@@ -26,6 +26,6 @@ add_precompiled_header(
     precomp.h
     SOURCE_CXX precomp.cpp)
 
-target_link_libraries(${TARGET} CommonLib)
+target_link_libraries(${TARGET} MsiDumpCommon)
 target_link_libraries(${TARGET} msi)
 target_link_libraries(${TARGET} setupapi)
