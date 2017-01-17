@@ -1,7 +1,10 @@
 set(TARGET MsiDumpCab)
 
 include_directories(..)
-include_directories(../deps/wtl)
+
+find_path(WTL_INCLUDE NAMES wtl/atlapp.h)
+set(WTL_INCLUDE "${WTL_INCLUDE}/wtl")
+include_directories(${WTL_INCLUDE})
 
 add_definitions(-DPROJ=${TARGET})
 
