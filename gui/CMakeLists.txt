@@ -1,17 +1,16 @@
 set(TARGET MsiDumpCab)
 
+add_definitions(-DPROJ=${TARGET})
+
 include_directories(..)
 
 find_path(WTL_INCLUDE NAMES wtl/atlapp.h)
 set(WTL_INCLUDE "${WTL_INCLUDE}/wtl")
 include_directories(${WTL_INCLUDE})
 
-add_definitions(-DPROJ=${TARGET})
-
 set(SOURCES
     DragDrop.cpp
-    MainFrame.cpp
-    precomp.cpp)
+    MainFrame.cpp)
 
 set(RESOURCE "MainFrame.rc")
 
@@ -23,11 +22,6 @@ add_executable(
     ${SOURCES}
     ${RESOURCE}
     ${MANIFEST})
-
-add_precompiled_header(
-    ${TARGET}
-    precomp.h
-    SOURCE_CXX precomp.cpp)
 
 target_link_libraries(${TARGET} MsiDumpCommon)
 target_link_libraries(${TARGET} msi)
