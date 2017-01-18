@@ -17,129 +17,102 @@ public:
         MSIHANDLE Next();
 };
 
+template <class T>
 class MsiTable
 {
-private:
+protected:
         int     CountRows();
         wstring getPrimaryKey();
+        void    Init();
 
-protected:
         int       count;
         wstring   name;
         MsiUtils* msiUtils;
+        T*        array;
 
 public:
-        MsiTable(MsiUtils* theMsiUtils, wstring tableName);
+        MsiTable(MsiUtils*);
         virtual ~MsiTable();
         friend class MsiUtils;
 };
 
-class MsiFile : public MsiTable
+struct tagFile
 {
-private:
-        struct tagFile
-        {
-                wstring file;
-                wstring component;
-                wstring filename;
-                wstring version;
-                wstring language;
-                int     filesize; // issue: should be DoubleInteger
-                int     attributes;
-                int     sequence;
+        wstring file;
+        wstring component;
+        wstring filename;
+        wstring version;
+        wstring language;
+        int     filesize; // issue: should be DoubleInteger
+        int     attributes;
+        int     sequence;
 
-                bool compressed;
-                int  keyCabinet; // if(compressed), which .cab file it residents?
-                int  keyDirectory;
-                int  keyComponent;
+        bool compressed;
+        int  keyCabinet; // if(compressed), which .cab file it residents?
+        int  keyDirectory;
+        int  keyComponent;
 
-                bool selected;
-        } * array;
-
-public:
-        MsiFile(MsiUtils* msiUtils);
-        virtual ~MsiFile();
-        friend class MsiUtils;
+        bool selected;
 };
+typedef class MsiTable<tagFile> MsiFile;
 
 //
 // note: ui.cpp (CMainFrame::OnGetDispInfo, case COLUMN_SIZE) caches filesize locally,
 // therefore both MsiSimpleFile and MsiFile must return the same filesize.
 //
-class MsiSimpleFile : public MsiTable
+struct tagSimpleFile
 {
-private:
-        struct tagFile
-        {
-                wstring filename;
-                int     filesize;
-        } * array;
+        wstring filename;
+        int     filesize;
+};
+typedef MsiTable<tagSimpleFile> MsiSimpleFile;
 
-public:
-        MsiSimpleFile(MsiUtils* msiUtils);
-        virtual ~MsiSimpleFile();
-        friend class MsiUtils;
+struct tagComponent
+{
+        wstring component;
+        wstring directory;
+        wstring condition;
+
+        int  keyDirectory;
+        bool win9x;
+        bool winNT;
+        bool winX64;
+};
+typedef MsiTable<tagComponent> MsiComponent;
+
+struct tagDirectory
+{
+        wstring directory;
+
+        wstring sourceDirectory;
+        wstring targetDirectory;
+
+        bool targetDirectoryVerified;
+        bool targetDirectoryExists;
+};
+typedef MsiTable<tagDirectory> MsiDirectory;
+
+struct tagCabinet
+{
+        int     diskId;
+        int     lastSequence;
+        wstring cabinet;
+
+        bool    embedded; // is it stored within .msi file as a separate stream?
+        wstring tempName; // if(embedded), already extracted to a temporary location?
+
+        bool iterated;
 };
 
-class MsiComponent : public MsiTable
+class MsiCabinet
+        : public MsiTable<tagCabinet>
 {
-private:
-        struct tagComponent
-        {
-                wstring component;
-                wstring directory;
-                wstring condition;
-
-                int  keyDirectory;
-                bool win9x;
-                bool winNT;
-                bool winX64;
-        } * array;
-
 public:
-        MsiComponent(MsiUtils* msiUtils);
-        virtual ~MsiComponent();
-        friend class MsiUtils;
-};
-
-class MsiDirectory : public MsiTable
-{
-private:
-        struct tagDirectory
+        MsiCabinet(MsiUtils* utils)
+                : MsiTable<tagCabinet>(utils)
         {
-                wstring directory;
-
-                wstring sourceDirectory;
-                wstring targetDirectory;
-
-                bool targetDirectoryVerified;
-                bool targetDirectoryExists;
-        } * array;
-
-public:
-        MsiDirectory(MsiUtils* msiUtils);
-        virtual ~MsiDirectory();
-        friend class MsiUtils;
-};
-
-class MsiCabinet : public MsiTable
-{
-private:
-        struct tagCabinet
-        {
-                int     diskId;
-                int     lastSequence;
-                wstring cabinet;
-
-                bool    embedded; // is it stored within .msi file as a separate stream?
-                wstring tempName; // if(embedded), already extracted to a temporary location?
-
-                bool iterated;
-        } * array;
-        bool Extract(int index);
-
-public:
-        MsiCabinet(MsiUtils* msiUtils);
+        }
         virtual ~MsiCabinet();
-        friend class MsiUtils;
+
+        bool Extract(int index);
 };

@@ -50,23 +50,27 @@ MsiQuery::Next()
         return NULL;
 }
 
-////////////////////////////////////////////////////////////////////////
-
-MsiTable::MsiTable(
-        MsiUtils* theMsiUtils,
-        wstring   tableName)
+template <class T>
+MsiTable<T>::MsiTable(
+        MsiUtils* theMsiUtils)
 {
         msiUtils = theMsiUtils;
-        name     = tableName;
-        count    = CountRows();
+        array    = NULL;
+        count    = 0;
+
+        Init();
 }
 
-MsiTable::~MsiTable()
+template <class T>
+MsiTable<T>::~MsiTable()
 {
+        if (count != 0)
+                delete[] array;
 }
 
+template <class T>
 wstring
-MsiTable::getPrimaryKey()
+MsiTable<T>::getPrimaryKey()
 {
         if (name == L"_Tables")
                 return L"Name";
@@ -90,7 +94,8 @@ MsiTable::getPrimaryKey()
         return s;
 }
 
-int MsiTable::CountRows()
+template <class T>
+int MsiTable<T>::CountRows()
 {
         wstring primaryKey = getPrimaryKey();
         if (primaryKey.empty())
@@ -108,11 +113,10 @@ int MsiTable::CountRows()
 
 ////////////////////////////////////////////////////////////////////////
 
-MsiFile::MsiFile(
-        MsiUtils* msiUtils)
-        : MsiTable(msiUtils, L"File")
+void MsiFile::Init()
 {
-        array = NULL;
+        name  = L"File";
+        count = CountRows();
         if (count == 0)
                 return;
 
@@ -152,29 +156,20 @@ MsiFile::MsiFile(
         }
 }
 
-MsiFile::~MsiFile()
+void MsiSimpleFile::Init()
 {
-        if (count != 0)
-                delete[] array;
-}
-
-////////////////////////////////////////////////////////////////////////
-
-MsiSimpleFile::MsiSimpleFile(
-        MsiUtils* msiUtils)
-        : MsiTable(msiUtils, L"File")
-{
-        array = NULL;
+        name  = L"File";
+        count = CountRows();
         if (count == 0)
                 return;
 
         MSIHANDLE record;
         DWORD     size = MAX_PATH;
         WCHAR     buffer[MAX_PATH];
-        array = new tagFile[count];
+        array = new tagSimpleFile[count];
         MsiQuery q(msiUtils, L"SELECT FileName, FileSize FROM File ORDER BY Sequence");
 
-        for (tagFile* p = array; (record = q.Next()) != NULL; p++)
+        for (tagSimpleFile* p = array; (record = q.Next()) != NULL; p++)
         {
                 size = MAX_PATH;
                 MsiRecordGetString(record, 1, buffer, &size);
@@ -186,19 +181,10 @@ MsiSimpleFile::MsiSimpleFile(
         }
 }
 
-MsiSimpleFile::~MsiSimpleFile()
+void MsiComponent::Init()
 {
-        if (count != 0)
-                delete[] array;
-}
-
-////////////////////////////////////////////////////////////////////////
-
-MsiComponent::MsiComponent(
-        MsiUtils* msiUtils)
-        : MsiTable(msiUtils, L"Component")
-{
-        array = NULL;
+        name  = L"Component";
+        count = CountRows();
         if (count == 0)
                 return;
 
@@ -224,19 +210,10 @@ MsiComponent::MsiComponent(
         }
 }
 
-MsiComponent::~MsiComponent()
+void MsiDirectory::Init()
 {
-        if (count != 0)
-                delete[] array;
-}
-
-////////////////////////////////////////////////////////////////////////
-
-MsiDirectory::MsiDirectory(
-        MsiUtils* msiUtils)
-        : MsiTable(msiUtils, L"Directory")
-{
-        array = NULL;
+        name  = L"Directory";
+        count = CountRows();
         if (count == 0)
                 return;
 
@@ -254,19 +231,11 @@ MsiDirectory::MsiDirectory(
         }
 }
 
-MsiDirectory::~MsiDirectory()
+void MsiTable<tagCabinet>::Init()
 {
-        if (count != 0)
-                delete[] array;
-}
+        name  = L"Media";
+        count = CountRows();
 
-////////////////////////////////////////////////////////////////////////
-
-MsiCabinet::MsiCabinet(
-        MsiUtils* msiUtils)
-        : MsiTable(msiUtils, L"Media")
-{
-        array = NULL;
         if (msiUtils->db_type == MsiUtils::merge_module)
         {
                 count           = 1;
@@ -306,15 +275,11 @@ MsiCabinet::MsiCabinet(
 
 MsiCabinet::~MsiCabinet()
 {
-        if (count == 0)
-                return;
-
         for (int i = 0; i < count; i++)
         {
                 if (!array[i].tempName.empty())
                         DeleteFile(array[i].tempName.c_str());
         }
-        delete[] array;
 }
 
 bool MsiCabinet::Extract(
@@ -359,4 +324,10 @@ bool MsiCabinet::Extract(
         return true;
 }
 
-////////////////////////////////////////////////////////////////////////
+// Explicit Instantiation, or else uninstantiated template definitions are not put into .obj/.lib and link will fail
+//
+template class MsiTable<tagFile>;
+template class MsiTable<tagSimpleFile>;
+template class MsiTable<tagComponent>;
+template class MsiTable<tagDirectory>;
+template class MsiTable<tagCabinet>;

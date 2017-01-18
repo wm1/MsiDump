@@ -199,7 +199,7 @@ bool MsiUtils::LoadDatabase()
               << endl;
         for (i = 0; i < cabinet->count; i++)
         {
-                MsiCabinet::tagCabinet* p = &cabinet->array[i];
+                tagCabinet* p = &cabinet->array[i];
                 trace << i << L"[last seq = " << p->lastSequence << L"]: "
                       << p->cabinet << endl;
         }
@@ -249,7 +249,7 @@ bool MsiUtils::LoadDatabase()
               << endl;
         for (i = 0; i < directory->count; i++)
         {
-                MsiDirectory::tagDirectory* p = &directory->array[i];
+                tagDirectory* p = &directory->array[i];
 
                 size = MAX_PATH;
                 r    = MsiGetSourcePath(product, p->directory.c_str(), buffer, &size);
@@ -279,10 +279,10 @@ bool MsiUtils::LoadDatabase()
               << endl;
         for (i = 0; i < component->count; i++)
         {
-                MsiComponent::tagComponent* p = &component->array[i];
+                tagComponent* p = &component->array[i];
                 for (j = 0; j < directory->count; j++)
                 {
-                        MsiDirectory::tagDirectory* q = &directory->array[j];
+                        tagDirectory* q = &directory->array[j];
                         if (p->directory == q->directory)
                         {
                                 p->keyDirectory = j;
@@ -333,10 +333,10 @@ bool MsiUtils::LoadDatabase()
               << endl;
         for (i = 0; i < file->count; i++)
         {
-                MsiFile::tagFile* p = &file->array[i];
+                tagFile* p = &file->array[i];
                 for (j = 0; j < component->count; j++)
                 {
-                        MsiComponent::tagComponent* q = &component->array[j];
+                        tagComponent* q = &component->array[j];
                         if (p->component == q->component)
                         {
                                 p->keyDirectory = q->keyDirectory;
@@ -351,7 +351,7 @@ bool MsiUtils::LoadDatabase()
                 {
                         for (j = 0; j < cabinet->count; j++)
                         {
-                                MsiCabinet::tagCabinet* q = &cabinet->array[j];
+                                tagCabinet* q = &cabinet->array[j];
                                 if (p->sequence <= q->lastSequence)
                                 {
                                         p->keyCabinet = j;
@@ -424,7 +424,7 @@ bool MsiUtils::ExtractTo(
         this->countDone = 0;
         for (i = 0; i < file->count; i++)
         {
-                MsiFile::tagFile* p = &file->array[i];
+                tagFile* p = &file->array[i];
                 if (!allSelected && !p->selected)
                         continue;
                 countTodo++;
@@ -449,8 +449,8 @@ bool MsiUtils::ExtractTo(
 bool MsiUtils::CopyFile(
         int index)
 {
-        MsiFile::tagFile*           p          = &file->array[index];
-        MsiDirectory::tagDirectory* pDirectory = &directory->array[p->keyDirectory];
+        tagFile*      p          = &file->array[index];
+        tagDirectory* pDirectory = &directory->array[p->keyDirectory];
 
         wstring source = pDirectory->sourceDirectory + pathSeperator + p->filename;
 
@@ -485,8 +485,8 @@ bool MsiUtils::CopyFile(
 bool MsiUtils::ExtractFile(
         int index)
 {
-        MsiFile::tagFile*       pFile    = &file->array[index];
-        MsiCabinet::tagCabinet* pCabinet = &cabinet->array[pFile->keyCabinet];
+        tagFile*    pFile    = &file->array[index];
+        tagCabinet* pCabinet = &cabinet->array[pFile->keyCabinet];
 
         if (pCabinet->iterated)
         {
@@ -605,7 +605,7 @@ MsiUtils::CabinetCallback(
         if (located &&
             (msiUtils->allSelected || msiUtils->file->array[index].selected))
         {
-                MsiFile::tagFile* p = &msiUtils->file->array[index];
+                tagFile* p = &msiUtils->file->array[index];
 
                 wstring targetFilename;
                 if (msiUtils->folderFlatten)
@@ -614,7 +614,7 @@ MsiUtils::CabinetCallback(
                 }
                 else
                 {
-                        MsiDirectory::tagDirectory* d = &msiUtils->directory->array[p->keyDirectory];
+                        tagDirectory* d = &msiUtils->directory->array[p->keyDirectory];
                         if (!d->targetDirectoryVerified)
                         {
                                 d->targetDirectoryVerified = true;
@@ -660,7 +660,7 @@ bool MsiUtils::GetFileDetail(
                 if (index < 0 || index > simpleFile->count)
                         return false;
 
-                MsiSimpleFile::tagFile* p = &simpleFile->array[index];
+                tagSimpleFile* p = &simpleFile->array[index];
                 ZeroMemory(detail, sizeof(MsiDumpFileDetail));
 
                 detail->filename = p->filename.c_str();
@@ -674,16 +674,16 @@ bool MsiUtils::GetFileDetail(
                 return false;
         }
 
-        MsiFile::tagFile* p = &file->array[index];
-        detail->filename    = p->filename.c_str();
-        detail->filesize    = p->filesize;
-        detail->path        = directory->array[p->keyDirectory].targetDirectory.c_str();
-        detail->win9x       = component->array[p->keyComponent].win9x;
-        detail->winNT       = component->array[p->keyComponent].winNT;
-        detail->winX64      = component->array[p->keyComponent].winX64;
-        detail->selected    = p->selected;
-        detail->version     = p->version.c_str();
-        detail->language    = p->language.c_str();
+        tagFile* p       = &file->array[index];
+        detail->filename = p->filename.c_str();
+        detail->filesize = p->filesize;
+        detail->path     = directory->array[p->keyDirectory].targetDirectory.c_str();
+        detail->win9x    = component->array[p->keyComponent].win9x;
+        detail->winNT    = component->array[p->keyComponent].winNT;
+        detail->winX64   = component->array[p->keyComponent].winX64;
+        detail->selected = p->selected;
+        detail->version  = p->version.c_str();
+        detail->language = p->language.c_str();
         return true;
 }
 

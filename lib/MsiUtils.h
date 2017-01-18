@@ -40,6 +40,7 @@ private:
         static bool VerifyDirectory(wstring);
         static UINT CALLBACK CabinetCallback(PVOID, UINT, UINT_PTR, UINT_PTR);
         friend class MsiQuery;
+        template <class T>
         friend class MsiTable;
         friend class MsiCabinet;
         friend IMsiDumpCab* MsiDumpCreateObject();
