@@ -19,16 +19,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build Common", "Build Commo
 		version.h = version.h
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencies", "{D78C3A54-B2DF-45A4-A0FC-05D0AB7BF87D}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "wtl", "wtl", "{5944EB0D-1FE2-45D9-B51B-000DB1035780}"
-	ProjectSection(SolutionItems) = preProject
-		deps\wtl\atlapp.h = deps\wtl\atlapp.h
-		deps\wtl\atlctrls.h = deps\wtl\atlctrls.h
-		deps\wtl\atldlgs.h = deps\wtl\atldlgs.h
-		deps\wtl\atlframe.h = deps\wtl\atlframe.h
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -72,8 +62,5 @@ Global
 		{D5A20E4B-1224-4A7E-B239-E0720F7C6149}.Release|x64.Build.0 = Release|x64
 		{D5A20E4B-1224-4A7E-B239-E0720F7C6149}.Release|x86.ActiveCfg = Release|Win32
 		{D5A20E4B-1224-4A7E-B239-E0720F7C6149}.Release|x86.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{5944EB0D-1FE2-45D9-B51B-000DB1035780} = {D78C3A54-B2DF-45A4-A0FC-05D0AB7BF87D}
 	EndGlobalSection
 EndGlobal
