@@ -146,7 +146,7 @@ bool parseOption(PCWSTR option)
                 {
                         args.list_format = list_format;
                         size_t len       = wcslen(list_format);
-                        for (int i = 0; i < len; i++)
+                        for (size_t i = 0; i < len; i++)
                         {
                                 WCHAR c = list_format[i];
                                 if (wcschr(L"nfspvl", c) == NULL)

@@ -535,7 +535,7 @@ bool MsiUtils::VerifyDirectory(
         WCHAR buffer[MAX_PATH];
         wcscpy_s(buffer, MAX_PATH, s.c_str());
 
-        wstring::size_type index = wstring::npos;
+        size_t index = wstring::npos;
         if (s[1] == L':' && s[2] == pathSeperator)
         {
                 // it is "C:\path\"
