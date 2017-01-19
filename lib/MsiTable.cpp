@@ -97,8 +97,7 @@ int MsiTable<T>::CountRows()
         return row_count;
 }
 
-////////////////////////////////////////////////////////////////////////
-
+template <>
 void MsiFile::Init()
 {
         name  = L"File";
@@ -142,6 +141,7 @@ void MsiFile::Init()
         }
 }
 
+template <>
 void MsiSimpleFile::Init()
 {
         name  = L"File";
@@ -167,6 +167,7 @@ void MsiSimpleFile::Init()
         }
 }
 
+template <>
 void MsiComponent::Init()
 {
         name  = L"Component";
@@ -196,6 +197,7 @@ void MsiComponent::Init()
         }
 }
 
+template <>
 void MsiDirectory::Init()
 {
         name  = L"Directory";
@@ -217,6 +219,7 @@ void MsiDirectory::Init()
         }
 }
 
+template <>
 void MsiTable<tagCabinet>::Init()
 {
         name  = L"Media";
@@ -231,7 +234,7 @@ void MsiTable<tagCabinet>::Init()
                 p->lastSequence = 0;
                 p->embedded     = true;
                 p->cabinet      = L"MergeModule.CABinet";
-                p->tempName.erase();
+                p->tempName.clear();
                 return;
         }
 
@@ -253,9 +256,7 @@ void MsiTable<tagCabinet>::Init()
                 MsiRecordGetString(record, 3, buffer, &size);
                 p->embedded = (buffer[0] == L'#');
                 p->cabinet  = (p->embedded ? buffer + 1 : buffer);
-
-                // w2k3 ddk stl does not support basic_string::clear(). use erase instead
-                p->tempName.erase();
+                p->tempName.clear();
         }
 }
 
