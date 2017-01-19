@@ -123,7 +123,6 @@ void MsiUtils::Close()
         if (!IsOpened())
                 return;
 
-        MsiCloseHandle(database);
         database = NULL;
 
         if (cabinet)
@@ -155,13 +154,13 @@ void MsiUtils::Close()
 
 bool MsiUtils::LoadSummary()
 {
-        MSIHANDLE summaryInformation;
-        UINT      datatype;
-        INT       data;
-        FILETIME  filetime;
-        DWORD     size = MAX_PATH;
-        WCHAR     buffer[MAX_PATH];
-        UINT      r;
+        PMSIHANDLE summaryInformation;
+        UINT       datatype;
+        INT        data;
+        FILETIME   filetime;
+        DWORD      size = MAX_PATH;
+        WCHAR      buffer[MAX_PATH];
+        UINT       r;
 
         compressed = false;
         r          = MsiGetSummaryInformation(database, 0, 0, &summaryInformation);
@@ -205,10 +204,10 @@ bool MsiUtils::LoadDatabase()
         }
         trace << endl;
 
-        MSIHANDLE product;
-        WCHAR     packageName[30];
-        DWORD     size = MAX_PATH;
-        WCHAR     buffer[MAX_PATH];
+        PMSIHANDLE product;
+        WCHAR      packageName[30];
+        DWORD      size = MAX_PATH;
+        WCHAR      buffer[MAX_PATH];
         swprintf_s(packageName, 30, L"#%d", (int)database);
         r = MsiOpenPackageEx(packageName, MSIOPENPACKAGEFLAGS_IGNOREMACHINESTATE, &product);
         if (r != ERROR_SUCCESS)
@@ -227,21 +226,18 @@ bool MsiUtils::LoadDatabase()
         if (r != ERROR_SUCCESS)
         {
                 trace_error << L"CostInitialize failed with " << r << endl;
-                MsiCloseHandle(product);
                 return false;
         }
         r = MsiDoAction(product, L"FileCost");
         if (r != ERROR_SUCCESS)
         {
                 trace_error << L"FileCost failed with " << r << endl;
-                MsiCloseHandle(product);
                 return false;
         }
         r = MsiDoAction(product, L"CostFinalize");
         if (r != ERROR_SUCCESS)
         {
-                trace_error << L"FileCost failed with " << r << endl;
-                MsiCloseHandle(product);
+                trace_error << L"CostFinalize failed with " << r << endl;
                 return false;
         }
 
@@ -327,7 +323,6 @@ bool MsiUtils::LoadDatabase()
                 trace << L"]: " << p->component << endl;
         }
         trace << endl;
-        MsiCloseHandle(product);
 
         trace << L"File count = " << file->count << endl
               << endl;

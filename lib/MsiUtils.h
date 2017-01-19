@@ -4,16 +4,16 @@
 class MsiUtils : public IMsiDumpCab
 {
 private:
-        wstring   msiFilename;
-        MSIHANDLE database;
-        bool      compressed;
-        bool      allSelected;
-        bool      folderFlatten;
-        wstring   targetRootDirectory;
-        wstring   sourceRootDirectory;
-        int       countDone;
-        bool      delayLoading;
-        HANDLE    delayEvent;
+        wstring    msiFilename;
+        PMSIHANDLE database;
+        bool       compressed;
+        bool       allSelected;
+        bool       folderFlatten;
+        wstring    targetRootDirectory;
+        wstring    sourceRootDirectory;
+        int        countDone;
+        bool       delayLoading;
+        HANDLE     delayEvent;
         enum
         {
                 installer_database, // msi

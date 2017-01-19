@@ -6,14 +6,12 @@ class MsiUtils;
 class MsiQuery
 {
 private:
-        MSIHANDLE view;
-        MSIHANDLE record;
-        bool      ended;
-        bool      viewCreated;
+        PMSIHANDLE view;
+        PMSIHANDLE record;
+        bool       ended;
 
 public:
         MsiQuery(MsiUtils* msiUtils, wstring sql);
-        ~MsiQuery();
         MSIHANDLE Next();
 };
 

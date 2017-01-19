@@ -4,9 +4,8 @@ MsiQuery::MsiQuery(
         MsiUtils* msiUtils,
         wstring   sql)
 {
-        viewCreated = false;
-        ended       = true;
-        record      = NULL;
+        ended  = true;
+        record = NULL;
 
         if (!msiUtils->IsOpened())
                 return;
@@ -18,19 +17,9 @@ MsiQuery::MsiQuery(
 
         r = MsiViewExecute(view, 0);
         if (r != ERROR_SUCCESS)
-        {
-                MsiCloseHandle(view);
                 return;
-        }
 
-        ended       = false;
-        viewCreated = true;
-}
-
-MsiQuery::~MsiQuery()
-{
-        if (viewCreated)
-                MsiCloseHandle(view);
+        ended = false;
 }
 
 MSIHANDLE
@@ -38,8 +27,6 @@ MsiQuery::Next()
 {
         if (ended)
                 return NULL;
-
-        MsiCloseHandle(record);
 
         UINT r;
         r = MsiViewFetch(view, &record);
@@ -78,9 +65,9 @@ MsiTable<T>::getPrimaryKey()
         if (name == L"_Columns")
                 return L"Table";
 
-        MSIHANDLE record;
-        UINT      r;
-        wstring   s;
+        PMSIHANDLE record;
+        UINT       r;
+        wstring    s;
         r = MsiDatabaseGetPrimaryKeys(msiUtils->database, name.c_str(), &record);
         if (r != ERROR_SUCCESS)
                 return s; // it is a empty string
@@ -88,7 +75,6 @@ MsiTable<T>::getPrimaryKey()
         DWORD size = MAX_PATH;
         WCHAR buffer[MAX_PATH];
         MsiRecordGetString(record, 1, buffer, &size);
-        MsiCloseHandle(record);
         s = buffer;
 
         return s;
