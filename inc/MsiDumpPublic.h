@@ -21,24 +21,24 @@
 
 struct MsiDumpFileDetail
 {
-        PCWSTR filename;
-        int    filesize;
+        PCWSTR file_name;
+        int    file_size;
         PCWSTR path;
         PCWSTR version;
         PCWSTR language;
-        bool   win9x; // Should the file be installed on Windows 95/98/Me?
-        bool   winNT; // Should be installed on Windows NT/2000/XP/2003?
-        bool   winX64;
-        bool   selected;
+        bool   win_9x; // Should the file be installed on Windows 95/98/Me?
+        bool   win_nt; // Should be installed on Windows NT/2000/XP/2003?
+        bool   win_x64;
+        bool   is_selected;
 };
 
-enum enumSelectAll
+enum EnumSelectItems
 {
-        ALL_SELECTED,
-        INDIVIDUAL_SELECTED
+        SELECT_ALL_ITEMS,
+        SELECT_INDIVIDUAL_ITEMS
 };
 
-enum enumFlatFolder
+enum EnumExtractTo
 {
         EXTRACT_TO_FLAT_FOLDER,
         EXTRACT_TO_TREE
@@ -61,7 +61,7 @@ public:
         //   ...
         //   p->Close();
         //
-        virtual bool Open(PCWSTR filename) = 0;
+        virtual bool Open(PCWSTR file_name) = 0;
 
         // Close the package that was previously opened
         //
@@ -69,20 +69,20 @@ public:
 
         // Get the number of files in the installer package
         //
-        virtual int getCount() = 0;
+        virtual int GetFileCount() = 0;
 
         // Get the i-th (0 <= i <= count) file's information.
-        // Note: refer to DelayedOpen() on which fields of the result is valid.
+        // Note: refer to DelayOpen() on which fields of the result is valid.
         //
         virtual bool GetFileDetail(int index, MsiDumpFileDetail* detail) = 0;
 
-        // Mark each file to be extracted later if calling ExtractTo() with INDIVIDUAL_SELECTED
+        // Mark each file to be extracted later if calling ExtractTo() with SELECT_INDIVIDUAL_ITEMS
         //
-        virtual void setSelected(int index, bool select) = 0;
+        virtual void SelectFile(int index, bool select) = 0;
 
         // Extract files out
         //
-        virtual bool ExtractTo(PCWSTR directory, enumSelectAll selectAll, enumFlatFolder flatFolder) = 0;
+        virtual bool ExtractTo(PCWSTR directory, EnumSelectItems select_items, EnumExtractTo extract_to) = 0;
 
         // By default Open() retrieves a list of file names in the installer package, as well as each file's
         // more detailed information, before returning control to the caller.
@@ -91,14 +91,14 @@ public:
         // simply takes too long to finish Open() and the user-interface cannot be refreshed during that time.
         //
         // The suggested approach for more responsive UI is to do it in two steps:
-        //   1. Call DelayedOpen(event). When it returns, the file names are ready to be displayed on UI
+        //   1. Call DelayOpen(event). When it returns, the file names are ready to be displayed on UI
         //   2. WaitForSingleObject(event). When it returns, more detailed file information can be displayed
         //
         // During each step, the caller calls the same GetFileDetail() but:
         //   1. before the said event is triggered, only file name & file size fields are valid
         //   2. after the event is set, all fields become valid
         //
-        virtual bool DelayedOpen(PCWSTR filename, HANDLE event) = 0;
+        virtual bool DelayOpen(PCWSTR file_name, HANDLE event) = 0;
 };
 
 IMsiDumpCab* MsiDumpCreateObject();

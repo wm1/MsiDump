@@ -2,50 +2,55 @@
 
 int __cdecl wmain(int argc, PCWSTR argv[])
 {
-        parseArgs(argc, argv);
-        if (args.cmd == cmd_help)
+        ParseArgs(argc, argv);
+        if (Args.command == CMD_HELP)
         {
                 PCWSTR exe = argv[0];
-                usage(exe);
+                Usage(exe);
                 return ERROR_SUCCESS;
         }
-        else if (args.cmd == cmd_invalid)
-                return E_INVALIDARG;
+        else if (Args.command == CMD_INVALID)
+                return ERROR_INVALID_PARAMETER;
 
         IMsiDumpCab* msi = MsiDumpCreateObject();
-
-        DWORD fileAttr = GetFileAttributes(args.filename);
-        if (fileAttr == INVALID_FILE_ATTRIBUTES)
+        if (msi == NULL)
         {
-                fwprintf(stderr, L"error: file not found: %s\n", args.filename);
+                fwprintf(stderr, L"internal error\n");
+                return ERROR_NOT_ENOUGH_MEMORY;
+        }
+
+        DWORD attributes = GetFileAttributes(Args.file_name);
+        if (attributes == INVALID_FILE_ATTRIBUTES)
+        {
+                fwprintf(stderr, L"error: file not found: %s\n", Args.file_name);
                 return ERROR_FILE_NOT_FOUND;
         }
 
-        if (!msi->Open(args.filename))
+        if (!msi->Open(Args.file_name))
         {
-                fwprintf(stderr, L"error: fail to open msi package: %s\n", args.filename);
+                fwprintf(stderr, L"error: fail to open msi package: %s\n", Args.file_name);
                 msi->Release();
                 return ERROR_INSTALL_PACKAGE_OPEN_FAILED;
         }
 
-        if (args.cmd == cmd_list)
+        if (Args.command == CMD_LIST)
         {
-                listHeader();
-                int count = msi->getCount();
+                ListHeader();
+                int count = msi->GetFileCount();
                 for (int i = 0; i < count; i++)
                 {
                         MsiDumpFileDetail detail;
                         msi->GetFileDetail(i, &detail);
-                        listRecord(i, &detail);
+                        ListRow(i, &detail);
                 }
         }
-        else if (args.cmd == cmd_extract)
+        else if (Args.command == CMD_EXTRACT)
         {
-                enumFlatFolder flatFolder = (args.extract_full_path ? EXTRACT_TO_TREE : EXTRACT_TO_FLAT_FOLDER);
+                EnumExtractTo extract_to = (Args.u.extract.is_extract_full_path ? EXTRACT_TO_TREE : EXTRACT_TO_FLAT_FOLDER);
 
-                WCHAR filename[MAX_PATH];
-                GetFullPathName(args.path_to_extract, MAX_PATH, filename, NULL);
-                bool b = msi->ExtractTo(filename, ALL_SELECTED, flatFolder);
+                WCHAR file_name[MAX_PATH];
+                GetFullPathName(Args.u.extract.path_to_extract, MAX_PATH, file_name, NULL);
+                bool b = msi->ExtractTo(file_name, SELECT_ALL_ITEMS, extract_to);
                 if (!b)
                 {
                         fwprintf(stderr, L"error: fail to extract msi file. check out trace.txt for details\n");

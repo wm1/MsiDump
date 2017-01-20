@@ -9,7 +9,7 @@
 #include <atlframe.h>
 #include <atlctrls.h>
 #include <atldlgs.h>
-#include <shlobj.h>
+#include <ShlObj.h>
 #include <shellapi.h>
 #include <string>
 #include <fstream>

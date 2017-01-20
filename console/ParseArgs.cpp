@@ -1,54 +1,53 @@
 #include "precomp.h"
-#include "parseArgs.h"
 
-bool parseOption(PCWSTR option);
-bool findOptionWithValue(PCWSTR option, PCWSTR name, PCWSTR* value);
-bool isSeparator(WCHAR c);
+bool ParseOption(PCWSTR option);
+bool FindOptionWithValue(PCWSTR option, PCWSTR name, PCWSTR* value);
+bool IsSeparator(WCHAR c);
 
-_args args;
+CommandArgs Args;
 
 //
 // Usage: MsiDump.exe command [options] msiFile [path_to_extract]
 //
-void parseArgs(int argc, PCWSTR argv[])
+void ParseArgs(int argc, PCWSTR argv[])
 {
         // default command and options
         //
-        args.cmd               = cmd_invalid;
-        args.list_format       = L"nfsp";
-        args.extract_full_path = true;
+        Args.command = CMD_INVALID;
 
         if (argc == 1)
         {
-                args.cmd = cmd_help;
+                Args.command = CMD_HELP;
                 return;
         }
 
-        PCWSTR cmd = argv[1];
+        PCWSTR command = argv[1];
 
         //
         // check whether the first argument start with '-'.
         // if so, it is new syntax, else it is legacy syntax
         //
-        if (!isSeparator(cmd[0]))
+        if (!IsSeparator(command[0]))
         {
                 // legacy syntax
                 //
                 if (argc == 2)
                 {
-                        args.cmd      = cmd_list;
-                        args.filename = argv[1];
+                        Args.command            = CMD_LIST;
+                        Args.file_name          = argv[1];
+                        Args.u.list.list_format = L"nfsp";
                 }
                 else if (argc == 3 || argc == 4)
                 {
-                        args.cmd             = cmd_extract;
-                        args.filename        = argv[1];
-                        args.path_to_extract = argv[2];
+                        Args.command                        = CMD_EXTRACT;
+                        Args.file_name                      = argv[1];
+                        Args.u.extract.path_to_extract      = argv[2];
+                        Args.u.extract.is_extract_full_path = true;
                         if (argc == 4)
                         {
                                 PCWSTR arg3 = argv[3];
-                                if (isSeparator(arg3[0]) && arg3[1] == L'f')
-                                        args.extract_full_path = false;
+                                if (IsSeparator(arg3[0]) && arg3[1] == L'f')
+                                        Args.u.extract.is_extract_full_path = false;
                         }
                 }
                 return;
@@ -57,32 +56,34 @@ void parseArgs(int argc, PCWSTR argv[])
         //
         // new syntax
         //
-        if (wcscmp(&cmd[1], L"list") == 0)
+        if (wcscmp(&command[1], L"list") == 0)
         {
-                args.cmd = cmd_list;
+                Args.command            = CMD_LIST;
+                Args.u.list.list_format = L"nfsp";
         }
-        else if (wcscmp(&cmd[1], L"extract") == 0)
+        else if (wcscmp(&command[1], L"extract") == 0)
         {
-                args.cmd = cmd_extract;
+                Args.command                        = CMD_EXTRACT;
+                Args.u.extract.is_extract_full_path = true;
         }
-        else if (wcscmp(&cmd[1], L"help") == 0 || wcscmp(&cmd[1], L"h") == 0 || wcscmp(&cmd[1], L"?") == 0)
+        else if (wcscmp(&command[1], L"help") == 0 || wcscmp(&command[1], L"h") == 0 || wcscmp(&command[1], L"?") == 0)
         {
-                args.cmd = cmd_help;
+                Args.command = CMD_HELP;
                 return;
         }
         else
         {
-                fwprintf(stderr, L"error: unrecognized command %s\n", cmd);
+                fwprintf(stderr, L"error: unrecognized command %s\n", command);
                 return;
         }
 
         int current_arg = 2;
-        while (current_arg < argc && isSeparator(argv[current_arg][0]))
+        while (current_arg < argc && IsSeparator(argv[current_arg][0]))
         {
-                if (!parseOption(argv[current_arg]))
+                if (!ParseOption(argv[current_arg]))
                 {
                         fwprintf(stderr, L"error: unrecognized parameter %s\n", argv[current_arg]);
-                        args.cmd = cmd_invalid;
+                        Args.command = CMD_INVALID;
                         return;
                 }
                 current_arg++;
@@ -91,26 +92,26 @@ void parseArgs(int argc, PCWSTR argv[])
         if (current_arg >= argc)
         {
                 fwprintf(stderr, L"error: msi file is not supplied\n");
-                args.cmd = cmd_invalid;
+                Args.command = CMD_INVALID;
                 return;
         }
-        args.filename = argv[current_arg];
+        Args.file_name = argv[current_arg];
         current_arg++;
 
-        if (args.cmd == cmd_extract)
+        if (Args.command == CMD_EXTRACT)
         {
                 if (current_arg >= argc)
                 {
                         fwprintf(stderr, L"error: path to extract is not supplied\n");
-                        args.cmd = cmd_invalid;
+                        Args.command = CMD_INVALID;
                         return;
                 }
-                args.path_to_extract = argv[current_arg];
+                Args.u.extract.path_to_extract = argv[current_arg];
                 current_arg++;
         }
 }
 
-bool isSeparator(WCHAR c)
+bool IsSeparator(WCHAR c)
 {
         return (c == L'-' || c == L'/');
 }
@@ -120,32 +121,32 @@ bool isSeparator(WCHAR c)
 //
 // return the 'value' string after the colon mark if 'name' matches
 //
-bool findOptionWithValue(PCWSTR option, PCWSTR name, PCWSTR* value)
+bool FindOptionWithValue(PCWSTR option, PCWSTR name, PCWSTR* value)
 {
         option++; // skip leading separator
 
-        size_t cName = wcslen(name);
-        if (wcsncmp(option, name, cName) == 0)
+        size_t name_count = wcslen(name);
+        if (wcsncmp(option, name, name_count) == 0)
         {
-                size_t cOption = wcslen(option);
-                if (cOption > cName && option[cName] == L':')
+                size_t option_count = wcslen(option);
+                if (option_count > name_count && option[name_count] == L':')
                 {
-                        *value = &option[cName + 1];
+                        *value = &option[name_count + 1];
                         return true;
                 }
         }
         return false;
 }
 
-bool parseOption(PCWSTR option)
+bool ParseOption(PCWSTR option)
 {
-        if (args.cmd == cmd_list)
+        if (Args.command == CMD_LIST)
         {
                 PCWSTR list_format;
-                if (findOptionWithValue(option, L"format", &list_format))
+                if (FindOptionWithValue(option, L"format", &list_format))
                 {
-                        args.list_format = list_format;
-                        size_t len       = wcslen(list_format);
+                        Args.u.list.list_format = list_format;
+                        size_t len              = wcslen(list_format);
                         for (size_t i = 0; i < len; i++)
                         {
                                 WCHAR c = list_format[i];
@@ -159,18 +160,18 @@ bool parseOption(PCWSTR option)
                 else
                         return false;
         }
-        else if (args.cmd == cmd_extract)
+        else if (Args.command == CMD_EXTRACT)
         {
-                PCWSTR extract_full_path;
-                if (findOptionWithValue(option, L"full_path", &extract_full_path))
+                PCWSTR is_extract_full_path;
+                if (FindOptionWithValue(option, L"full_path", &is_extract_full_path))
                 {
-                        if (wcscmp(extract_full_path, L"no") == 0)
-                                args.extract_full_path = false;
-                        else if (wcscmp(extract_full_path, L"yes") == 0)
-                                args.extract_full_path = true;
+                        if (wcscmp(is_extract_full_path, L"no") == 0)
+                                Args.u.extract.is_extract_full_path = false;
+                        else if (wcscmp(is_extract_full_path, L"yes") == 0)
+                                Args.u.extract.is_extract_full_path = true;
                         else
                         {
-                                fwprintf(stderr, L"error: unrecognized specifier \"%s\" in %s\n", extract_full_path, option);
+                                fwprintf(stderr, L"error: unrecognized specifier \"%s\" in %s\n", is_extract_full_path, option);
                                 return false;
                         }
                 }
@@ -180,7 +181,7 @@ bool parseOption(PCWSTR option)
         return true;
 }
 
-void usage(PCWSTR exe)
+void Usage(PCWSTR exe)
 {
         wprintf(L"Usage:\n"
                 L"  %s command [options] msiFile [path_to_extract]\n"
@@ -205,9 +206,9 @@ void usage(PCWSTR exe)
                 exe, exe, exe);
 }
 
-void listHeader()
+void ListHeader()
 {
-        PCWSTR format = args.list_format;
+        PCWSTR format = Args.u.list.list_format;
         while (*format != 0)
         {
                 switch (*format)
@@ -237,9 +238,9 @@ void listHeader()
         wprintf(L"\n");
 }
 
-void listRecord(int num, MsiDumpFileDetail* detail)
+void ListRow(int num, MsiDumpFileDetail* detail)
 {
-        PCWSTR format = args.list_format;
+        PCWSTR format = Args.u.list.list_format;
         while (*format != 0)
         {
                 switch (*format)
@@ -248,10 +249,10 @@ void listRecord(int num, MsiDumpFileDetail* detail)
                         wprintf(L"%4d", num);
                         break;
                 case L'f':
-                        wprintf(L"%15s", detail->filename);
+                        wprintf(L"%15s", detail->file_name);
                         break;
                 case L's':
-                        wprintf(L"%9d", detail->filesize);
+                        wprintf(L"%9d", detail->file_size);
                         break;
                 case L'p':
                         wprintf(L"%-45s", detail->path);

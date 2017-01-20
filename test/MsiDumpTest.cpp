@@ -1,13 +1,13 @@
 //
 // Description:
-//  1. Extract input_msi to output_folder
+//  1. Extract input_file to output_folder
 //  2. Compare source_folder with output_folder
 //
 
 #include "precomp.h"
 
 #define DATA_FOLDER L"data\\"
-PCWSTR input_msi     = DATA_FOLDER L"test.msi";
+PCWSTR input_file    = DATA_FOLDER L"test.msi";
 PCWSTR output_folder = DATA_FOLDER L"out";
 PCWSTR source_folder = DATA_FOLDER L"in";
 
@@ -20,38 +20,38 @@ bool RemoveFolderRecursively(PCWSTR path);
 
 int __cdecl wmain()
 {
-        trace << L"Extract " << input_msi << L" to " << output_folder << endl;
+        trace << L"Extract " << input_file << L" to " << output_folder << endl;
 
-        int          main_result = ERROR_SUCCESS;
-        IMsiDumpCab* msi         = MsiDumpCreateObject();
+        int          result = ERROR_INSTALL_FAILURE;
+        IMsiDumpCab* msi    = MsiDumpCreateObject();
         if (msi == NULL)
         {
                 trace_error << L"internal error" << endl;
-                main_result = ERROR_INSTALL_FAILURE;
-                return main_result;
+                return result;
+        }
+        else if (!msi->Open(input_file))
+        {
+                trace_error << L"Open msi package: " << input_file << endl;
+                msi->Release();
+                return result;
         }
         else if (!RemoveFolderRecursively(output_folder))
         {
-                main_result = ERROR_INSTALL_FAILURE;
+                ;
         }
-        else if (!msi->Open(input_msi))
-        {
-                trace_error << L"Open msi package:" << input_msi << endl;
-                main_result = ERROR_INSTALL_PACKAGE_OPEN_FAILED;
-        }
-        else if (!msi->ExtractTo(output_folder, ALL_SELECTED, EXTRACT_TO_FLAT_FOLDER))
+        else if (!msi->ExtractTo(output_folder, SELECT_ALL_ITEMS, EXTRACT_TO_FLAT_FOLDER))
         {
                 trace_error << L"Extract msi file" << endl;
-                main_result = ERROR_INSTALL_FAILURE;
         }
-        else if (!CompareFolder(source_folder, output_folder))
+        else if (CompareFolder(source_folder, output_folder))
         {
-                main_result = ERROR_INSTALL_FAILURE;
+                trace << L"Test passes" << endl;
+                result = ERROR_SUCCESS;
         }
 
         msi->Close();
         msi->Release();
-        return main_result;
+        return result;
 }
 
 class Folder
@@ -72,7 +72,7 @@ public:
         {
                 DWORD           attr;
                 DWORD           error;
-                HANDLE          hFind;
+                HANDLE          find_handle;
                 WIN32_FIND_DATA find_data;
 
                 valid = false;
@@ -84,8 +84,8 @@ public:
                 }
 
                 path  = Path;
-                hFind = FindFirstFile(Path.append(L"\\*").c_str(), &find_data);
-                if (hFind == INVALID_HANDLE_VALUE)
+                find_handle = FindFirstFile(Path.append(L"\\*").c_str(), &find_data);
+                if (find_handle == INVALID_HANDLE_VALUE)
                 {
                         error = GetLastError();
                         trace_error << "FindFirstFile(" << path << L"\\*) failed with " << error << endl;
@@ -107,25 +107,25 @@ public:
                                 files.push_back(file);
                         }
 
-                } while (FindNextFile(hFind, &find_data) != 0);
+                } while (FindNextFile(find_handle, &find_data) != 0);
 
-                FindClose(hFind);
+                FindClose(find_handle);
         }
 
-        bool Equals(Folder& That)
+        bool Equals(Folder& that)
         {
-                if (!valid || !That.valid)
+                if (!valid || !that.valid)
                 {
                         return false;
                 }
 
                 // Verify the two folders have the same number of child entries
                 //
-                if (files.size() != That.files.size())
+                if (files.size() != that.files.size())
                 {
                         trace_error << L"File counts in two folders are different:" << endl
                                     << path << L" : " << files.size() << endl
-                                    << That.path << L" : " << That.files.size() << endl;
+                                    << that.path << L" : " << that.files.size() << endl;
                         return false;
                 }
 
@@ -134,21 +134,21 @@ public:
                         // Verify the same file name exists in both folders
                         //
                         wstring name = p->name;
-                        auto    q    = That.files.begin();
-                        for (; q != That.files.end() && name != q->name; q++)
+                        auto    q    = that.files.begin();
+                        for (; q != that.files.end() && name != q->name; q++)
                                 ;
-                        if (q == That.files.end())
+                        if (q == that.files.end())
                         {
-                                trace_error << name << L" exits in " << path << L" but not in " << That.path << endl;
+                                trace_error << name << L" exits in " << path << L" but not in " << that.path << endl;
                                 return false;
                         }
 
-                        wstring thisChild = path + L"\\" + name;
-                        wstring thatChild = That.path + L"\\" + name;
+                        wstring this_child = path + L"\\" + name;
+                        wstring that_child = that.path + L"\\" + name;
 
                         if (p->is_folder != q->is_folder)
                         {
-                                trace_error << L"One is a folder, but the other is not: " << thisChild << ", " << thatChild << endl;
+                                trace_error << L"One is a folder, but the other is not: " << this_child << ", " << that_child << endl;
                                 return false;
                         }
 
@@ -156,9 +156,9 @@ public:
                         {
                                 // recursively compare sub-folders
                                 //
-                                Folder thisChildFolder(thisChild);
-                                Folder thatChildFolder(thatChild);
-                                if (!thisChildFolder.Equals(thatChildFolder))
+                                Folder this_child_folder(this_child);
+                                Folder that_child_folder(that_child);
+                                if (!this_child_folder.Equals(that_child_folder))
                                 {
                                         return false;
                                 }
@@ -170,11 +170,11 @@ public:
                                 if (p->size.QuadPart != q->size.QuadPart)
                                 {
                                         trace_error << L"File sizes are different" << endl
-                                                    << thisChild << L" : " << p->size.QuadPart << endl
-                                                    << thatChild << L" : " << q->size.QuadPart << endl;
+                                                    << this_child << L" : " << p->size.QuadPart << endl
+                                                    << that_child << L" : " << q->size.QuadPart << endl;
                                         return false;
                                 }
-                                if (!CompareFile(thisChild.c_str(), thatChild.c_str(), (size_t)p->size.QuadPart))
+                                if (!CompareFile(this_child.c_str(), that_child.c_str(), (size_t)p->size.QuadPart))
                                 {
                                         return false;
                                 }
@@ -194,11 +194,11 @@ public:
 
                 for (auto p = files.begin(); p != files.end(); p++)
                 {
-                        wstring childPath = path + L"\\" + p->name;
+                        wstring child_path = path + L"\\" + p->name;
 
                         if (p->is_folder)
                         {
-                                Folder childFolder(childPath);
+                                Folder childFolder(child_path);
                                 if (!childFolder.Remove())
                                 {
                                         return false;
@@ -206,10 +206,10 @@ public:
                         }
                         else
                         {
-                                if (!DeleteFile(childPath.c_str()))
+                                if (!DeleteFile(child_path.c_str()))
                                 {
                                         error = GetLastError();
-                                        trace_error << error << L": DeleteFile: " << childPath << endl;
+                                        trace_error << error << L": DeleteFile: " << child_path << endl;
                                         return false;
                                 }
                         }
@@ -228,9 +228,9 @@ public:
 bool CompareFolder(PCWSTR path1, PCWSTR path2)
 {
         trace << L"Compare " << path1 << L" with " << path2 << endl;
-        Folder thisFolder(path1);
-        Folder thatFolder(path2);
-        return thisFolder.Equals(thatFolder);
+        Folder folder1(path1);
+        Folder folder2(path2);
+        return folder1.Equals(folder2);
 }
 
 bool CompareFile(PCWSTR name1, PCWSTR name2, size_t length)
@@ -273,8 +273,8 @@ bool CompareFile(PCWSTR name1, PCWSTR name2, size_t length)
 
 bool RemoveFolderRecursively(PCWSTR path)
 {
-        DWORD attr = GetFileAttributes(path);
-        if (attr == INVALID_FILE_ATTRIBUTES)
+        DWORD attributes = GetFileAttributes(path);
+        if (attributes == INVALID_FILE_ATTRIBUTES)
         {
                 DWORD error = GetLastError();
                 if (error == ERROR_FILE_NOT_FOUND)

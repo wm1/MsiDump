@@ -1,10 +1,10 @@
 
 #pragma once
 
-#include <windows.h>
+#include <Windows.h>
 #include <string>
 #include <fstream>
 using namespace std;
 
 #include "MsiDumpPublic.h"
-#include "parseArgs.h"
+#include "ParseArgs.h"

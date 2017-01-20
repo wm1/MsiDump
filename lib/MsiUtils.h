@@ -4,16 +4,16 @@
 class MsiUtils : public IMsiDumpCab
 {
 private:
-        wstring    msiFilename;
-        PMSIHANDLE database;
-        bool       compressed;
-        bool       allSelected;
-        bool       folderFlatten;
-        wstring    targetRootDirectory;
-        wstring    sourceRootDirectory;
-        int        countDone;
-        bool       delayLoading;
-        HANDLE     delayEvent;
+        wstring         msi_file_name;
+        PMSIHANDLE      database;
+        bool            is_compressed;
+        EnumSelectItems select_items;
+        EnumExtractTo   extract_to;
+        wstring         target_root_directory;
+        wstring         source_root_directory;
+        int             files_extracted;
+        bool            is_delay_loading;
+        HANDLE          delay_event;
         enum
         {
                 installer_database, // msi
@@ -22,11 +22,11 @@ private:
                 patch_package       // msp
         } db_type;
 
-        MsiFile*       file;
-        MsiComponent*  component;
-        MsiDirectory*  directory;
-        MsiCabinet*    cabinet;
-        MsiSimpleFile* simpleFile;
+        MsiFiles*       files;
+        MsiComponents*  components;
+        MsiDirectories* directories;
+        MsiCabinets*    cabinets;
+        MsiSimpleFiles* simple_files;
 
         MsiUtils();
         virtual ~MsiUtils();
@@ -42,29 +42,29 @@ private:
         friend class MsiQuery;
         template <class T>
         friend class MsiTable;
-        friend class MsiCabinet;
+        friend class MsiCabinets;
         friend IMsiDumpCab* MsiDumpCreateObject();
-        static void __cdecl threadLoadDatabase(void* parameter);
-        bool DoOpen(PCWSTR filename);
+        static void __cdecl ThreadLoadDatabase(void* parameter);
+        bool DoOpen(PCWSTR file_name);
 
 public:
         void Release();
-        bool Open(PCWSTR filename)
+        bool Open(PCWSTR file_name)
         {
-                delayLoading = false;
-                delayEvent   = NULL;
-                return DoOpen(filename);
+                is_delay_loading = false;
+                delay_event      = NULL;
+                return DoOpen(file_name);
         }
-        bool DelayedOpen(PCWSTR filename, HANDLE event)
+        bool DelayOpen(PCWSTR file_name, HANDLE event)
         {
-                delayLoading = true;
-                delayEvent   = event;
-                return DoOpen(filename);
+                is_delay_loading = true;
+                delay_event      = event;
+                return DoOpen(file_name);
         }
         void Close();
-        bool ExtractTo(PCWSTR theDirectory, enumSelectAll selectAll, enumFlatFolder flatFolder);
+        bool ExtractTo(PCWSTR directory_name, EnumSelectItems, EnumExtractTo);
 
-        int  getCount();
-        void setSelected(int index, bool select);
+        int  GetFileCount();
+        void SelectFile(int index, bool select);
         bool GetFileDetail(int index, MsiDumpFileDetail* detail);
 };

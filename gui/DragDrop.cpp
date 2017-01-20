@@ -9,12 +9,12 @@ CDropSource::CDropSource()
 
 STDMETHODIMP
 CDropSource::QueryContinueDrag(
-        BOOL  fEscapePressed,
-        DWORD grfKeyState)
+        BOOL  is_escape_pressed,
+        DWORD key_state)
 {
-        if (fEscapePressed)
+        if (is_escape_pressed)
                 return DRAGDROP_S_CANCEL;
-        if (grfKeyState & (MK_LBUTTON | MK_RBUTTON))
+        if (key_state & (MK_LBUTTON | MK_RBUTTON))
                 return S_OK;
         return DRAGDROP_S_DROP;
 }
@@ -42,15 +42,15 @@ CEnumFormatetc::CEnumFormatetc(
 STDMETHODIMP
 CEnumFormatetc::Next(
         ULONG /*celt*/,
-        FORMATETC* rgelt,
-        ULONG*     pceltFetched)
+        FORMATETC* item,
+        ULONG*     fetched)
 {
         if (current == count)
                 return S_FALSE;
 
-        *rgelt = array[current++];
-        if (pceltFetched)
-                *pceltFetched = 1;
+        *item = array[current++];
+        if (fetched)
+                *fetched = 1;
         return S_OK;
 }
 
@@ -76,16 +76,16 @@ CDataObject::CDataObject(
         int          _selectedCount)
         : INIT_IUNKNOWN(IID_IDataObject)
 {
-        msi         = _msi;
-        count       = _selectedCount;
-        extracted   = false;
-        array       = new int[count];
-        int current = 0;
-        for (int i = 0; i < msi->getCount(); i++)
+        msi          = _msi;
+        count        = _selectedCount;
+        is_extracted = false;
+        array        = new int[count];
+        int current  = 0;
+        for (int i = 0; i < msi->GetFileCount(); i++)
         {
                 MsiDumpFileDetail detail;
                 msi->GetFileDetail(i, &detail);
-                if (detail.selected)
+                if (detail.is_selected)
                         array[current++] = i;
                 if (current == count)
                         break;
@@ -102,13 +102,14 @@ CDataObject::~CDataObject()
 {
         delete[] array;
 
-        // RemoveDirectory(tempFolder) recursively.
-        tempFolder[wcslen(tempFolder) + 1] = L'\0'; // SHFileOp requires double zero ending
+        // RemoveDirectory(temporary_folder) recursively.
+        temporary_folder[wcslen(temporary_folder) + 1] = L'\0'; // SHFileOp requires double zero ending
+
         SHFILEOPSTRUCT op;
         ZeroMemory(&op, sizeof(op));
         op.hwnd   = NULL;
         op.wFunc  = FO_DELETE;
-        op.pFrom  = tempFolder;
+        op.pFrom  = temporary_folder;
         op.pTo    = NULL;
         op.fFlags = FOF_NOCONFIRMATION | FOF_SILENT;
         SHFileOperation(&op);
@@ -116,13 +117,13 @@ CDataObject::~CDataObject()
 
 STDMETHODIMP
 CDataObject::EnumFormatEtc(
-        DWORD            dwDirection,
-        IEnumFORMATETC** ppenumFormatetc)
+        DWORD            direction,
+        IEnumFORMATETC** enum_formatetc)
 {
-        if (dwDirection == DATADIR_SET)
+        if (direction != DATADIR_GET)
                 return E_NOTIMPL;
 
-        *ppenumFormatetc = (IEnumFORMATETC*)new CEnumFormatetc(formats, sizeof(formats) / sizeof(formats[0]));
+        *enum_formatetc = (IEnumFORMATETC*)new CEnumFormatetc(formats, sizeof(formats) / sizeof(formats[0]));
         return S_OK;
 }
 
@@ -156,8 +157,8 @@ CDataObject::GetData(
 
                         MsiDumpFileDetail detail;
                         msi->GetFileDetail(array[i], &detail);
-                        desc->nFileSizeLow = detail.filesize;
-                        wcscpy_s(desc->cFileName, MAX_PATH, detail.filename);
+                        desc->nFileSizeLow = detail.file_size;
+                        wcscpy_s(desc->cFileName, MAX_PATH, detail.file_name);
                 }
                 medium->tymed          = TYMED_HGLOBAL;
                 medium->hGlobal        = (HGLOBAL)group;
@@ -185,40 +186,41 @@ HGLOBAL
 CDataObject::ReadFile(
         int index)
 {
-        if (!extracted)
+        if (!is_extracted)
         {
-                extracted = true;
-                enumSelectAll selectAll;
-                if (count == msi->getCount())
-                        selectAll = ALL_SELECTED;
+                is_extracted = true;
+                EnumSelectItems select_items;
+                if (count == msi->GetFileCount())
+                        select_items = SELECT_ALL_ITEMS;
                 else
-                        selectAll = INDIVIDUAL_SELECTED;
+                        select_items = SELECT_INDIVIDUAL_ITEMS;
 
                 WCHAR temp[MAX_PATH];
                 GetTempPath(MAX_PATH, temp);
-                GetTempFileName(temp, L"cac", 0, tempFolder);
-                DeleteFile(tempFolder);
-                CreateDirectory(tempFolder, NULL);
+                GetTempFileName(temp, L"cac", 0, temporary_folder);
+                DeleteFile(temporary_folder);
+                CreateDirectory(temporary_folder, NULL);
 
-                msi->ExtractTo(tempFolder, selectAll, EXTRACT_TO_TREE);
+                msi->ExtractTo(temporary_folder, select_items, EXTRACT_TO_TREE);
         }
-        WCHAR tempPath[MAX_PATH], tempFile[MAX_PATH];
-        GetTempPath(MAX_PATH, tempPath);
-        GetTempFileName(tempPath, L"cab", 0, tempFile);
+
+        WCHAR temp_path[MAX_PATH], temp_file[MAX_PATH];
+        GetTempPath(MAX_PATH, temp_path);
+        GetTempFileName(temp_path, L"cab", 0, temp_file);
 
         MsiDumpFileDetail detail;
         msi->GetFileDetail(index, &detail);
-        WCHAR filename[MAX_PATH];
-        wcscpy_s(filename, MAX_PATH, tempFolder);
-        wcscat_s(filename, MAX_PATH, detail.path);
-        wcscat_s(filename, MAX_PATH, detail.filename);
-        BYTE* buffer = (BYTE*)GlobalAlloc(GMEM_FIXED, detail.filesize);
+        WCHAR file_name[MAX_PATH];
+        wcscpy_s(file_name, MAX_PATH, temporary_folder);
+        wcscat_s(file_name, MAX_PATH, detail.path);
+        wcscat_s(file_name, MAX_PATH, detail.file_name);
+        BYTE* buffer = (BYTE*)GlobalAlloc(GMEM_FIXED, detail.file_size);
 
-        FILE* f;
-        if (_wfopen_s(&f, filename, L"rb") != 0)
+        FILE* file;
+        if (_wfopen_s(&file, file_name, L"rb") != 0)
         {
-                fread(buffer, detail.filesize, 1, f);
-                fclose(f);
+                fread(buffer, detail.file_size, 1, file);
+                fclose(file);
         }
         return (HGLOBAL)buffer;
 }
@@ -229,14 +231,14 @@ CDataObject::ReadFile(
 
 void Drag(
         IMsiDumpCab* msi,
-        int          selectedCount)
+        int          selected_count)
 {
-        CDataObject* dataObject = new CDataObject(msi, selectedCount);
-        CDropSource* dropSource = new CDropSource;
-        DWORD        effect     = DROPEFFECT_COPY;
-        DoDragDrop(dataObject, dropSource, effect, &effect);
-        dropSource->Release();
-        dataObject->Release();
+        CDataObject* data_object = new CDataObject(msi, selected_count);
+        CDropSource* drop_source = new CDropSource;
+        DWORD        effect      = DROPEFFECT_COPY;
+        DoDragDrop(data_object, drop_source, effect, &effect);
+        drop_source->Release();
+        data_object->Release();
 }
 
 //////////////////////////////////////////////////////////////////////////

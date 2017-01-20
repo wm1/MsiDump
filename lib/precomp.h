@@ -1,10 +1,10 @@
 
 #pragma once
 
-#include <windows.h>
-#include <msiquery.h>
-#include <msidefs.h>
-#include <setupapi.h>
+#include <Windows.h>
+#include <MsiQuery.h>
+#include <MsiDefs.h>
+#include <SetupAPI.h>
 #include <wtypes.h>
 #include <process.h>
 #include <string>

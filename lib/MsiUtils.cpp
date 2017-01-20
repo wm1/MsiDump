@@ -2,7 +2,7 @@
 
 wofstream trace;
 
-char* trace_file =
+PCSTR trace_file =
 
 #if ENABLE_TRACE == 1
         "trace.txt"
@@ -12,7 +12,7 @@ char* trace_file =
         ;
 
 ////////////////////////////////////////////////////////////////////////
-WCHAR pathSeperator = L'\\';
+WCHAR path_seperator = L'\\';
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -36,37 +36,37 @@ void MsiUtils::Release()
 }
 
 bool MsiUtils::DoOpen(
-        PCWSTR filename)
+        PCWSTR file_name)
 {
         Close();
-        PWSTR pFilePart;
+        PWSTR file_part;
         WCHAR buffer[MAX_PATH];
-        DWORD result = GetFullPathName(filename, MAX_PATH, buffer, &pFilePart);
-        if (result == 0 || !pFilePart)
+        DWORD result = GetFullPathName(file_name, MAX_PATH, buffer, &file_part);
+        if (result == 0 || !file_part)
         {
                 DWORD error = GetLastError();
                 trace_error << L"GetFullPathName failed with: " << error << endl;
                 return false;
         }
-        DWORD fileAttr = GetFileAttributes(buffer);
-        if ((fileAttr == INVALID_FILE_ATTRIBUTES) || TEST_FLAG(fileAttr, FILE_ATTRIBUTE_DEVICE) || TEST_FLAG(fileAttr, FILE_ATTRIBUTE_DIRECTORY))
+        DWORD file_attributes = GetFileAttributes(buffer);
+        if ((file_attributes == INVALID_FILE_ATTRIBUTES) || TEST_FLAG(file_attributes, FILE_ATTRIBUTE_DEVICE) || TEST_FLAG(file_attributes, FILE_ATTRIBUTE_DIRECTORY))
         {
                 trace_error << buffer << L" is not a normal file" << endl;
                 return false;
         }
 
-        msiFilename = buffer;
+        msi_file_name = buffer;
 
-        PCWSTR fileExt = wcsrchr(buffer, L'.');
-        if (!fileExt)
+        PCWSTR file_extension = wcsrchr(buffer, L'.');
+        if (!file_extension)
         {
                 trace_error << buffer << L" does not have any file extension" << endl;
                 return false;
         }
 
-        if (_wcsicmp(fileExt, L".msi") == 0)
+        if (_wcsicmp(file_extension, L".msi") == 0)
                 db_type = installer_database;
-        else if (_wcsicmp(fileExt, L".msm") == 0)
+        else if (_wcsicmp(file_extension, L".msm") == 0)
                 db_type = merge_module;
         else
         {
@@ -74,16 +74,16 @@ bool MsiUtils::DoOpen(
                 return false;
         }
 
-        // sourceRootDirectory now contains the trailing path separator
+        // source_root_directory now contains the trailing path separator
         //
-        *pFilePart          = L'\0';
-        sourceRootDirectory = buffer;
+        *file_part            = L'\0';
+        source_root_directory = buffer;
         trace << L"******************************" << endl
-              << msiFilename << endl
-              << sourceRootDirectory << endl
+              << msi_file_name << endl
+              << source_root_directory << endl
               << endl;
 
-        UINT r = MsiOpenDatabase(msiFilename.c_str(), MSIDBOPEN_READONLY, &database);
+        UINT r = MsiOpenDatabase(msi_file_name.c_str(), MSIDBOPEN_READONLY, &database);
         if (r != ERROR_SUCCESS)
         {
                 trace_error << L"failed to open msi file, err = " << r << endl;
@@ -91,10 +91,10 @@ bool MsiUtils::DoOpen(
                 return false;
         }
 
-        if (delayLoading == false)
+        if (is_delay_loading == false)
         {
-                simpleFile = NULL;
-                bool b     = LoadSummary();
+                simple_files = NULL;
+                bool b       = LoadSummary();
                 if (!b)
                 {
                         Close();
@@ -109,10 +109,10 @@ bool MsiUtils::DoOpen(
         }
         else
         {
-                cabinet   = NULL;
-                directory = NULL;
-                component = NULL;
-                file      = NULL;
+                cabinets    = NULL;
+                directories = NULL;
+                components  = NULL;
+                files       = NULL;
                 DelayLoadDatabase();
         }
         return true;
@@ -125,61 +125,61 @@ void MsiUtils::Close()
 
         database = NULL;
 
-        if (cabinet)
+        if (cabinets)
         {
-                delete cabinet;
-                cabinet = NULL;
+                delete cabinets;
+                cabinets = NULL;
         }
-        if (directory)
+        if (directories)
         {
-                delete directory;
-                directory = NULL;
+                delete directories;
+                directories = NULL;
         }
-        if (component)
+        if (components)
         {
-                delete component;
-                component = NULL;
+                delete components;
+                components = NULL;
         }
-        if (file)
+        if (files)
         {
-                delete file;
-                file = NULL;
+                delete files;
+                files = NULL;
         }
-        if (simpleFile)
+        if (simple_files)
         {
-                delete simpleFile;
-                simpleFile = NULL;
+                delete simple_files;
+                simple_files = NULL;
         }
 }
 
 bool MsiUtils::LoadSummary()
 {
-        PMSIHANDLE summaryInformation;
-        UINT       datatype;
+        PMSIHANDLE summary;
+        UINT       data_type;
         INT        data;
-        FILETIME   filetime;
+        FILETIME   file_time;
         DWORD      size = MAX_PATH;
         WCHAR      buffer[MAX_PATH];
         UINT       r;
 
-        compressed = false;
-        r          = MsiGetSummaryInformation(database, 0, 0, &summaryInformation);
+        is_compressed = false;
+        r             = MsiGetSummaryInformation(database, 0, 0, &summary);
         if (r != ERROR_SUCCESS)
         {
                 trace_error << L"MsiGetSummaryInformation failed with " << r << endl;
                 return false;
         }
 
-        r = MsiSummaryInfoGetProperty(summaryInformation, PID_MSISOURCE,
-                                      &datatype, &data, &filetime, buffer, &size);
+        r = MsiSummaryInfoGetProperty(summary, PID_MSISOURCE,
+                                      &data_type, &data, &file_time, buffer, &size);
 
-        if (r == ERROR_SUCCESS && datatype == VT_I4)
-                compressed = TEST_FLAG(data, MSISOURCE_COMPRESSED);
+        if (r == ERROR_SUCCESS && data_type == VT_I4)
+                is_compressed = TEST_FLAG(data, MSISOURCE_COMPRESSED);
 
         if (db_type == merge_module)
-                compressed = true;
+                is_compressed = true;
 
-        trace << L"compressed: " << compressed << endl
+        trace << L"compressed: " << is_compressed << endl
               << endl;
 
         return true;
@@ -187,32 +187,32 @@ bool MsiUtils::LoadSummary()
 
 bool MsiUtils::LoadDatabase()
 {
-        cabinet   = new MsiCabinet(this);
-        directory = new MsiDirectory(this);
-        component = new MsiComponent(this);
-        file      = new MsiFile(this);
+        cabinets    = new MsiCabinets(this);
+        directories = new MsiDirectories(this);
+        components  = new MsiComponents(this);
+        files       = new MsiFiles(this);
         UINT r;
 
         int i, j;
-        trace << L"Cabinet count = " << cabinet->count << endl
+        trace << L"Cabinet count = " << cabinets->count << endl
               << endl;
-        for (i = 0; i < cabinet->count; i++)
+        for (i = 0; i < cabinets->count; i++)
         {
-                tagCabinet* p = &cabinet->array[i];
-                trace << i << L"[last seq = " << p->lastSequence << L"]: "
-                      << p->cabinet << endl;
+                TagCabinet* cabinet = &cabinets->array[i];
+                trace << i << L"[last seq = " << cabinet->last_sequence << L"]: "
+                      << cabinet->cabinet << endl;
         }
         trace << endl;
 
         PMSIHANDLE product;
-        WCHAR      packageName[30];
+        WCHAR      package_name[30];
         DWORD      size = MAX_PATH;
         WCHAR      buffer[MAX_PATH];
-        swprintf_s(packageName, 30, L"#%d", (int)database);
-        r = MsiOpenPackageEx(packageName, MSIOPENPACKAGEFLAGS_IGNOREMACHINESTATE, &product);
+        swprintf_s(package_name, 30, L"#%d", (int)database);
+        r = MsiOpenPackageEx(package_name, MSIOPENPACKAGEFLAGS_IGNOREMACHINESTATE, &product);
         if (r != ERROR_SUCCESS)
         {
-                trace_error << L"MsiOpenPackageEx(" << packageName << L") failed with " << r << endl;
+                trace_error << L"MsiOpenPackageEx(" << package_name << L") failed with " << r << endl;
                 return false;
         }
 
@@ -241,71 +241,71 @@ bool MsiUtils::LoadDatabase()
                 return false;
         }
 
-        trace << L"Directory count = " << directory->count << endl
+        trace << L"Directory count = " << directories->count << endl
               << endl;
-        for (i = 0; i < directory->count; i++)
+        for (i = 0; i < directories->count; i++)
         {
-                tagDirectory* p = &directory->array[i];
+                TagDirectory* direcotry = &directories->array[i];
 
                 size = MAX_PATH;
-                r    = MsiGetSourcePath(product, p->directory.c_str(), buffer, &size);
+                r    = MsiGetSourcePath(product, direcotry->directory.c_str(), buffer, &size);
                 if (r != ERROR_SUCCESS)
                 {
-                        trace_error << L"MsiGetSourcePath(" << p->directory.c_str() << ") failed with " << r << endl;
+                        trace_error << L"MsiGetSourcePath(" << direcotry->directory.c_str() << ") failed with " << r << endl;
                         return false;
                 }
-                p->sourceDirectory = buffer;
+                direcotry->source_directory = buffer;
 
                 size = MAX_PATH;
-                r    = MsiGetTargetPath(product, p->directory.c_str(), buffer, &size);
+                r    = MsiGetTargetPath(product, direcotry->directory.c_str(), buffer, &size);
                 if (r != ERROR_SUCCESS)
                 {
-                        trace_error << L"MsiGetTargetPath(" << p->directory.c_str() << ") failed with " << r << endl;
+                        trace_error << L"MsiGetTargetPath(" << direcotry->directory.c_str() << ") failed with " << r << endl;
                         return false;
                 }
-                p->targetDirectory = &buffer[2]; // skip drive letter part of C:\xxxx
+                direcotry->target_directory = &buffer[2]; // skip drive letter part of C:\xxxx
 
-                trace << i << L": " << p->directory << endl
-                      << L"    " << p->sourceDirectory << endl
-                      << L"    " << p->targetDirectory << endl;
+                trace << i << L": " << direcotry->directory << endl
+                      << L"    " << direcotry->source_directory << endl
+                      << L"    " << direcotry->target_directory << endl;
         }
         trace << endl;
 
-        trace << L"Component count = " << component->count << endl
+        trace << L"Component count = " << components->count << endl
               << endl;
-        for (i = 0; i < component->count; i++)
+        for (i = 0; i < components->count; i++)
         {
-                tagComponent* p = &component->array[i];
-                for (j = 0; j < directory->count; j++)
+                TagComponent* component = &components->array[i];
+                for (j = 0; j < directories->count; j++)
                 {
-                        tagDirectory* q = &directory->array[j];
-                        if (p->directory == q->directory)
+                        TagDirectory* directory = &directories->array[j];
+                        if (component->directory == directory->directory)
                         {
-                                p->keyDirectory = j;
+                                component->key_directory = j;
                                 break;
                         }
                 }
 
-                p->win9x  = true;
-                p->winNT  = true;
-                p->winX64 = false;
-                if (!p->condition.empty())
+                component->win_9x  = true;
+                component->win_nt  = true;
+                component->win_x64 = false;
+                if (!component->condition.empty())
                 {
                         // NOTE: there is no common rule to define which architecture the msi
                         // package or individual files are built for. Therefore what we're
                         // doing here is guess at our best effort
                         //
-                        PCWSTR condition = p->condition.c_str();
+                        PCWSTR condition = component->condition.c_str();
 
                         MsiSetProperty(product, L"Version9X", L"490");
                         MsiSetProperty(product, L"VersionNT", L"");
                         MsiSetProperty(product, L"VersionNT64", L"");
-                        p->win9x = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
+                        component->win_9x = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
 
                         MsiSetProperty(product, L"Version9X", L"");
                         MsiSetProperty(product, L"VersionNT", L"502");
                         MsiSetProperty(product, L"VersionNT64", L"");
-                        p->winNT = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
+                        component->win_nt = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
 
                         MsiSetProperty(product, L"Version9X", L"");
                         MsiSetProperty(product, L"VersionNT", L"");
@@ -313,118 +313,119 @@ bool MsiUtils::LoadDatabase()
                         bool x64Pos, x64Neg;
                         x64Pos = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
                         MsiSetProperty(product, L"VersionNT64", L"");
-                        x64Neg    = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
-                        p->winX64 = (x64Pos == true && x64Neg == false);
+                        x64Neg             = (MsiEvaluateCondition(product, condition) == MSICONDITION_TRUE);
+                        component->win_x64 = (x64Pos == true && x64Neg == false);
                 }
 
-                trace << i << L"[dir = " << p->keyDirectory;
-                if (!p->condition.empty())
-                        trace << L", condition = " << p->condition;
-                trace << L"]: " << p->component << endl;
+                trace << i << L"[dir = " << component->key_directory;
+                if (!component->condition.empty())
+                        trace << L", condition = " << component->condition;
+                trace << L"]: " << component->component << endl;
         }
         trace << endl;
 
-        trace << L"File count = " << file->count << endl
+        trace << L"File count = " << files->count << endl
               << endl;
-        for (i = 0; i < file->count; i++)
+        for (i = 0; i < files->count; i++)
         {
-                tagFile* p = &file->array[i];
-                for (j = 0; j < component->count; j++)
+                TagFile* file = &files->array[i];
+                for (j = 0; j < components->count; j++)
                 {
-                        tagComponent* q = &component->array[j];
-                        if (p->component == q->component)
+                        TagComponent* component = &components->array[j];
+                        if (file->component == component->component)
                         {
-                                p->keyDirectory = q->keyDirectory;
-                                p->keyComponent = j;
+                                file->key_directory = component->key_directory;
+                                file->key_component = j;
                                 break;
                         }
                 }
 
                 if (db_type == merge_module)
-                        p->keyCabinet = 0;
+                        file->key_cabinet = 0;
                 else
                 {
-                        for (j = 0; j < cabinet->count; j++)
+                        for (j = 0; j < cabinets->count; j++)
                         {
-                                tagCabinet* q = &cabinet->array[j];
-                                if (p->sequence <= q->lastSequence)
+                                TagCabinet* cabinet = &cabinets->array[j];
+                                if (file->sequence <= cabinet->last_sequence)
                                 {
-                                        p->keyCabinet = j;
+                                        file->key_cabinet = j;
                                         break;
                                 }
                         }
                 }
 
-                p->selected   = false;
-                p->compressed = compressed;
-                if (p->attributes & msidbFileAttributesCompressed)
-                        p->compressed = true;
-                if (p->attributes & msidbFileAttributesNoncompressed)
-                        p->compressed = false;
+                file->is_selected   = false;
+                file->is_compressed = is_compressed;
+                if (file->attributes & msidbFileAttributesCompressed)
+                        file->is_compressed = true;
+                if (file->attributes & msidbFileAttributesNoncompressed)
+                        file->is_compressed = false;
 
-                trace << p->sequence << L"[comp = " << p->keyComponent
-                      << L", dir = " << p->keyDirectory;
-                if (p->compressed)
-                        trace << L", cab = " << p->keyCabinet;
-                trace << L"]: " << p->filename << endl;
+                trace << file->sequence << L"[comp = " << file->key_component
+                      << L", dir = " << file->key_directory;
+                if (file->is_compressed)
+                        trace << L", cab = " << file->key_cabinet;
+                trace << L"]: " << file->file_name << endl;
         }
         trace << endl;
         return true;
 }
 
 bool MsiUtils::ExtractTo(
-        PCWSTR         theDirectory,
-        enumSelectAll  selectAll,
-        enumFlatFolder flatFolder)
+        PCWSTR          directory_name,
+        EnumSelectItems select_items_,
+        EnumExtractTo   extract_to_)
 {
-        if (delayLoading)
+        if (is_delay_loading)
                 return false;
 
         WCHAR buffer[MAX_PATH];
         DWORD result;
-        result = GetFullPathName(theDirectory, MAX_PATH, buffer, NULL);
+        result = GetFullPathName(directory_name, MAX_PATH, buffer, NULL);
         if (result == 0)
         {
                 result = GetLastError();
-                trace_error << L"GetFullPathName(" << theDirectory << L") fails with " << result << endl;
+                trace_error << L"GetFullPathName(" << directory_name << L") fails with " << result << endl;
                 return false;
         }
-        theDirectory = buffer;
-        trace << L"Extract to: " << theDirectory << endl
+        directory_name = buffer;
+        trace << L"Extract to: " << directory_name << endl
               << endl;
-        if (!VerifyDirectory(theDirectory))
+        if (!VerifyDirectory(directory_name))
                 return false;
 
-        targetRootDirectory = theDirectory;
-        allSelected         = (selectAll == ALL_SELECTED);
-        folderFlatten       = (flatFolder == EXTRACT_TO_FLAT_FOLDER);
-        if (folderFlatten &&
-            !VerifyDirectory(targetRootDirectory))
+        target_root_directory = directory_name;
+        select_items          = select_items_;
+        extract_to            = extract_to_;
+
+        if ((extract_to == EXTRACT_TO_FLAT_FOLDER) &&
+            !VerifyDirectory(target_root_directory))
         {
                 return false;
         }
 
         int i;
-        for (i = 0; i < cabinet->count; i++)
+        for (i = 0; i < cabinets->count; i++)
         {
-                cabinet->array[i].iterated = false;
+                cabinets->array[i].iterated = false;
         }
 
-        for (i = 0; i < directory->count; i++)
+        for (i = 0; i < directories->count; i++)
         {
-                directory->array[i].targetDirectoryVerified = false;
+                directories->array[i].is_target_verified = false;
         }
 
-        int countTodo   = 0;
-        this->countDone = 0;
-        for (i = 0; i < file->count; i++)
+        int files_to_be_extracted = 0;
+        this->files_extracted     = 0;
+        for (i = 0; i < files->count; i++)
         {
-                tagFile* p = &file->array[i];
-                if (!allSelected && !p->selected)
+                TagFile* file = &files->array[i];
+                if ((select_items == SELECT_INDIVIDUAL_ITEMS) && !file->is_selected)
                         continue;
-                countTodo++;
+                files_to_be_extracted++;
 
-                bool b = (p->compressed)
+                bool b = (file->is_compressed)
                                  ? ExtractFile(i)
                                  : CopyFile(i);
                 if (!b)
@@ -433,9 +434,9 @@ bool MsiUtils::ExtractTo(
                 }
         }
 
-        if (countTodo != countDone)
+        if (files_to_be_extracted != files_extracted)
         {
-                trace_error << (countTodo - countDone) << L" files are not extracted" << endl;
+                trace_error << (files_to_be_extracted - files_extracted) << L" files are not extracted" << endl;
                 return false;
         }
         return true;
@@ -444,21 +445,14 @@ bool MsiUtils::ExtractTo(
 bool MsiUtils::CopyFile(
         int index)
 {
-        tagFile*      p          = &file->array[index];
-        tagDirectory* pDirectory = &directory->array[p->keyDirectory];
+        TagFile*      file      = &files->array[index];
+        TagDirectory* directory = &directories->array[file->key_directory];
 
-        wstring source = pDirectory->sourceDirectory + pathSeperator + p->filename;
+        wstring source = directory->source_directory + path_seperator + file->file_name;
 
-        //
-        // targetRootDirectory = c:\temp
-        // pDirectory->targetDirectory = \Program Files\Orca\
-        // p->filename = orca.exe
-        //
-        // target = c:\temp\Program Files\Orca\orca.exe
-        //
-        wstring target = (folderFlatten)
-                                 ? (targetRootDirectory + pathSeperator + p->filename)
-                                 : (targetRootDirectory + pathSeperator + pDirectory->targetDirectory + pathSeperator + p->filename);
+        wstring target = (extract_to == EXTRACT_TO_FLAT_FOLDER)
+                                 ? (target_root_directory + path_seperator + file->file_name)
+                                 : (target_root_directory + path_seperator + directory->target_directory + path_seperator + file->file_name);
 
         trace << source << endl
               << L"=> " << target << endl
@@ -466,7 +460,7 @@ bool MsiUtils::CopyFile(
         BOOL b = ::CopyFile(source.c_str(), target.c_str(), FALSE);
         if (b)
         {
-                countDone++;
+                files_extracted++;
                 return true;
         }
         else
@@ -480,41 +474,41 @@ bool MsiUtils::CopyFile(
 bool MsiUtils::ExtractFile(
         int index)
 {
-        tagFile*    pFile    = &file->array[index];
-        tagCabinet* pCabinet = &cabinet->array[pFile->keyCabinet];
+        TagFile*    file    = &files->array[index];
+        TagCabinet* cabinet = &cabinets->array[file->key_cabinet];
 
-        if (pCabinet->iterated)
+        if (cabinet->iterated)
         {
                 // already extracted
                 return true;
         }
-        pCabinet->iterated = true;
+        cabinet->iterated = true;
 
-        wstring sourceCabinet;
-        if (pCabinet->embedded)
+        wstring source_cabinet;
+        if (cabinet->is_embedded)
         {
-                if (!cabinet->Extract(pFile->keyCabinet))
+                if (!cabinets->Extract(file->key_cabinet))
                 {
                         return false;
                 }
-                sourceCabinet = pCabinet->tempName;
-                trace << L"Extract " << pCabinet->cabinet
-                      << L" to " << pCabinet->tempName << endl;
+                source_cabinet = cabinet->extracted_name;
+                trace << L"Extract " << cabinet->cabinet
+                      << L" to " << cabinet->extracted_name << endl;
         }
         else
         {
-                sourceCabinet = sourceRootDirectory + pCabinet->cabinet;
-                trace << L"cabinet: " << sourceCabinet << endl;
+                source_cabinet = source_root_directory + cabinet->cabinet;
+                trace << L"cabinet: " << source_cabinet << endl;
         }
 
-        DWORD attributes = GetFileAttributes(sourceCabinet.c_str());
+        DWORD attributes = GetFileAttributes(source_cabinet.c_str());
         if (attributes == INVALID_FILE_ATTRIBUTES)
         {
-                trace_error << L"GetFileAttributes(" << sourceCabinet << L") failed" << endl;
+                trace_error << L"GetFileAttributes(" << source_cabinet << L") failed" << endl;
                 return false;
         }
 
-        SetupIterateCabinet(sourceCabinet.c_str(), 0, CabinetCallback, this);
+        SetupIterateCabinet(source_cabinet.c_str(), 0, CabinetCallback, this);
         return true;
 }
 
@@ -522,30 +516,30 @@ bool MsiUtils::ExtractFile(
 // the input format must be an full path (e.g. C:\path or \\server\share)
 //
 bool MsiUtils::VerifyDirectory(
-        wstring s)
+        wstring path)
 {
-        CreateDirectory(s.c_str(), NULL);
-        DWORD attributes = GetFileAttributes(s.c_str());
+        CreateDirectory(path.c_str(), NULL);
+        DWORD attributes = GetFileAttributes(path.c_str());
         if ((attributes != INVALID_FILE_ATTRIBUTES) && TEST_FLAG(attributes, FILE_ATTRIBUTE_DIRECTORY))
                 return true;
 
-        if (s[s.length() - 1] != pathSeperator)
-                s.append(1, pathSeperator);
+        if (path[path.length() - 1] != path_seperator)
+                path.append(1, path_seperator);
 
         WCHAR buffer[MAX_PATH];
-        wcscpy_s(buffer, MAX_PATH, s.c_str());
+        wcscpy_s(buffer, MAX_PATH, path.c_str());
 
         size_t index = wstring::npos;
-        if (s[1] == L':' && s[2] == pathSeperator)
+        if (path[1] == L':' && path[2] == path_seperator)
         {
                 // it is "C:\path\"
-                index = s.find(pathSeperator, 3);
+                index = path.find(path_seperator, 3);
         }
-        else if (s[0] == pathSeperator && s[1] == pathSeperator)
+        else if (path[0] == path_seperator && path[1] == path_seperator)
         {
                 // it is a UNC path, "\\server\share\path\"
-                index = s.find(pathSeperator, 2);
-                index = s.find(pathSeperator, index + 1);
+                index = path.find(path_seperator, 2);
+                index = path.find(path_seperator, index + 1);
         }
 
         while (index != wstring::npos && index < MAX_PATH)
@@ -560,12 +554,12 @@ bool MsiUtils::VerifyDirectory(
 
                 if (!TEST_FLAG(attributes, FILE_ATTRIBUTE_DIRECTORY))
                         return false;
-                buffer[index] = pathSeperator;
+                buffer[index] = path_seperator;
 
-                index = s.find(pathSeperator, index + 1);
+                index = path.find(path_seperator, index + 1);
         }
 
-        attributes = GetFileAttributes(s.c_str());
+        attributes = GetFileAttributes(path.c_str());
         return ((attributes != INVALID_FILE_ATTRIBUTES) && TEST_FLAG(attributes, FILE_ATTRIBUTE_DIRECTORY));
 }
 
@@ -577,8 +571,8 @@ MsiUtils::CabinetCallback(
         UINT_PTR /*param2*/
         )
 {
-        MsiUtils*             msiUtils    = (MsiUtils*)context;
-        FILE_IN_CABINET_INFO* cabinetInfo = (FILE_IN_CABINET_INFO*)param1;
+        MsiUtils*             msi  = (MsiUtils*)context;
+        FILE_IN_CABINET_INFO* info = (FILE_IN_CABINET_INFO*)param1;
 
         switch (notification)
         {
@@ -595,37 +589,37 @@ MsiUtils::CabinetCallback(
         }
 
         int  index;
-        bool located = msiUtils->LocateFile(cabinetInfo->NameInCabinet, &index);
+        bool located = msi->LocateFile(info->NameInCabinet, &index);
 
         if (located &&
-            (msiUtils->allSelected || msiUtils->file->array[index].selected))
+            ((msi->select_items == SELECT_ALL_ITEMS) || msi->files->array[index].is_selected))
         {
-                tagFile* p = &msiUtils->file->array[index];
+                TagFile* file = &msi->files->array[index];
 
-                wstring targetFilename;
-                if (msiUtils->folderFlatten)
+                wstring target_file_name;
+                if (msi->extract_to == EXTRACT_TO_FLAT_FOLDER)
                 {
-                        targetFilename = msiUtils->targetRootDirectory + pathSeperator + p->filename;
+                        target_file_name = msi->target_root_directory + path_seperator + file->file_name;
                 }
                 else
                 {
-                        tagDirectory* d = &msiUtils->directory->array[p->keyDirectory];
-                        if (!d->targetDirectoryVerified)
+                        TagDirectory* directory = &msi->directories->array[file->key_directory];
+                        if (!directory->is_target_verified)
                         {
-                                d->targetDirectoryVerified = true;
-                                d->targetDirectoryExists   = VerifyDirectory(
-                                        msiUtils->targetRootDirectory + pathSeperator + d->targetDirectory);
+                                directory->is_target_verified = true;
+                                directory->is_target_existing = VerifyDirectory(
+                                        msi->target_root_directory + path_seperator + directory->target_directory);
                         }
-                        if (!d->targetDirectoryExists)
+                        if (!directory->is_target_existing)
                                 return FILEOP_SKIP;
-                        targetFilename = msiUtils->targetRootDirectory + pathSeperator + d->targetDirectory + pathSeperator + p->filename;
+                        target_file_name = msi->target_root_directory + path_seperator + directory->target_directory + path_seperator + file->file_name;
                 }
 
-                wcscpy_s(cabinetInfo->FullTargetName, MAX_PATH, targetFilename.c_str());
-                trace << L"... " << p->filename
-                      << L"\t" << targetFilename << endl;
+                wcscpy_s(info->FullTargetName, MAX_PATH, target_file_name.c_str());
+                trace << L"... " << file->file_name
+                      << L"\t" << target_file_name << endl;
 
-                msiUtils->countDone++;
+                msi->files_extracted++;
                 return FILEOP_DOIT;
         }
 
@@ -633,16 +627,17 @@ MsiUtils::CabinetCallback(
 }
 
 bool MsiUtils::LocateFile(
-        wstring filename,
-        int*    pIndex)
+        wstring file_name,
+        int*    index)
 {
-        for (int i = 0; i < file->count; i++)
-                if (_wcsicmp(file->array[i].file.c_str(), filename.c_str()) == 0)
+        for (int i = 0; i < files->count; i++)
+                if (_wcsicmp(files->array[i].file.c_str(), file_name.c_str()) == 0)
                 {
-                        *pIndex = i;
+                        *index = i;
                         return true;
                 }
-        trace_error << L"File not found: " << filename << endl;
+
+        trace_error << L"File not found: " << file_name << endl;
         return false;
 }
 
@@ -650,85 +645,91 @@ bool MsiUtils::GetFileDetail(
         int                index,
         MsiDumpFileDetail* detail)
 {
-        if (delayLoading)
+        if (is_delay_loading)
         {
-                if (index < 0 || index > simpleFile->count)
+                if (index < 0 || index > simple_files->count)
                         return false;
 
-                tagSimpleFile* p = &simpleFile->array[index];
+                TagSimpleFile* simple_file = &simple_files->array[index];
                 ZeroMemory(detail, sizeof(MsiDumpFileDetail));
 
-                detail->filename = p->filename.c_str();
-                detail->filesize = p->filesize;
+                detail->file_name = simple_file->file_name.c_str();
+                detail->file_size = simple_file->file_size;
                 return true;
         }
 
-        if (index < 0 || index > file->count)
+        if (index < 0 || index > files->count)
         {
-                trace_error << L"File index [" << index << L"] out of range: 0 - " << file->count << endl;
+                trace_error << L"File index [" << index << L"] out of range: 0 - " << files->count << endl;
                 return false;
         }
 
-        tagFile* p       = &file->array[index];
-        detail->filename = p->filename.c_str();
-        detail->filesize = p->filesize;
-        detail->path     = directory->array[p->keyDirectory].targetDirectory.c_str();
-        detail->win9x    = component->array[p->keyComponent].win9x;
-        detail->winNT    = component->array[p->keyComponent].winNT;
-        detail->winX64   = component->array[p->keyComponent].winX64;
-        detail->selected = p->selected;
-        detail->version  = p->version.c_str();
-        detail->language = p->language.c_str();
+        TagFile*      file      = &files->array[index];
+        TagDirectory* directory = &directories->array[file->key_directory];
+        TagComponent* component = &components->array[file->key_component];
+
+        detail->file_name   = file->file_name.c_str();
+        detail->file_size   = file->file_size;
+        detail->path        = directory->target_directory.c_str();
+        detail->win_9x      = component->win_9x;
+        detail->win_nt      = component->win_nt;
+        detail->win_x64     = component->win_x64;
+        detail->is_selected = file->is_selected;
+        detail->version     = file->version.c_str();
+        detail->language    = file->language.c_str();
         return true;
 }
 
-void MsiUtils::setSelected(
+void MsiUtils::SelectFile(
         int  index,
         bool select)
 {
-        if (delayLoading)
+        if (is_delay_loading)
                 return;
 
-        if (index < 0 || index > file->count)
+        if (index < 0 || index > files->count)
                 return;
 
-        file->array[index].selected = select;
+        files->array[index].is_selected = select;
 }
 
-int MsiUtils::getCount()
+int MsiUtils::GetFileCount()
 {
         return (IsOpened()
-                        ? (delayLoading ? simpleFile->count : file->count)
+                        ? (is_delay_loading ? simple_files->count : files->count)
                         : 0);
 }
 
 IMsiDumpCab*
 MsiDumpCreateObject()
 {
-        MsiUtils* msiUtils = new MsiUtils();
-        return (IMsiDumpCab*)msiUtils;
+        MsiUtils* msi = new MsiUtils();
+        return (IMsiDumpCab*)msi;
 }
 
-void __cdecl MsiUtils::threadLoadDatabase(void* parameter)
+void __cdecl MsiUtils::ThreadLoadDatabase(void* parameter)
 {
         MsiUtils* _this = (MsiUtils*)parameter;
         bool      b;
+
         b = _this->LoadSummary();
         if (!b)
         {
                 return;
         }
+
         b = _this->LoadDatabase();
         if (!b)
         {
                 return;
         }
-        _this->delayLoading = false;
-        SetEvent(_this->delayEvent);
+
+        _this->is_delay_loading = false;
+        SetEvent(_this->delay_event);
 }
 
 void MsiUtils::DelayLoadDatabase()
 {
-        simpleFile = new MsiSimpleFile(this);
-        _beginthread(threadLoadDatabase, 0, this);
+        simple_files = new MsiSimpleFiles(this);
+        _beginthread(ThreadLoadDatabase, 0, this);
 }

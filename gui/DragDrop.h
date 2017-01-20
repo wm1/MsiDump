@@ -46,7 +46,8 @@ public:
 
 private:
         FORMATETC* array;
-        int        count, current;
+        int        count;
+        int        current;
 };
 
 class CDataObject
@@ -115,7 +116,7 @@ private:
         IMsiDumpCab* msi;
         int          count;
         int*         array;
-        bool         extracted;
-        WCHAR        tempFolder[MAX_PATH];
+        bool         is_extracted;
+        WCHAR        temporary_folder[MAX_PATH];
         HGLOBAL ReadFile(int index);
 };

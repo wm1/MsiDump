@@ -1,40 +1,37 @@
 
 #pragma once
 
-void parseArgs(int argc, PCWSTR argv[]);
-void usage(PCWSTR exe);
-void listHeader();
-void listRecord(int num, MsiDumpFileDetail* detail);
+void ParseArgs(int argc, PCWSTR argv[]);
+void Usage(PCWSTR exe);
+void ListHeader();
+void ListRow(int num, MsiDumpFileDetail* detail);
 
-enum _cmds
+enum Commands
 {
-        cmd_list,
-        cmd_extract,
-        cmd_help,
-        cmd_invalid
+        CMD_LIST,
+        CMD_EXTRACT,
+        CMD_HELP,
+        CMD_INVALID
 };
 
-struct _args
+struct CommandArgs
 {
-        // command
-        //
-        _cmds cmd;
+        Commands command;
 
-        // options for cmd_list
-        //
-        PCWSTR list_format;
+        PCWSTR file_name;
 
-        // options for cmd_extract
-        //
-        bool extract_full_path;
+        union {
+                struct
+                {
+                        PCWSTR list_format;
+                } list;
 
-        // archive file name
-        //
-        PCWSTR filename;
-
-        // path_to_extract
-        //
-        PCWSTR path_to_extract;
+                struct
+                {
+                        bool   is_extract_full_path;
+                        PCWSTR path_to_extract;
+                } extract;
+        } u;
 };
 
-extern _args args;
+extern CommandArgs Args;

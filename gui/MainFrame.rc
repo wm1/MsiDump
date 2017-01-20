@@ -1,5 +1,5 @@
 #include <atlres.h>
-#include "resource.h"
+#include "Resource.h"
 #include "version.rc"
 
 IDR_MAINFRAME MENU

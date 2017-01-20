@@ -8,7 +8,7 @@ class MsiQuery
 private:
         PMSIHANDLE view;
         PMSIHANDLE record;
-        bool       ended;
+        bool       is_end;
 
 public:
         MsiQuery(MsiUtils* msiUtils, wstring sql);
@@ -19,12 +19,12 @@ template <class T>
 class MsiTable
 {
 protected:
-        int     CountRows();
-        wstring getPrimaryKey();
+        int     GetRowCount();
+        wstring GetPrimaryKey();
         void    Init();
 
         int       count;
-        wstring   name;
+        wstring   table_name;
         MsiUtils* msiUtils;
         T*        array;
 
@@ -34,83 +34,79 @@ public:
         friend class MsiUtils;
 };
 
-struct tagFile
+struct TagFile
 {
         wstring file;
         wstring component;
-        wstring filename;
+        wstring file_name;
         wstring version;
         wstring language;
-        int     filesize; // issue: should be DoubleInteger
+        int     file_size;
         int     attributes;
         int     sequence;
 
-        bool compressed;
-        int  keyCabinet; // if(compressed), which .cab file it residents?
-        int  keyDirectory;
-        int  keyComponent;
+        bool is_compressed;
+        int  key_cabinet;
+        int  key_directory;
+        int  key_component;
 
-        bool selected;
+        bool is_selected;
 };
-typedef class MsiTable<tagFile> MsiFile;
+typedef class MsiTable<TagFile> MsiFiles;
 
-//
-// note: ui.cpp (CMainFrame::OnGetDispInfo, case COLUMN_SIZE) caches filesize locally,
-// therefore both MsiSimpleFile and MsiFile must return the same filesize.
-//
-struct tagSimpleFile
+
+struct TagSimpleFile
 {
-        wstring filename;
-        int     filesize;
+        wstring file_name;
+        int     file_size;
 };
-typedef MsiTable<tagSimpleFile> MsiSimpleFile;
+typedef MsiTable<TagSimpleFile> MsiSimpleFiles;
 
-struct tagComponent
+struct TagComponent
 {
         wstring component;
         wstring directory;
         wstring condition;
 
-        int  keyDirectory;
-        bool win9x;
-        bool winNT;
-        bool winX64;
+        int  key_directory;
+        bool win_9x;
+        bool win_nt;
+        bool win_x64;
 };
-typedef MsiTable<tagComponent> MsiComponent;
+typedef MsiTable<TagComponent> MsiComponents;
 
-struct tagDirectory
+struct TagDirectory
 {
         wstring directory;
+        wstring source_directory;
+        wstring target_directory;
 
-        wstring sourceDirectory;
-        wstring targetDirectory;
-
-        bool targetDirectoryVerified;
-        bool targetDirectoryExists;
+        bool is_target_verified;
+        bool is_target_existing;
 };
-typedef MsiTable<tagDirectory> MsiDirectory;
+typedef MsiTable<TagDirectory> MsiDirectories;
 
-struct tagCabinet
+struct TagCabinet
 {
-        int     diskId;
-        int     lastSequence;
+        int     disk_id;
+        int     last_sequence;
         wstring cabinet;
 
-        bool    embedded; // is it stored within .msi file as a separate stream?
-        wstring tempName; // if(embedded), already extracted to a temporary location?
+        bool    is_embedded;
+        wstring extracted_name;
 
         bool iterated;
 };
 
-class MsiCabinet
-        : public MsiTable<tagCabinet>
+class MsiCabinets
+        : public MsiTable<TagCabinet>
 {
 public:
-        MsiCabinet(MsiUtils* utils)
-                : MsiTable<tagCabinet>(utils)
+        MsiCabinets(MsiUtils* utils)
+                : MsiTable<TagCabinet>(utils)
         {
         }
-        virtual ~MsiCabinet();
+        virtual ~MsiCabinets();
 
         bool Extract(int index);
 };

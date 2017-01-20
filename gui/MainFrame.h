@@ -64,7 +64,7 @@ public:
         }
         LRESULT OnEditSelectAll(WORD, WORD, HWND, BOOL&)
         {
-                m_list.SetItemState(-1, LVIS_SELECTED, LVIS_SELECTED);
+                list_view.SetItemState(-1, LVIS_SELECTED, LVIS_SELECTED);
                 return 0;
         }
         LRESULT OnExtractFiles(WORD, WORD, HWND, BOOL&);
@@ -77,42 +77,42 @@ public:
         LRESULT OnRightClick(int, LPNMHDR, BOOL&);
         LRESULT OnAppAbout(WORD, WORD, HWND, BOOL&)
         {
-                CAboutDlg dlg;
-                dlg.DoModal();
+                CAboutDlg dialog;
+                dialog.DoModal();
                 return 0;
         }
 
-        CMainFrame(PCWSTR cmdLine) { CmdLine = cmdLine; }
-        ~CMainFrame() { m_msi->Release(); }
+        CMainFrame(PCWSTR cmd_line) { command_line = cmd_line; }
+        ~CMainFrame() { msi->Release(); }
 
 private:
         void SetCaption(PCWSTR caption);
         void Cleanup();
-        void LoadMsiFiles(PCWSTR filename);
+        void LoadMsiFiles(PCWSTR file_name);
         void UpdateStatusbar(int part);
 
-        CListViewCtrl  m_list;
-        int*           LVindex;   // map ListView[iItem] to getfiledetail(index)
-        PCWSTR*        filesizes; // store listview.iItem[COLUMN_SIZE]
-        CStatusBarCtrl m_statusbar;
-        IMsiDumpCab*   m_msi;
+        CListViewCtrl  list_view;
+        int*           list_view_index; // map ListView[iItem] to Getfiledetail(index)
+        PCWSTR*        file_sizes;      // store listview.iItem[COLUMN_SIZE]
+        CStatusBarCtrl status_bar;
+        IMsiDumpCab*   msi;
 
-        PCWSTR    CmdLine;
-        ULONGLONG totalFileSize;
-        ULONGLONG selectedFileSize;
-        bool      selectionChanged;
-        bool      waitCursor;
-        HCURSOR   hWaitCursor;
+        PCWSTR    command_line;
+        ULONGLONG total_file_size;
+        ULONGLONG selected_file_size;
+        bool      is_selection_changed;
+        bool      is_wait_cursor_in_use;
+        HCURSOR   wait_cursor_handle;
 
-        HANDLE delayEvent;
-        bool   delayLoading;
-        static void __cdecl threadWaitDelayLoad(void* parameter);
+        HANDLE delay_event;
+        bool   is_delay_loading;
+        static void __cdecl ThreadWaitDelayLoad(void* parameter);
 
         // sorting stuff
-        int  sortColumn;
-        BOOL sortAscending;
-        void sort();
-        static int __cdecl sortCallback(const void*, const void*);
+        int  id_of_column_being_sorted;
+        BOOL is_sort_ascending;
+        void Sort();
+        static int __cdecl SortCallback(const void*, const void*);
 };
 
 enum Columns
