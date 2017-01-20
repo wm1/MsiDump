@@ -18,9 +18,7 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <PropertyGroup Label="Globals">
-    <Platform>x64</Platform> <!-- a valid $(Platform) is required or else vcpkg.targets may fail -->
-  </PropertyGroup>
+  <PropertyGroup Label="Globals" />
 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
 
