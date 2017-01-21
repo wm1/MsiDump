@@ -1,24 +1,6 @@
 
 #pragma once
 
-//
-// Platform SDK: Windows Installer: Installer Database Reference
-//
-// File Table
-// =======================================
-// Column     Type           Key  Nullable
-// =======================================
-// File       Identifier     Y    N
-// Component_ Identifier          N
-// FileName   Filename            N
-// FileSize   DoubleInteger       N
-// Version    Version             Y
-// Language   Language            Y
-// Attributes Integer             Y
-// Sequence   Integer             N
-// =======================================
-//
-
 struct MsiDumpFileDetail
 {
         PCWSTR file_name;
@@ -71,7 +53,7 @@ public:
         //
         virtual int GetFileCount() = 0;
 
-        // Get the i-th (0 <= i <= count) file's information.
+        // Get the i-th (0 <= i < count) file's information.
         // Note: refer to DelayOpen() on which fields of the result is valid.
         //
         virtual bool GetFileDetail(int index, MsiDumpFileDetail* detail) = 0;

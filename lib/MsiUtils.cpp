@@ -647,7 +647,7 @@ bool MsiUtils::GetFileDetail(
 {
         if (is_delay_loading)
         {
-                if (index < 0 || index > simple_files->count)
+                if (index < 0 || index >= simple_files->count)
                         return false;
 
                 TagSimpleFile* simple_file = &simple_files->array[index];
@@ -658,7 +658,7 @@ bool MsiUtils::GetFileDetail(
                 return true;
         }
 
-        if (index < 0 || index > files->count)
+        if (index < 0 || index >= files->count)
         {
                 trace_error << L"File index [" << index << L"] out of range: 0 - " << files->count << endl;
                 return false;

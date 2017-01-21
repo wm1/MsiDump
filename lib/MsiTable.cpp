@@ -1,16 +1,16 @@
 #include "precomp.h"
 
 MsiQuery::MsiQuery(
-        MsiUtils* msiUtils,
+        MsiUtils* msi,
         wstring   sql)
 {
         is_end = true;
         record = NULL;
 
-        if (!msiUtils->IsOpened())
+        if (!msi->IsOpened())
                 return;
 
-        UINT r = MsiDatabaseOpenView(msiUtils->database, sql.c_str(), &view);
+        UINT r = MsiDatabaseOpenView(msi->database, sql.c_str(), &view);
         if (r != ERROR_SUCCESS)
                 return;
 
@@ -37,11 +37,11 @@ MsiQuery::Next()
 
 template <class T>
 MsiTable<T>::MsiTable(
-        MsiUtils* theMsiUtils)
+        MsiUtils* _msi)
 {
-        msiUtils = theMsiUtils;
-        array    = NULL;
-        count    = 0;
+        msi   = _msi;
+        array = NULL;
+        count = 0;
 
         Init();
 }
@@ -57,6 +57,9 @@ template <class T>
 wstring
 MsiTable<T>::GetPrimaryKey()
 {
+        // MSDN says MsiDatabaseGetPrimaryKeys is not valid for the following two tables,
+        // therefore we provide the hard-coded answer for them
+        //
         if (table_name == L"_Tables")
                 return L"Name";
 
@@ -65,15 +68,17 @@ MsiTable<T>::GetPrimaryKey()
 
         PMSIHANDLE record;
         wstring    s;
-        UINT       r = MsiDatabaseGetPrimaryKeys(msiUtils->database, table_name.c_str(), &record);
+        UINT       r = MsiDatabaseGetPrimaryKeys(msi->database, table_name.c_str(), &record);
         if (r != ERROR_SUCCESS)
                 return s; // it is a empty string
 
         DWORD size = MAX_PATH;
         WCHAR buffer[MAX_PATH];
-        MsiRecordGetString(record, 1, buffer, &size);
-        s = buffer;
+        r = MsiRecordGetString(record, 1, buffer, &size);
+        if (r != ERROR_SUCCESS)
+                return s;
 
+        s = buffer;
         return s;
 }
 
@@ -86,9 +91,9 @@ int MsiTable<T>::GetRowCount()
 
         wstring sql = L"SELECT " + primary_key + L" FROM " + table_name;
 
-        MsiQuery q(msiUtils, sql);
+        MsiQuery query(msi, sql);
         int      row_count = 0;
-        while (q.Next() != NULL)
+        while (query.Next() != NULL)
                 row_count++;
 
         return row_count;
@@ -106,7 +111,7 @@ void MsiFiles::Init()
         DWORD     size = MAX_PATH;
         WCHAR     buffer[MAX_PATH];
         array = new TagFile[count];
-        MsiQuery query(msiUtils, L"SELECT File, Component_, FileName, FileSize, Attributes, Sequence, Version, Language FROM File ORDER BY Sequence");
+        MsiQuery query(msi, L"SELECT File, Component_, FileName, FileSize, Attributes, Sequence, Version, Language FROM File ORDER BY Sequence");
 
         for (TagFile* file = array; (record = query.Next()) != NULL; file++)
         {
@@ -150,7 +155,7 @@ void MsiSimpleFiles::Init()
         DWORD     size = MAX_PATH;
         WCHAR     buffer[MAX_PATH];
         array = new TagSimpleFile[count];
-        MsiQuery query(msiUtils, L"SELECT FileName, FileSize FROM File ORDER BY Sequence");
+        MsiQuery query(msi, L"SELECT FileName, FileSize FROM File ORDER BY Sequence");
 
         for (TagSimpleFile* simple_file = array; (record = query.Next()) != NULL; simple_file++)
         {
@@ -175,7 +180,7 @@ void MsiComponents::Init()
         DWORD     size = MAX_PATH;
         WCHAR     buffer[MAX_PATH];
         array = new TagComponent[count];
-        MsiQuery query(msiUtils, L"SELECT Component, Directory_, Condition FROM Component");
+        MsiQuery query(msi, L"SELECT Component, Directory_, Condition FROM Component");
 
         for (TagComponent* component = array; (record = query.Next()) != NULL; component++)
         {
@@ -205,7 +210,7 @@ void MsiDirectories::Init()
         DWORD     size = MAX_PATH;
         WCHAR     buffer[MAX_PATH];
         array = new TagDirectory[count];
-        MsiQuery query(msiUtils, L"SELECT Directory FROM Directory");
+        MsiQuery query(msi, L"SELECT Directory FROM Directory");
 
         for (TagDirectory* directory = array; (record = query.Next()) != NULL; directory++)
         {
@@ -219,12 +224,11 @@ template <>
 void MsiTable<TagCabinet>::Init()
 {
         table_name = L"Media";
-        if (msiUtils->db_type == MsiUtils::merge_module)
+        if (msi->db_type == MsiUtils::merge_module)
         {
                 count                  = 1;
                 array                  = new TagCabinet[count];
                 TagCabinet* cabinet    = array;
-                cabinet->disk_id       = 0;
                 cabinet->last_sequence = 0;
                 cabinet->is_embedded   = true;
                 cabinet->cabinet       = L"MergeModule.CABinet";
@@ -240,15 +244,14 @@ void MsiTable<TagCabinet>::Init()
         DWORD     size = MAX_PATH;
         WCHAR     buffer[MAX_PATH];
         array = new TagCabinet[count];
-        MsiQuery query(msiUtils, L"SELECT DiskId, LastSequence, Cabinet FROM Media");
+        MsiQuery query(msi, L"SELECT LastSequence, Cabinet FROM Media");
 
         for (TagCabinet* cabinet = array; (record = query.Next()) != NULL; cabinet++)
         {
-                cabinet->disk_id       = MsiRecordGetInteger(record, 1);
-                cabinet->last_sequence = MsiRecordGetInteger(record, 2);
+                cabinet->last_sequence = MsiRecordGetInteger(record, 1);
 
                 size = MAX_PATH;
-                MsiRecordGetString(record, 3, buffer, &size);
+                MsiRecordGetString(record, 2, buffer, &size);
                 cabinet->is_embedded = (buffer[0] == L'#');
                 cabinet->cabinet     = (cabinet->is_embedded ? buffer + 1 : buffer);
                 cabinet->extracted_name.clear();
@@ -281,7 +284,7 @@ bool MsiCabinets::Extract(
 
         wstring sql = L"SELECT Data FROM _Streams WHERE Name=\'";
         sql         = sql + cabinet->cabinet + L'\'';
-        MsiQuery  query(msiUtils, sql);
+        MsiQuery  query(msi, sql);
         MSIHANDLE record = query.Next();
         DWORD     size   = MsiRecordDataSize(record, 1);
         if (size == 0)

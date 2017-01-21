@@ -83,7 +83,7 @@ public:
                         return;
                 }
 
-                path  = Path;
+                path        = Path;
                 find_handle = FindFirstFile(Path.append(L"\\*").c_str(), &find_data);
                 if (find_handle == INVALID_HANDLE_VALUE)
                 {
