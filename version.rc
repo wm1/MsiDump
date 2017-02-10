@@ -13,6 +13,6 @@
 #define VER_INTERNALNAME_STR        PROJECT_STR ".exe"
 #define VER_FILEVERSION_STR         PROJECT_VERSION_STR
 #define VER_FILEVERSION             PROJ_VER_MAJOR,PROJ_VER_MINOR,PROJ_VER_BUILD,PROJ_VER_PATCH
-#define VER_LEGALCOPYRIGHT_STR      "Copyright (C) 2004-2017 Wei Mao"
+#define VER_LEGALCOPYRIGHT_STR      "Copyright (C) 2002-2017 Wei Mao"
 
 #include <common.ver>

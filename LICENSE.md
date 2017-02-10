@@ -1,4 +1,4 @@
-## Copyright (c) 2002-2016 Wei Mao
+## Copyright (c) 2002-2017 Wei Mao
 
 The MIT License
 
