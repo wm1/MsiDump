@@ -29,6 +29,10 @@ objfre/
 objchk/
 ipch/
 
+# Visual Studio
+.vs/
+CMakeSettings.json
+
 # VSCode editor configurations
 .vscode/
 

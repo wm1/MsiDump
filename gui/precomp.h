@@ -4,11 +4,11 @@
 #define _ATL_NO_MSIMG
 #define _ATL_NO_OPENGL
 #include <atlbase.h>
-#include <atlapp.h>
 #include <atlwin.h>
-#include <atlframe.h>
-#include <atlctrls.h>
-#include <atldlgs.h>
+#include <wtl/atlapp.h>
+#include <wtl/atlframe.h>
+#include <wtl/atlctrls.h>
+#include <wtl/atldlgs.h>
 #include <ShlObj.h>
 #include <shellapi.h>
 #include <string>

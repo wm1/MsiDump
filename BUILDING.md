@@ -8,15 +8,11 @@
 
 ## Steps
 
-    - git clone https://github.com/Microsoft/vcpkg
-    - vcpkg install wtl:x86-windows
+    - vcpkg integrate install
     - vcpkg install wtl:x64-windows
-
     - md build & cd build
-    - cmake -D CMAKE_TOOLCHAIN_FILE=[your-vcpkg-root]\scripts\buildsystems\vcpkg.cmake
-            -G "Visual Studio 14 2015 Win64"
-            ..
-    - msbuild
+    - cmake -G "Visual Studio 15 2017" -A x64 -T host=x64 ..
+    - msbuild MsiDump.sln
 
 ## Test
 

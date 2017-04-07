@@ -4,10 +4,6 @@ add_definitions(-DPROJ=${TARGET})
 
 include_directories(..)
 
-find_path(WTL_INCLUDE NAMES wtl/atlapp.h)
-set(WTL_INCLUDE "${WTL_INCLUDE}/wtl")
-include_directories(${WTL_INCLUDE})
-
 set(SOURCES
     DragDrop.cpp
     MainFrame.cpp)

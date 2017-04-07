@@ -1,4 +1,4 @@
-#include <atlres.h>
+#include <wtl/atlres.h>
 #include "Resource.h"
 #include "version.rc"
 
